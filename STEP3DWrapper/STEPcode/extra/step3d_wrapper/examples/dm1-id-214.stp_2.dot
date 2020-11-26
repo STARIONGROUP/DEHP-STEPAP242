@@ -1,0 +1,27 @@
+digraph tree
+{
+fixedsize=true;
+node [style="rounded,filled", width=0, height=0, shape=box, fillcolor="#E5E5E5"]
+i_dir_12 [label="PD#12 ''", width=2]
+{rank=same
+  i_point_57 [shape=point]
+  i_dir_57 [label="PD#57 ''", width=2]
+}
+i_point_57 -> i_dir_57
+{rank=same
+  i_point_118 [shape=point]
+  i_dir_118 [label="PD#118 ''", width=2]
+}
+i_point_118 -> i_dir_118
+{rank=same
+  i_point_219 [shape=point]
+  i_dir_219 [label="PD#219 ''", width=2]
+}
+i_point_219 -> i_dir_219
+i_dir_546 [label="PD#546 'Greek Ascoloy'", width=2]
+i_dir_1186 [label="PD#1186 'Titanium 6-4'", width=2]
+i_dir_1490 [label="PD#1490 'Inconel 718'", width=2]
+
+
+i_dir_12 -> i_point_57 -> i_point_118 -> i_point_118 -> i_point_118 -> i_point_219 -> i_point_219 -> i_point_219 [arrowhead=none]
+}

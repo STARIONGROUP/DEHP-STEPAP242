@@ -1,0 +1,11 @@
+digraph G {
+rankdir=LR;
+fixedsize=true;
+node [style="rounded,filled", width=0, height=0, shape=box, fillcolor="#E5E5E5", concentrate=true];
+
+I36 [label="PD#36 'Predeterminado'"];
+I19 [label="PD#19 'Silla oficina'"];
+
+I19 -> I36;
+I19 [shape=box, style=""];
+}

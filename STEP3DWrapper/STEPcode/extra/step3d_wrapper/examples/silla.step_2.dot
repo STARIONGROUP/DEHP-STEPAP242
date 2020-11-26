@@ -1,0 +1,14 @@
+digraph tree
+{
+fixedsize=true;
+node [style="rounded,filled", width=0, height=0, shape=box, fillcolor="#E5E5E5"]
+{rank=same
+  i_point_36 [shape=point]
+  i_dir_36 [label="PD#36 'Predeterminado'", width=2]
+}
+i_point_36 -> i_dir_36
+i_dir_19 [label="PD#19 'Silla oficina'", width=2]
+
+
+i_dir_19 -> i_point_36 [arrowhead=none]
+}

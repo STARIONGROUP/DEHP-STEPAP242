@@ -1,0 +1,8 @@
+digraph G {
+node [fontname="Courier New", fontsize=10];
+node [shape=box, style="filled, rounded", fillcolor="#E5E5E5"];
+I36 [label="PD#36 'Predeterminado'"];
+I19 [label="PD#19 'Silla oficina'"];
+I19 -> I36;
+I19 [shape=box, style=""];
+}
