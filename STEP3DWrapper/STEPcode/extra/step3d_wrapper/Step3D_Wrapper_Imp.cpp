@@ -22,6 +22,17 @@ const string Step3D_Wrapper_Imp::NAUO("Next_Assembly_Usage_Occurrence");
 const string Step3D_Wrapper_Imp::SDR("Shape_Definition_Representation");
 
 
+class WrapperException
+{
+public:
+    WrapperException(int errcode, const std::string message) : code((WrapperErrorCode)errcode), msg(message) {}
+    WrapperException(WrapperErrorCode errcode, const std::string message) : code(errcode), msg(message) {}
+
+    WrapperErrorCode code;
+    std::string msg;
+};
+
+
 std::string PrettyPrintAttributeType(BASE_TYPE type) {
     std::string ret = "";
     switch(type) {
@@ -130,6 +141,8 @@ bool Step3D_Wrapper_Imp::load(std::string fname)
 {
     m_filename = fname;
 
+    clearError();
+
     checkFileToLoad();
     if (hasFailed()) return false;
 
@@ -143,7 +156,25 @@ bool Step3D_Wrapper_Imp::load(std::string fname)
 
     try
     {
-        m_stepfile->ReadExchangeFile(m_filename.c_str());
+        Severity sev = m_stepfile->ReadExchangeFile(m_filename.c_str());
+
+#ifndef NDEBUG
+        cout << "Severity: " << sev << endl;
+        ErrorDescriptor errorDesc = m_stepfile->Error();
+        cout << "ED: " << errorDesc.severityString() << endl;
+        cout << "ED: " << errorDesc.DetailMsg() << endl;
+#endif
+
+        if (sev < SEVERITY_WARNING)  // non-recoverable error
+        {
+            m_errorCode = WrapperErrorCode::FILE_READ;
+            
+            std::stringstream ss;
+            ss << "Error reading the STEP file content: " << errorDesc.severityString();
+
+            m_errorMessage = ss.str();
+            return false;
+        }
     }
     catch( std::exception &e )
     {
@@ -168,40 +199,39 @@ bool Step3D_Wrapper_Imp::parseHLRInformation()
 {
     cout << "Getting the HLR related information" << endl;
 
-    clearError();
+    if (hasFailed()) return false; // avoid parsing when the current state has errors (from load)
 
-    processHeader();
-    if (hasFailed()) return false;
+    if (m_stepfile == nullptr)
+    {
+        m_errorCode = WrapperErrorCode::FILE_NOT_FOUND;
+        m_errorMessage = "No loaded file yet, parse content is not possible";
+        return false;
+    }
 
-    processContent();
-    if (hasFailed()) return false;
+    try
+    {
+        processHeader();
 
-    processGeometricInformation();
-    if (hasFailed()) return false;
+        processContent();
 
-    cout << "Parsing content finished!" << endl;
+        processGeometricInformation();
 
-    return hasFailed();
+        cout << "Parsing content finished!" << endl;
+    }
+    catch (WrapperException& e)
+    {
+        m_errorCode = e.code;
+        m_errorMessage = e.msg;
+        cout << "Parsing content finished with errors!" << endl;
+    }
+
+    return !hasFailed();
 }
 
 Step3D_HeaderInfo_Wrapper Step3D_Wrapper_Imp::getHeaderInfo()
 {
     return m_headerInfo;
 }
-
-#ifdef test_description_ctype
-TDescriptionNodeCType Step3D_Wrapper_Imp::getDescriptionCType()
-{
-    TDescriptionNodeCType desc;
-
-    desc.File_Name= m_desc.File_Name.c_str();
-    desc.File_Description = m_desc.File_Description.c_str();
-    desc.File_Description_Id = m_desc.File_Description_Id.c_str();
-    desc.File_Schema = m_desc.File_Schema.c_str();
-
-    return desc;
-}
-#endif
 
 std::list<Part_Wrapper> Step3D_Wrapper_Imp::getNodes()
 {
@@ -320,8 +350,15 @@ void Step3D_Wrapper_Imp::processHeader()
     {
         std::cerr << e.what() << std::endl;
         
-        m_errorCode = WrapperErrorCode::FILE_PROCESS;
-        m_errorMessage = string(e.what()) + " at Step3D_Wrapper_Imp::processHeader()";
+        WrapperException wex(WrapperErrorCode::FILE_PROCESS, string(e.what()) + " at Step3D_Wrapper_Imp::processHeader()");
+        throw wex;
+    }
+    catch (...)
+    {
+        std::cerr << "unnown exception" << std::endl;
+        
+        WrapperException wex(WrapperErrorCode::FILE_PROCESS, "Unknown Exception at Step3D_Wrapper_Imp::processHeader()");
+        throw wex;
     }
 }
 
@@ -383,8 +420,8 @@ void Step3D_Wrapper_Imp::processContent()
     {
         std::cerr << e.what() << std::endl;
         
-        m_errorCode = WrapperErrorCode::FILE_PROCESS;
-        m_errorMessage = e.what();
+        WrapperException wex(WrapperErrorCode::FILE_PROCESS, string(e.what()) + " at Step3D_Wrapper_Imp::processContent()");
+        throw wex;
     }
 }
 
@@ -617,6 +654,8 @@ void Step3D_Wrapper_Imp::processAxis2PLacement3D(SDAI_Application_instance* inst
     if (pos == nullptr)
     {
         placement.name = "ERROR";
+
+        // silently continue, no expection
         m_errorCode = WrapperErrorCode::FILE_PROCESS;
         m_errorMessage = "Step3D_Wrapper_Imp::processAxis2PLacement3D(nullptr)";
         return;
@@ -842,10 +881,10 @@ void Step3D_Wrapper_Imp::checkFileToLoad()
     ifile.open(m_filename);
     if (!ifile.is_open())
     {
-        cerr << "Impossilbe to open file: " << m_filename << endl;
-
         m_errorCode = WrapperErrorCode::FILE_NOT_FOUND;
-        m_errorMessage = "Impossilbe to open file: " + m_filename;
+        m_errorMessage = "File does not exists: " + m_filename;
+
+        cerr << "Step3D_Wrapper_Imp::checkFileToLoad(): " << m_errorMessage << endl;
     }
 }
 

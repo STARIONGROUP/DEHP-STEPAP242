@@ -22,7 +22,7 @@ void processStep3DFile(std::string fname, bool drawGraph)
 
     if (wrapper->hasFailed())
     {
-        cout << "ERROR" << (int)wrapper->getError() << ": " << wrapper->getErrorMessage();
+        cout << "ERROR " << (int)wrapper->getError() << ": " << wrapper->getErrorMessage();
         return;
     }
 

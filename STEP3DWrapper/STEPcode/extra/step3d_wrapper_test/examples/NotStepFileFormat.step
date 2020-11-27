@@ -1,0 +1,136 @@
+Normal text file to be used by Test: IStep3D_Wrapper_LoadBadFormatFile_NotLoaded()
+
+Getting the HLR related information
+Parsing header...
+Parsing content...
+processSDR SDR
+EntityName: Shape_Definition_Representation #3
+EntityName: Product_Definition_Shape #4
+SDR --> PD found
+EntityName: Shape_Definition_Representation #3
+EntityName: Product_Definition #5
+
+PD #5 'Part'
+processSDR SDR
+EntityName: Shape_Definition_Representation #365
+EntityName: Product_Definition_Shape #366
+SDR --> PD found
+EntityName: Shape_Definition_Representation #365
+EntityName: Product_Definition #367
+
+PD #367 'Caja'
+NAUO #376 (#5, #367)
+processSDR SDR
+EntityName: Shape_Definition_Representation #378
+EntityName: Product_Definition_Shape #379
+SDR --> PD found
+EntityName: Shape_Definition_Representation #378
+EntityName: Product_Definition #380
+
+PD #380 'SubPart'
+processSDR SDR
+EntityName: Shape_Definition_Representation #735
+EntityName: Product_Definition_Shape #736
+SDR --> PD found
+EntityName: Shape_Definition_Representation #735
+EntityName: Product_Definition #737
+
+PD #737 'Cube'
+NAUO #746 (#380, #737)
+processSDR SDR
+EntityName: Shape_Definition_Representation #852
+EntityName: Product_Definition_Shape #853
+SDR --> PD found
+EntityName: Shape_Definition_Representation #852
+EntityName: Product_Definition #854
+
+PD #854 'Cylinder'
+NAUO #863 (#380, #854)
+NAUO #869 (#5, #380)
+Parsing geometric information...
+EntityName: Shape_Definition_Representation #3
+EntityName: Shape_Representation #10
+EntityName: Axis2_Placement_3d #11
+Cartesian_Point #12 EntryCount() = 3
+Direction EntryCount() = 3
+Direction EntryCount() = 3
+EntityName: Shape_Definition_Representation #365
+EntityName: Advanced_Brep_Shape_Representation #29
+EntityName: Axis2_Placement_3d #11
+Cartesian_Point #12 EntryCount() = 3
+Direction EntryCount() = 3
+Direction EntryCount() = 3
+EntityName: Shape_Definition_Representation #378
+EntityName: Shape_Representation #385
+EntityName: Axis2_Placement_3d #11
+Cartesian_Point #12 EntryCount() = 3
+Direction EntryCount() = 3
+Direction EntryCount() = 3
+EntityName: Shape_Definition_Representation #735
+EntityName: Advanced_Brep_Shape_Representation #399
+EntityName: Axis2_Placement_3d #11
+Cartesian_Point #12 EntryCount() = 3
+Direction EntryCount() = 3
+Direction EntryCount() = 3
+EntityName: Shape_Definition_Representation #852
+EntityName: Advanced_Brep_Shape_Representation #748
+EntityName: Axis2_Placement_3d #11
+Cartesian_Point #12 EntryCount() = 3
+Direction EntryCount() = 3
+Direction EntryCount() = 3
+Parsing content finished!
+
+File_Description:
+   ('FreeCAD Model')
+   '2;1'
+File_Name:
+   'D:/dev/DEHP/SharePoint/Project
+Documents/XIPE_STEP_3D_Samples/MyParts.step'
+   '2020-09-01T18:50:05'
+   ('Author')
+   ('')
+   'Open CASCADE STEP processor 7.2'
+   'FreeCAD'
+   'Unknown'
+File_Schema:
+   ('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }')
+
+Node #5 PD 'Part'
+ --> placement.name: ''
+ --> placement.location: [0, 0, 0]
+ --> placement.axis: [1, 0, -0]
+ --> placement.ref_direction: [1, 0, -0]
+ --> representation_type: Shape_Representation
+
+Node #367 PD 'Caja'
+ --> placement.name: ''
+ --> placement.location: [0, 0, 0]
+ --> placement.axis: [1, 0, -0]
+ --> placement.ref_direction: [1, 0, -0]
+ --> representation_type: Advanced_Brep_Shape_Representation
+
+Node #380 PD 'SubPart'
+ --> placement.name: ''
+ --> placement.location: [0, 0, 0]
+ --> placement.axis: [1, 0, -0]
+ --> placement.ref_direction: [1, 0, -0]
+ --> representation_type: Shape_Representation
+
+Node #737 PD 'Cube'
+ --> placement.name: ''
+ --> placement.location: [0, 0, 0]
+ --> placement.axis: [1, 0, -0]
+ --> placement.ref_direction: [1, 0, -0]
+ --> representation_type: Advanced_Brep_Shape_Representation
+
+Node #854 PD 'Cylinder'
+ --> placement.name: ''
+ --> placement.location: [0, 0, 0]
+ --> placement.axis: [1, 0, -0]
+ --> placement.ref_direction: [1, 0, -0]
+ --> representation_type: Advanced_Brep_Shape_Representation
+
+Relation #376 NUAO '=>[0:1:1:1]' for #5 --> #367
+Relation #746 NUAO '=>[0:1:1:2]' for #380 --> #737
+Relation #863 NUAO '=>[0:1:1:3]' for #380 --> #854
+Relation #869 NUAO '=>[0:1:1:4]' for #5 --> #380
