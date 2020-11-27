@@ -170,7 +170,7 @@ bool Step3D_Wrapper_Imp::load(std::string fname)
             m_errorCode = WrapperErrorCode::FILE_READ;
             
             std::stringstream ss;
-            ss << "Error reading the STEP file content: " << errorDesc.severityString();
+            ss << "Error reading the STEP file content: " << m_stepfile->Error().severityString();
 
             m_errorMessage = ss.str();
             return false;
