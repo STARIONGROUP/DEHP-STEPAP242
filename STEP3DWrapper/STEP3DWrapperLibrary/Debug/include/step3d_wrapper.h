@@ -135,7 +135,7 @@ struct STEP3D_DLLAPI Part_Wrapper
 
     // From used_representation (geometry)
     Axis2_Placement_3d_Wrapper placement;     //!< Geometry placement (local, not absolute) - from the R.items[]
-    std::string representation_type;                         //!< ENTITY TYPE (STEP class name)- only SR and ABSP are managed
+    std::string representation_type;          //!< ENTITY TYPE (STEP class name)- only SR and ABSP are managed
 
     // Other Representation properties could be:
     // - R.name (empty in all examples)
