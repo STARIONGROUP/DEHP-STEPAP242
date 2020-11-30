@@ -12,6 +12,15 @@ namespace STEP3DAdapter.Tests
 		private string MyParts_path;
 		private string NotStep3DFile_path;
 
+#if Example_of_ArePartsEqual
+		private static void AssertPartsEqual(in STEP3D_Part p1, in STEP3D_Part p2)
+		{
+			// Note: an operator == can be implemented in the struct
+			bool eq = (p1.id == p2.id) && (p1.name == p2.name) && (p1.representation_type == p2.representation_type);
+			return eq;
+		}
+#endif
+
 		[OneTimeSetUp]
 		public void ConfigureTest()
 		{
@@ -73,16 +82,17 @@ namespace STEP3DAdapter.Tests
 		}
 
 		[TestCase]
-		public void CheckMyPartsFileContent_isOK()
+		public void CheckMyPartsFileContent_IsCorrect()
 		{
 			var step3d = new STEP3DFile(MyParts_path);
 
 			Assert.IsFalse(step3d.HasFailed);
-			Assert.AreEqual(MyParts_path, step3d.FileName);
-
-			// Check retrieved information
 
 			var hdr = step3d.HeaderInfo;
+			var parts = step3d.Parts;
+			var relations = step3d.Relations;
+
+			/* Check retrieved information */
 
 			Assert.AreEqual("FreeCAD Model", hdr.file_description.description);
 			Assert.AreEqual("2;1", hdr.file_description.implementation_level);
@@ -95,83 +105,78 @@ namespace STEP3DAdapter.Tests
 			Assert.AreEqual("Unknown", hdr.file_name.authorisation);
 			Assert.AreEqual("AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }", hdr.file_schema);
 
-			//Console.WriteLine($"");
-
-			var parts = step3d.Parts;
+#if DEBUG
 			foreach (var n in parts)
 			{
 				Console.WriteLine($"Part: #{n.id} {n.type} '{n.name}'");
 			}
-
-			var relations = step3d.Relations;
+			
 			foreach (var r in relations)
 			{
 				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.name}' for #{r.relating_id} --> #{r.related_id}");
 			}
+#endif
 
 			Assert.AreEqual(5, parts.Length);
 			Assert.AreEqual(4, relations.Length);
 
-			/*
-			auto nodes = wrapper->getNodes();
-			Assert::AreEqual((size_t)5, nodes.size());
+			STEP3D_Part aPart;
+			STEP3D_PartRelation aRelation;
 
-			auto itNode = nodes.begin();
-			Assert::AreEqual(5, itNode->id);
-			Assert::AreEqual("'Part'", itNode->name.c_str());
-			Assert::AreEqual("Shape_Representation", itNode->representation_type.c_str());
+			/* Parts */
+			aPart = parts[0];
+			Assert.AreEqual(5, aPart.id);
+			Assert.AreEqual("Part", aPart.name);
+			Assert.AreEqual("Shape_Representation", aPart.representation_type);
 
-			itNode++;
-			Assert::AreEqual(367, itNode->id);
-			Assert::AreEqual("'Caja'", itNode->name.c_str());
-			Assert::AreEqual("Advanced_Brep_Shape_Representation", itNode->representation_type.c_str());
+			aPart = parts[1];
+			Assert.AreEqual(367, aPart.id);
+			Assert.AreEqual("Caja", aPart.name);
+			Assert.AreEqual("Advanced_Brep_Shape_Representation", aPart.representation_type);
 
-			itNode++;
-			Assert::AreEqual(380, itNode->id);
-			Assert::AreEqual("'SubPart'", itNode->name.c_str());
-			Assert::AreEqual("Shape_Representation", itNode->representation_type.c_str());
+			aPart = parts[2];
+			Assert.AreEqual(380, aPart.id);
+			Assert.AreEqual("SubPart", aPart.name);
+			Assert.AreEqual("Shape_Representation", aPart.representation_type);
 
-			itNode++;
-			Assert::AreEqual(737, itNode->id);
-			Assert::AreEqual("'Cube'", itNode->name.c_str());
-			Assert::AreEqual("Advanced_Brep_Shape_Representation", itNode->representation_type.c_str());
+			aPart = parts[3];
+			Assert.AreEqual(737, aPart.id);
+			Assert.AreEqual("Cube", aPart.name);
+			Assert.AreEqual("Advanced_Brep_Shape_Representation", aPart.representation_type);
 
-			itNode++;
-			Assert::AreEqual(854, itNode->id);
-			Assert::AreEqual("'Cylinder'", itNode->name.c_str());
-			Assert::AreEqual("Advanced_Brep_Shape_Representation", itNode->representation_type.c_str());
+			aPart = parts[4];
+			Assert.AreEqual(854, aPart.id);
+			Assert.AreEqual("Cylinder", aPart.name);
+			Assert.AreEqual("Advanced_Brep_Shape_Representation", aPart.representation_type);
 
-			auto relations = wrapper->getRelations();
-			Assert::AreEqual((size_t)4, relations.size());
+			/* Parts-Relation */
+			aRelation = relations[0];
+			Assert.AreEqual(376, aRelation.id);
+			Assert.AreEqual("=>[0:1:1:1]", aRelation.name);
+			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual(5, aRelation.relating_id);
+			Assert.AreEqual(367, aRelation.related_id);
 
-			auto itRel = relations.begin();
-			Assert::AreEqual(376, itRel->id);
-			Assert::AreEqual("'=>[0:1:1:1]'", itRel->name.c_str());
-			Assert::AreEqual("NUAO", itRel->type.c_str());
-			Assert::AreEqual(5, itRel->relating_id);
-			Assert::AreEqual(367, itRel->related_id);
+			aRelation = relations[1];
+			Assert.AreEqual(746, aRelation.id);
+			Assert.AreEqual("=>[0:1:1:2]", aRelation.name);
+			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual(380, aRelation.relating_id);
+			Assert.AreEqual(737, aRelation.related_id);
 
-			itRel++;
-			Assert::AreEqual(746, itRel->id);
-			Assert::AreEqual("'=>[0:1:1:2]'", itRel->name.c_str());
-			Assert::AreEqual("NUAO", itRel->type.c_str());
-			Assert::AreEqual(380, itRel->relating_id);
-			Assert::AreEqual(737, itRel->related_id);
+			aRelation = relations[2];
+			Assert.AreEqual(863, aRelation.id);
+			Assert.AreEqual("=>[0:1:1:3]", aRelation.name);
+			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual(380, aRelation.relating_id);
+			Assert.AreEqual(854, aRelation.related_id);
 
-			itRel++;
-			Assert::AreEqual(863, itRel->id);
-			Assert::AreEqual("'=>[0:1:1:3]'", itRel->name.c_str());
-			Assert::AreEqual("NUAO", itRel->type.c_str());
-			Assert::AreEqual(380, itRel->relating_id);
-			Assert::AreEqual(854, itRel->related_id);
-
-			itRel++;
-			Assert::AreEqual(869, itRel->id);
-			Assert::AreEqual("'=>[0:1:1:4]'", itRel->name.c_str());
-			Assert::AreEqual("NUAO", itRel->type.c_str());
-			Assert::AreEqual(5, itRel->relating_id);
-			Assert::AreEqual(380, itRel->related_id);
-			*/
+			aRelation = relations[3];
+			Assert.AreEqual(869, aRelation.id);
+			Assert.AreEqual("=>[0:1:1:4]", aRelation.name);
+			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual(5, aRelation.relating_id);
+			Assert.AreEqual(380, aRelation.related_id);
 		}
 	}
 }
