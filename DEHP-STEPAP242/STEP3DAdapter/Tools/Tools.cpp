@@ -15,44 +15,37 @@ std::string Tools::toStdString(String^ s)
     return msg;
 }
 
-String^ STEP3DAdapter::Tools::toString(std::string s)
+String^ STEP3DAdapter::Tools::toString(const std::string& s)
 {
     return gcnew String(s.c_str());
 }
 
 String^ STEP3DAdapter::Tools::toUnquotedString(const std::string& s)
 {
-    return removeQuotes(toString(s));
+    return toUnquotedString(toString(s));
 }
 
-String^ STEP3DAdapter::Tools::toUnparenthesisString(const std::string& s)
-{
-    return removeParenthesis(toString(s));
-}
-
-String^ STEP3DAdapter::Tools::toCleanString(const std::string& s)
-{
-    return removeQuotes(toUnparenthesisString(s));
-}
-
-String^ Tools::removeQuotes(String^ s)
+String^ Tools::toUnquotedString(String^ s)
 {
     return s->Replace("'", "");
 }
 
-String^ Tools::removeParenthesis(String^ s)
+String^ STEP3DAdapter::Tools::toUnparenthesisString(const std::string& s)
+{
+    return toUnparenthesisString(toString(s));
+}
+
+String^ Tools::toUnparenthesisString(String^ s)
 {
     return s->Replace("(", "")->Replace(")", "");
 }
 
-/*
-void Tools::removeQuotes(String^% s)
+String^ STEP3DAdapter::Tools::toCleanString(const std::string& s)
 {
-    s = s->Replace("'", "");
+    return toUnquotedString(toUnparenthesisString(s));
 }
 
-void Tools::removeParenthesis(String^% s)
+String^ STEP3DAdapter::Tools::toCleanString(String^ s)
 {
-    s = s->Replace("(", "")->Replace(")", "");
+    return toUnquotedString(toUnparenthesisString(s));
 }
-*/
