@@ -11,32 +11,50 @@ namespace STEP3DAdapter.Console
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static private void ShowSTEP3DInformation(String fname)
 		{
-			var step3d = new STEP3DFile(args[0]);
-			
-			System.Console.WriteLine($"File name: { step3d.FileName }");
+			System.Console.WriteLine("STEP3D file information (from step3d_wrapper.dll)");
+			System.Console.WriteLine("");
+
+			var step3d = new STEP3DFile(fname);
 
 			if (step3d.HasFailed)
 			{
 				System.Console.WriteLine($"Error message: { step3d.ErrorMessage }");
+				return;
 			}
 
-			System.Console.WriteLine("\n\nDATA ----------------------------------");
-
+			var hdr = step3d.HeaderInfo;
 			var parts = step3d.Parts;
+			var relations = step3d.Relations;
+
+			System.Console.WriteLine($"\nFile name: { step3d.FileName }");
+
+			System.Console.WriteLine("\nHEADER --------------------------------");
+			System.Console.WriteLine("File_Description:");
+			System.Console.WriteLine($"   description:          { hdr.file_description.description }");
+			System.Console.WriteLine($"   implementation_level: { hdr.file_description.implementation_level }");
+			System.Console.WriteLine("File_Name:");
+			System.Console.WriteLine($"   name:                 { hdr.file_name.name }");
+			System.Console.WriteLine($"   time_stamp:           { hdr.file_name.time_stamp }");
+			System.Console.WriteLine($"   author:               { hdr.file_name.author }");
+			System.Console.WriteLine($"   organization:         { hdr.file_name.organization }");
+			System.Console.WriteLine($"   preprocessor_version: { hdr.file_name.preprocessor_version }");
+			System.Console.WriteLine($"   originating_system:   { hdr.file_name.originating_system }");
+			System.Console.WriteLine($"   authorisation:        { hdr.file_name.authorisation }");
+			System.Console.WriteLine("File_Schema:");
+			System.Console.WriteLine($"   schema:               { hdr.file_schema }");
+
+			System.Console.WriteLine("\nDATA ----------------------------------");
 
 			foreach (var p in parts)
 			{
-				//Console.WriteLine($"");
 				System.Console.WriteLine($"Part: #{p.id} {p.type} '{p.name}'");
 			}
 
-			var relations = step3d.Relations;
-
 			foreach (var r in relations)
 			{
-				//Console.WriteLine($"");
+				
 				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.name}' for #{r.relating_id} --> #{r.related_id}");
 			}
 
@@ -57,6 +75,13 @@ namespace STEP3DAdapter.Console
 				System.Console.WriteLine("Differents");
 			}
 #endif
+		}
+		static void Main(string[] args)
+		{
+			foreach (var argument in args)
+			{
+				ShowSTEP3DInformation(argument);
+			}
 		}
 	}
 }

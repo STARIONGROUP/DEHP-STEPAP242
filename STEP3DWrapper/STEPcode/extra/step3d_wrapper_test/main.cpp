@@ -27,32 +27,25 @@ void processStep3DFile(std::string fname, bool drawGraph)
     }
 
     cout << endl;
-
-    auto hdr = wrapper->getHeaderInfo();
     
+    auto hdr = wrapper->getHeaderInfo();
+    cout << "HEADER --------------------------------" << endl;
     cout << "File_Description: " << endl;
-    cout << "   " << hdr.file_description.description << endl;
-    cout << "   " << hdr.file_description.implementation_level << endl;
+    cout << "   description:          " << hdr.file_description.description << endl;
+    cout << "   implementation_level: " << hdr.file_description.implementation_level << endl;
     cout << "File_Name:" << endl;
-    cout << "   " << hdr.file_name.name << endl;
-    cout << "   " << hdr.file_name.time_stamp << endl;
-    cout << "   " << hdr.file_name.author << endl;
-    cout << "   " << hdr.file_name.organization << endl;
-    cout << "   " << hdr.file_name.preprocessor_version << endl;
-    cout << "   " << hdr.file_name.originating_system << endl;
-    cout << "   " << hdr.file_name.authorisation << endl;
+    cout << "   name:                 " << hdr.file_name.name << endl;
+    cout << "   time_stamp:           " << hdr.file_name.time_stamp << endl;
+    cout << "   author:               " << hdr.file_name.author << endl;
+    cout << "   organization:         " << hdr.file_name.organization << endl;
+    cout << "   preprocessor_version: " << hdr.file_name.preprocessor_version << endl;
+    cout << "   originating_system:   " << hdr.file_name.originating_system << endl;
+    cout << "   authorisation:        " << hdr.file_name.authorisation << endl;
     cout << "File_Schema:" << endl;
-    cout << "   " << hdr.file_schema << endl;
+    cout << "   schema:               " << hdr.file_schema << endl;
 
     cout << endl;
-    
-#ifdef test_description_ctype
-    auto dc = wrapper->getDescriptionCType();
-    cout << "File_Name: " << dc.File_Name << endl;
-    cout << "File_Description: " << dc.File_Description << endl;
-    cout << "File_Description_Id: " << dc.File_Description_Id << endl;
-    cout << "File_Schema: " << dc.File_Schema << endl;
-#endif
+    cout << "DATA ----------------------------------" << endl;
 
     std::list<Part_Wrapper> nodes = wrapper->getNodes();
     for (const Part_Wrapper& n : nodes)
