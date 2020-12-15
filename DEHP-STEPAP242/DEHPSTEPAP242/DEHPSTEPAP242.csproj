@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>DEHPSTEPAP242</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <AssemblyTitle>DEHPSTEPAP242</AssemblyTitle>
+    <Company>Open Engineering S.A.</Company>
+    <Product>DEHPSTEPAP242</Product>
+    <Description>DEHPSTEPAP242 desktop application</Description>
+    <Copyright>Copyright © RHEA System S.A.</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <LangVersion>latest</LangVersion>
+    <StartupObject>DEHPSTEPAP242.App</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.0.0" />
+    <PackageReference Include="DEHPCommon" Version="1.0.80" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Wpf.Layout" Version="20.1.8" />
+    <PackageReference Include="DevExpress.Wpf.Core" Version="20.1.8" />
+    <PackageReference Include="DevExpress.Wpf.Grid" Version="20.1.8" />
+    <PackageReference Include="DevExpress.Wpf.Layout" Version="20.1.8" />
+    <PackageReference Include="DevExpress.Wpf.Navigation" Version="20.1.8" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.363.107" />
+    <PackageReference Include="reactiveui-core.Net40" Version="6.5.0" />
+    <PackageReference Include="Splat.Net40" Version="1.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\STEP3DAdapter\STEP3DAdapter.vcxproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\OpcClient.Config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\DstBrowserHeader.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+</Project>

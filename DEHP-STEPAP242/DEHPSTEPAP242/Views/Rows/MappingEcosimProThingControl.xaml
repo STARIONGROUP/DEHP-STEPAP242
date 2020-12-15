@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="DEHPSTEPAP242.Views.Rows.MappingEcosimProThing"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DEHPSTEPAP242.Views.Rows"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="325">
+    <UserControl.ToolTip>
+        <ToolTip>
+            <StackPanel Orientation="Vertical">
+                <StackPanel Margin="3" Orientation="Horizontal">
+                    <TextBlock FontWeight="Bold" Text="Thing Kind:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding ClassKind}" />
+                </StackPanel>
+                <StackPanel Margin="3" Orientation="Horizontal">
+                    <TextBlock FontWeight="Bold" Text="Owner:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding Owner}" />
+                </StackPanel>
+                <StackPanel Margin="3" Orientation="Horizontal">
+                    <TextBlock FontWeight="Bold" Text="Name:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding Name}" />
+                </StackPanel>
+                <StackPanel Margin="3" Orientation="Horizontal">
+                    <TextBlock FontWeight="Bold" Text="ShortName:" />
+                    <TextBlock Text="{Binding ShortName}" />
+                </StackPanel>
+                <StackPanel Margin="3" Orientation="Horizontal">
+                    <TextBlock FontWeight="Bold" Text="Value:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding Value}" />
+                </StackPanel>
+                <StackPanel Margin="3" Orientation="Horizontal">
+                    <TextBlock FontWeight="Bold" Text="Value Switch:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding ValueSwitch}" />
+                </StackPanel>
+            </StackPanel>
+        </ToolTip>
+    </UserControl.ToolTip>
+    <Border BorderBrush="DarkGray" BorderThickness="1">
+
+    <Grid Background="AliceBlue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Thing Kind: " />
+        <TextBlock Grid.Row="0" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" Text="{Binding ClassKind}" TextTrimming="CharacterEllipsis" />
+
+        <TextBlock Grid.Row="0" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Owner: " />
+        <TextBlock Grid.Row="0" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" Text="{Binding Owner}" TextTrimming="CharacterEllipsis" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Name: " />
+        <TextBlock Grid.Row="1" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+
+        <TextBlock Grid.Row="1" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="ShortName: " />
+        <TextBlock Grid.Row="1" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" Text="{Binding ShortName}" TextTrimming="CharacterEllipsis" />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Value:" />
+        <TextBlock Grid.Row="2" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" Text="{Binding Value}" TextTrimming="CharacterEllipsis" />
+            
+        <TextBlock Grid.Row="2" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Value Switch:" />
+        <TextBlock Grid.Row="2" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" Text="{Binding ValueSwitch}" TextTrimming="CharacterEllipsis" />
+    </Grid>
+    </Border>
+</UserControl>
