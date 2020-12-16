@@ -1,0 +1,116 @@
+image: Visual Studio 2019
+environment:
+  matrix:
+    - DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      TEST_RESULT: 'TestResult.xml'
+      TEST_COVERAGE: 'CoverResults.xml'
+      SONARCLOUD_PROJECT_KEY: RHEAGROUP_DEHP-STEPAP242
+      SONARCLOUD_ORGANIZATION: rheagroup
+      SONARCLOUD_URL: 'https://sonarcloud.io'
+      SONARCLOUD_TOKEN:
+        secure: 67KNIhsvMPwHylkTvfGtu39hYkK94X8svR0pxSBeqbm92ffGeViAv7SVDHnC+kbv
+      GITHUB_TOKEN:
+        secure: uS7/WlBplrAs/j9ab9P3SUN7GZyf4QAHZX//YpDOzXG/DZ6o1MGHdIWLHHdDYM5P
+      TAG_SCENARIO: true
+
+    - DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      TEST_RESULT:    'TestResult.xml'
+      TEST_COVERAGE:  'CoverResults.xml'
+      SONARCLOUD_PROJECT_KEY: RHEAGROUP_DEHP-STEPAP242
+      SONARCLOUD_ORGANIZATION: rheagroup
+      SONARCLOUD_URL: 'https://sonarcloud.io'
+      SONARCLOUD_TOKEN:
+        secure: 67KNIhsvMPwHylkTvfGtu39hYkK94X8svR0pxSBeqbm92ffGeViAv7SVDHnC+kbv
+      GITHUB_TOKEN:
+        secure: uS7/WlBplrAs/j9ab9P3SUN7GZyf4QAHZX//YpDOzXG/DZ6o1MGHdIWLHHdDYM5P
+      TAG_SCENARIO: false
+
+skip_branch_with_pr: true
+
+for:
+-
+  matrix:
+    only:
+      - TAG_SCENARIO: true
+
+  skip_non_tags: true
+
+  configuration: Release
+  before_build:
+    - ps: >-
+          Write-Host Tag Encountered. Producing Artifact
+    - cmd: nuget sources add -name devexpress -source %DEVEXPRESS_API%
+    - cmd: nuget sources add -name github -username RHEAGROUP -password %GITHUB_TOKEN% -source https://nuget.pkg.github.com/RHEAGROUP/index.json
+    - cmd: nuget restore -verbosity quiet
+  build_script:
+    - cmd: msbuild DEHP-STEPAP242\DEHP-STEPAP242.sln -p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  after_build:
+    - cmd: 7z a DEHP-STEPAP242-%APPVEYOR_REPO_TAG_NAME%.zip %APPVEYOR_BUILD_FOLDER%\DEHP-STEPAP242\DEHPSTEPAP242\bin\Release\net472\*
+
+  artifacts:
+  - path: DEHP-STEPAP242-%APPVEYOR_REPO_TAG_NAME%.zip
+    name: DEHP-STEPAP242 %APPVEYOR_REPO_TAG_NAME%
+
+-
+  matrix:
+    only:
+      - TAG_SCENARIO: false
+
+  skip_tags: true
+
+  configuration:
+    - Debug
+
+  install:
+    - choco install opencover.portable
+    - choco install "sonarscanner-msbuild-net46" -y
+  
+  before_build:
+    - cmd: nuget install NUnit.Console -Version 3.11.1 -OutputDirectory testrunner
+    - cmd: nuget install NUnit.Runners -Version 3.11.1 -OutputDirectory testrunner
+    - cmd: nuget sources add -name devexpress -source %DEVEXPRESS_API%
+    - cmd: nuget sources add -name github -username RHEAGROUP -password %GITHUB_TOKEN% -source https://nuget.pkg.github.com/RHEAGROUP/index.json
+    - cmd: nuget restore -verbosity quiet
+    - cmd: set "JAVA_HOME=C:\Program Files\Java\jdk11"
+    - cmd: set "PATH=C:\Program Files\Java\jdk11\bin;%PATH%"
+    - cmd: java -version
+    - ps: >-
+        if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+          Write-Host Sonar Scanning PR# $env:APPVEYOR_PULL_REQUEST_NUMBER Branch $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH
+          SonarScanner.MSBuild.exe begin /key:$env:SONARCLOUD_PROJECT_KEY /o:$env:SONARCLOUD_ORGANIZATION /d:sonar.host.url=$env:SONARCLOUD_URL /d:sonar.login=$env:SONARCLOUD_TOKEN /d:sonar.cs.opencover.reportsPaths=$env:TEST_COVERAGE /d:sonar.cs.nunit.reportsPaths=$env:TEST_RESULT /d:sonar.pullrequest.key=$env:APPVEYOR_PULL_REQUEST_NUMBER /d:sonar.pullrequest.branch=$env:APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH /d:sonar.pullrequest.provider=GitHub /d:sonar.pullrequest.github.repository=$env:APPVEYOR_REPO_NAME
+        } elseif ($env:APPVEYOR_REPO_BRANCH -eq "development") {
+          Write-Host Sonar Scanning branch $env:APPVEYOR_REPO_BRANCH
+          SonarScanner.MSBuild.exe begin /key:$env:SONARCLOUD_PROJECT_KEY /o:$env:SONARCLOUD_ORGANIZATION /d:sonar.host.url=$env:SONARCLOUD_URL /d:sonar.login=$env:SONARCLOUD_TOKEN /d:sonar.cs.opencover.reportsPaths=$env:TEST_COVERAGE /d:sonar.cs.nunit.reportsPaths=$env:TEST_RESULT /d:sonar.branch.name=$env:APPVEYOR_REPO_BRANCH /d:sonar.pullrequest.github.repository=$env:APPVEYOR_REPO_NAME
+        } elseif ($env:APPVEYOR_REPO_BRANCH -eq "master") {
+          Write-Host Sonar Scanning branch $env:APPVEYOR_REPO_BRANCH
+          SonarScanner.MSBuild.exe begin /key:$env:SONARCLOUD_PROJECT_KEY /o:$env:SONARCLOUD_ORGANIZATION /d:sonar.host.url=$env:SONARCLOUD_URL /d:sonar.login=$env:SONARCLOUD_TOKEN /d:sonar.cs.opencover.reportsPaths=$env:TEST_COVERAGE /d:sonar.cs.nunit.reportsPaths=$env:TEST_RESULT /d:sonar.branch.name=$env:APPVEYOR_REPO_BRANCH /d:sonar.pullrequest.github.repository=$env:APPVEYOR_REPO_NAME
+        } else {
+          Write-Host Skipping Sonar Scanning
+        }
+  build:
+    project: DEHP-STEPAP242\DEHP-STEPAP242.sln
+  
+  test_script:
+    - >
+      OpenCover.Console.exe
+      -log:Error
+      -register
+      -target:".\testrunner\NUnit.ConsoleRunner.3.11.1\tools\nunit3-console.exe"
+      -targetargs:"DEHP-STEPAP242-tests.nunit --where=""cat!=AppVeyorExclusion"""
+      -returntargetcode
+      -hideskipped:All;Attribute
+      -output:"%TEST_COVERAGE%"
+      -filter:"+[DEHPSTEPAP242*]* -[*.Tests*]* -[*.Views]*"
+      -excludebyattribute:*.ExcludeFromCodeCoverageAttribute
+  after_test:
+    - ps: >-
+        if ($env:APPVEYOR_PULL_REQUEST_NUMBER -Or $env:APPVEYOR_REPO_BRANCH -eq "development" -Or $env:APPVEYOR_REPO_BRANCH -eq "master") {
+          SonarScanner.MSBuild.exe end /d:"sonar.login=$env:SONARCLOUD_TOKEN"
+        }
+
+notifications:
+  - provider: Email
+    to:
+      - cdp_devs@rheagroup.com
