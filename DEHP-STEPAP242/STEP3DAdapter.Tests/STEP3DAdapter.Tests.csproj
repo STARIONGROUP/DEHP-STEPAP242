@@ -70,4 +70,7 @@
     <Error Condition="!Exists('..\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit.3.12.0\build\NUnit.props'))" />
     <Error Condition="!Exists('..\packages\NUnit3TestAdapter.3.17.0\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit3TestAdapter.3.17.0\build\net35\NUnit3TestAdapter.props'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(SolutionDir)\..\STEP3DWrapper\STEP3DWrapperLibrary\$(ConfigurationName)\bin\*.*" "$(ProjectDir)\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

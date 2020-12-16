@@ -56,4 +56,8 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;$(SolutionDir)\..\STEP3DWrapper\STEP3DWrapperLibrary\$(ConfigurationName)\bin\*.*&quot; &quot;$(ProjectDir)\$(OutDir)&quot;" />
+  </Target>
 </Project>

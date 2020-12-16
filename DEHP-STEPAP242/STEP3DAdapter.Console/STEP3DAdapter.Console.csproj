@@ -56,4 +56,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(SolutionDir)\..\STEP3DWrapper\STEP3DWrapperLibrary\$(ConfigurationName)\bin\*.*" "$(ProjectDir)\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
