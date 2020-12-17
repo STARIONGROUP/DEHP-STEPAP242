@@ -7,6 +7,29 @@
              xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <!--
+    <dxg:TreeListControl AutoGenerateColumns="AddNew" 
+                         ItemsSource="{Binding Step3DHLR}">
+    -->
+    <dxg:TreeListControl Name="treeList" ItemsSource="{Binding Step3DHLR}">
+
+        <dxg:TreeListControl.View>
+        <dxg:TreeListView Name="treeListView" AutoWidth="False" 
+                          KeyFieldName="ID" ParentFieldName="ParentID"
+                          HorizontalScrollbarVisibility="Auto"/>
+        </dxg:TreeListControl.View>
+
+        
+        <dxg:TreeListControl.Columns>
+            <dxg:TreeListColumn FieldName="Name" Fixed="Left" />
+            <dxg:TreeListColumn FieldName="Type" />
+            <dxg:TreeListColumn FieldName="RepresentationType" />
+            <dxg:TreeListColumn FieldName="Description" />
+        </dxg:TreeListControl.Columns>
+        
+    </dxg:TreeListControl>
+    <!-- 
     <UserControl.Resources>
         <ResourceDictionary>
             <Style x:Key="ThingIcon" TargetType="{x:Type Image}">
@@ -34,4 +57,5 @@
             <dxg:TreeListColumn FieldName="RowType" Header="Row Type" />
         </dxg:TreeListControl.Columns>
     </dxg:TreeListControl>
+    -->
 </UserControl>

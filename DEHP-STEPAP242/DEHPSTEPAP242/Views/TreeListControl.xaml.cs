@@ -24,12 +24,15 @@
 
 namespace DEHPSTEPAP242.Views
 {
-    using System.Windows.Controls;
+    using System.Collections.Generic;
+	using System.Windows.Controls;
+    using DevExpress.Mvvm;
+	using STEP3DAdapter;
 
-    /// <summary>
-    /// Interaction logic for TreeListControl.xaml
-    /// </summary>
-    public partial class TreeListControl : UserControl
+	/// <summary>
+	/// Interaction logic for TreeListControl.xaml
+	/// </summary>
+	public partial class TreeListControl : UserControl
     {
         /// <summary>
         /// Initializes a new <see cref="TreeListControl"/>
@@ -37,6 +40,68 @@ namespace DEHPSTEPAP242.Views
         public TreeListControl()
         {
             this.InitializeComponent();
+
+            DataContext = new DemoTreeViewModel();
+            treeListView.ExpandAllNodes();
         }
+    }
+
+    public class Step3DPartTreeNode : STEP3D_Part
+    {
+        /// <summary>
+        /// Auxiliary index for tree control.
+        /// </summary>
+        public int ID { get => id; }
+
+        /// <summary>
+        /// Auxiliary parent index for tree control.
+        /// </summary>
+        public int ParentID { get; set; }
+
+		#region wrapping structure as properties
+
+		public string Name { get => name;}
+        public string Type { get => type;}
+        public string RepresentationType { get => representation_type; }
+		
+        #endregion
+
+		/// <summary>
+		/// Compose a reduced description of the ProductDefinition.
+		/// </summary>
+		public string Description
+		{
+            get => $"{type}#{id} '{name}'";
+		}
+    }
+
+    public static class MockStep3DTree
+    {
+        public static List<Step3DPartTreeNode> GetTree()
+        {
+            List<Step3DPartTreeNode> staff = new List<Step3DPartTreeNode>();
+
+            staff.Add(new Step3DPartTreeNode() {                 id = 5,   type = "PD", name = "Part", representation_type = "Shape_Representation" });
+            staff.Add(new Step3DPartTreeNode() { ParentID = 5,   id = 367, type = "PD", name = "Caja", representation_type = "Advanced_Brep_Shape_Representation" });
+            staff.Add(new Step3DPartTreeNode() { ParentID = 5,   id = 380, type = "PD", name = "SubPart", representation_type = "Shape_Representation" });
+            staff.Add(new Step3DPartTreeNode() { ParentID = 380, id = 737, type = "PD", name = "Cube", representation_type = "Advanced_Brep_Shape_Representation" });
+            staff.Add(new Step3DPartTreeNode() { ParentID = 380, id = 854, type = "PD", name = "Cylinder", representation_type = "Advanced_Brep_Shape_Representation" });
+
+            // ID from id cannot be duplicated. Multiple usage of a PD must be modeled in a different way:
+            // ID and ParentID can be sequential numbers
+            //staff.Add(new Step3DPartTreeNode() { ParentID = 380, id = 854, type = "PD", name = "Cylinder", representation_type = "Advanced_Brep_Shape_Representation" });
+            //staff.Add(new Step3DPartTreeNode() {                 id = 123, type = "X", name = "Extra", representation_type = "None" });
+
+            return staff;
+        }
+    }
+
+    public class DemoTreeViewModel : ViewModelBase
+    {
+        public DemoTreeViewModel()
+        {
+            Step3DHLR = MockStep3DTree.GetTree();
+        }
+        public List<Step3DPartTreeNode> Step3DHLR { get; private set; }
     }
 }
