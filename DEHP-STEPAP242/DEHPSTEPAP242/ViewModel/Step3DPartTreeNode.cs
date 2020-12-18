@@ -5,6 +5,11 @@ namespace DEHPSTEPAP242.ViewModel
 	using System.Collections.Generic;
 	using STEP3DAdapter;
 
+	/// <summary>
+	/// The <see cref="Step3DPartTreeNode"/> is the node in the HLR tree structure.
+	/// 
+	/// <seealso cref="DstObjectBrowserViewModel"/>
+	/// </summary>
 	public class Step3DPartTreeNode
 	{
 		internal STEP3D_Part part;
@@ -28,23 +33,40 @@ namespace DEHPSTEPAP242.ViewModel
 #endregion
 
 #region access to Part fields
-		// TODO: add information about the Relation
 
+		/// <summary>
+		/// Get Part name.
+		/// </summary>
 		public string Name { get => part.name; }
+
+		/// <summary>
+		/// Get short entity type.
+		/// </summary>
 		public string Type { get => part.type; }
+
+		/// <summary>
+		/// Get STEP entity type.
+		/// </summary>
 		public string RepresentationType { get => part.representation_type; }
+
+		/// <summary>
+		/// Get STEP entity file Id.
+		/// </summary>
 		public int StepId { get => part.stepId; }
 
 		/// <summary>
-		/// Compose a reduced description of the ProductDefinition.
+		/// Compose a reduced description of the Part.
 		/// </summary>
 		public string Description
 		{
 			get => $"{part.type}#{part.stepId} '{part.name}'";
 		}
-		#endregion
+
+		// TODO: add information about the Relation
 
 		public string RelationLabel { get; set; }
+
+#endregion
 	}
 
 	public static class MockStep3DTree

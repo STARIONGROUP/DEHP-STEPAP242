@@ -2,16 +2,19 @@
 namespace DEHPSTEPAP242.ViewModel
 {
 	using System.Collections.Generic;
-
-	using DevExpress.Mvvm;
+	using ReactiveUI;
 
 	using DEHPSTEPAP242.ViewModel.Interfaces;
 	using STEP3DAdapter;
-	using System;
-	using ReactiveUI;
 
 	/// <summary>
-	/// The <see cref="DstObjectBrowserViewModel"/> is the view model the <see cref="DstObjectBrowser"/>
+	/// The <see cref="DstObjectBrowserViewModel"/> is the view model 
+	/// of the <see cref="DstObjectBrowser"/> and provides the 
+	/// High Level Representation (aka HLR) of a STEP-AP242 file.
+	/// 
+	/// Information is provided as a Self-Referential Data Source.
+	/// 
+	/// <seealso cref="Step3DPartTreeNode"/>
 	/// </summary>
 	public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel
 	{
@@ -27,28 +30,31 @@ namespace DEHPSTEPAP242.ViewModel
 		/// Helper structure to speedup tree searches.
 		/// See FindPart().
 		/// </summary>
-		private Dictionary<int, STEP3D_Part> idToPartMap = new Dictionary<int, STEP3D_Part>();
+		private readonly Dictionary<int, STEP3D_Part> idToPartMap = new Dictionary<int, STEP3D_Part>();
 
-		private Dictionary<int, STEP3D_PartRelation> idToRelationMap = new Dictionary<int, STEP3D_PartRelation>();
+		/// <summary>
+		/// Helper structure to speedup tree searches.
+		/// See FindRelation().
+		private readonly Dictionary<int, STEP3D_PartRelation> idToRelationMap = new Dictionary<int, STEP3D_PartRelation>();
 
 		/// <summary>
 		/// Helper structure to speedup tree searches.
 		/// See FindChildren().
 		/// </summary>
-		private Dictionary<int, List<int>> partChildren = new Dictionary<int, List<int>>();
+		private readonly Dictionary<int, List<int>> partChildren = new Dictionary<int, List<int>>();
 
 		/// <summary>
 		/// Keep track of Parts used as parent of an Assembly.
 		/// </summary>
-		private HashSet<int> relatedParts = new HashSet<int>();
+		private readonly HashSet<int> relatedParts = new HashSet<int>();
 
 		/// <summary>
 		/// Keep track of Parts used as childs of an Assembly.
 		/// </summary>
-		private HashSet<int> relatingParts = new HashSet<int>();
+		private readonly HashSet<int> relatingParts = new HashSet<int>();
 
 		/// <summary>
-		/// Gets or sets the Step3D HLR
+		/// Gets or sets the Step3D High Level Representation structure.
 		/// </summary>
 		public List<Step3DPartTreeNode> Step3DHLR
 		{
@@ -56,16 +62,22 @@ namespace DEHPSTEPAP242.ViewModel
 			private set => this.RaiseAndSetIfChanged(ref this.step3DHLR, value);
 		}
 
-		public DstObjectBrowserViewModel()
-		{
-			//Step3DHLR = MockStep3DTree.GetTree();
-		}
-
 		/// <summary>
-		/// Create the HLR tree from the Parts/Relations
+		/// Create the HLR tree from the Parts/Relations.
+		/// 
+		/// The HLR is a Self-Referential Data Source. In this approach
+		/// each item in the list has a pair values describing the tree link.
+		/// they are ID and ParentID.
+		/// 
+		/// The ID and ParentID are assigned in a way they are different 
+		/// at each level, enabling that sub-trees can be repeated at
+		/// different levels.
+		/// 
+		/// Any <see cref="STEP3D_Part"/> item without <see cref="STEP3D_PartRelation"/> 
+		/// defining a specific instance, it will placed as child of the main root item.
 		/// </summary>
-		/// <param name="parts"></param>
-		/// <param name="relations"></param>
+		/// <param name="parts">List of geometric parts</param>
+		/// <param name="relations">List of part relations defining instances in the tree composition</param>
 		internal void UpdateHLR(STEP3D_Part[] parts, STEP3D_PartRelation[] relations)
 		{
 			// HLR Tree construction:
@@ -107,13 +119,7 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Fill the auxiliary HasSet wich enable us the Tree construction.
-		/// 
-		/// We need to keep track of which ones are at top level 
-		/// (do not belong to any assembly).
-		/// 
-		/// The ID and ParentID must be different each time the same Part is
-		/// used at different levels. 
+		/// Fill the auxiliary HasSet/Dictionary to speedup the tree construction.
 		/// </summary>
 		/// <param name="parts"></param>
 		/// <param name="relations"></param>
@@ -152,7 +158,7 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Geth Children of a Part
+		/// Geth Children of a part.
 		/// </summary>
 		/// <param name="partId">Relating Part (parent)</param>
 		/// <returns>List of Part id related to</returns>
@@ -178,7 +184,7 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Find the Part object from its StepId
+		/// Find the Part object from its StepId.
 		/// </summary>
 		/// <param name="partId">Step Id of the part</param>
 		/// <returns>A <see cref="STEP3D_Part"/></returns>
@@ -188,17 +194,7 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Find the Relation object from its StepId
-		/// </summary>
-		/// <param name="relationId">Step Id of the relation</param>
-		/// <returns>A <see cref="STEP3D_PartRelation"/></returns>
-		private STEP3D_PartRelation FindRelation(int relationId)
-		{
-			return idToRelationMap[relationId];
-		}
-
-		/// <summary>
-		/// Find the Relation of two parts
+		/// Find the Relation of two parts.
 		/// 
 		/// Note: it is not expected to have duplicated relations 
 		/// for the same pair (relating, related).
