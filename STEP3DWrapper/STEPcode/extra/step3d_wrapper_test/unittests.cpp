@@ -146,27 +146,27 @@ namespace Step3D_Wrapper_Tests
             Assert::AreEqual((size_t)5, nodes.size());
 
             auto itNode = nodes.begin();
-            Assert::AreEqual(5, itNode->id);
+            Assert::AreEqual(5, itNode->stepId);
             Assert::AreEqual("'Part'", itNode->name.c_str());
             Assert::AreEqual("Shape_Representation", itNode->representation_type.c_str());
 
             itNode++;
-            Assert::AreEqual(367, itNode->id);
+            Assert::AreEqual(367, itNode->stepId);
             Assert::AreEqual("'Caja'", itNode->name.c_str());
             Assert::AreEqual("Advanced_Brep_Shape_Representation", itNode->representation_type.c_str());
 
             itNode++;
-            Assert::AreEqual(380, itNode->id);
+            Assert::AreEqual(380, itNode->stepId);
             Assert::AreEqual("'SubPart'", itNode->name.c_str());
             Assert::AreEqual("Shape_Representation", itNode->representation_type.c_str());
 
             itNode++;
-            Assert::AreEqual(737, itNode->id);
+            Assert::AreEqual(737, itNode->stepId);
             Assert::AreEqual("'Cube'", itNode->name.c_str());
             Assert::AreEqual("Advanced_Brep_Shape_Representation", itNode->representation_type.c_str());
 
             itNode++;
-            Assert::AreEqual(854, itNode->id);
+            Assert::AreEqual(854, itNode->stepId);
             Assert::AreEqual("'Cylinder'", itNode->name.c_str());
             Assert::AreEqual("Advanced_Brep_Shape_Representation", itNode->representation_type.c_str());
 
@@ -174,28 +174,28 @@ namespace Step3D_Wrapper_Tests
             Assert::AreEqual((size_t)4, relations.size());
 
             auto itRel = relations.begin();
-            Assert::AreEqual(376, itRel->id);
+            Assert::AreEqual(376, itRel->stepId);
             Assert::AreEqual("'=>[0:1:1:1]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(5, itRel->relating_id);
             Assert::AreEqual(367, itRel->related_id);
 
             itRel++;
-            Assert::AreEqual(746, itRel->id);
+            Assert::AreEqual(746, itRel->stepId);
             Assert::AreEqual("'=>[0:1:1:2]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(380, itRel->relating_id);
             Assert::AreEqual(737, itRel->related_id);
 
             itRel++;
-            Assert::AreEqual(863, itRel->id);
+            Assert::AreEqual(863, itRel->stepId);
             Assert::AreEqual("'=>[0:1:1:3]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(380, itRel->relating_id);
             Assert::AreEqual(854, itRel->related_id);
 
             itRel++;
-            Assert::AreEqual(869, itRel->id);
+            Assert::AreEqual(869, itRel->stepId);
             Assert::AreEqual("'=>[0:1:1:4]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(5, itRel->relating_id);

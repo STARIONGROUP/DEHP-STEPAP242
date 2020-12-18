@@ -61,14 +61,14 @@ bool TreeGraphGenerator_Wrapper_Imp::buildDOT(TreeGraphStyle dottype)
 
         for (const auto& n : m_nodes)
         {
-            f << "I" << n.id << " [label=\"" << n.type << "#" << n.id << " " << n.name << "\"];" << endl;
-            //f << "I" << n.id << " [label=\"" << n.type << "#" << n.id << " (" << n.name << ")\"];" << endl;
+            f << "I" << n.stepId << " [label=\"" << n.type << "#" << n.stepId << " " << n.name << "\"];" << endl;
+            //f << "I" << n.stepId << " [label=\"" << n.type << "#" << n.stepId << " (" << n.name << ")\"];" << endl;
         }
 
         for (const auto& r : m_relations)
         {
             if (m_dot_relation_labeled)
-                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.id << " " << r.name <<"\"];" << endl;
+                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.stepId << " " << r.name <<"\"];" << endl;
             else
                 f << "I" << r.relating_id << " -> I" << r.related_id << ";" << endl;
         }
@@ -89,7 +89,7 @@ bool TreeGraphGenerator_Wrapper_Imp::buildDOT(TreeGraphStyle dottype)
 
         for (const auto& n : m_nodes)
         {
-            f << "I" << n.id << " [label=\"" << n.type << "#" << n.id << " " << n.name << "\"];" << endl;
+            f << "I" << n.stepId << " [label=\"" << n.type << "#" << n.stepId << " " << n.name << "\"];" << endl;
         }
 
         f << endl;
@@ -97,7 +97,7 @@ bool TreeGraphGenerator_Wrapper_Imp::buildDOT(TreeGraphStyle dottype)
         for (const auto& r : m_relations)
         {
             if (m_dot_relation_labeled)
-                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.id << " " << r.name << "\"];" << endl;
+                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.stepId << " " << r.name << "\"];" << endl;
             else
                 f << "I" << r.relating_id << " -> I" << r.related_id << ";" << endl;
         }
@@ -128,17 +128,17 @@ bool TreeGraphGenerator_Wrapper_Imp::buildDOT(TreeGraphStyle dottype)
 
         for (const auto& n : m_nodes)
         {
-            if (relateds.find(n.id) == relateds.end())
+            if (relateds.find(n.stepId) == relateds.end())
             {
-                f << "i_dir_" << n.id << " [label=\"" << n.type << "#" << n.id << " " << n.name << "\", width=2]" << endl;
+                f << "i_dir_" << n.stepId << " [label=\"" << n.type << "#" << n.stepId << " " << n.name << "\", width=2]" << endl;
             }
             else
             {
                 f << "{rank=same" << endl;
-                f << "  i_point_" << n.id << " [shape=point]" << endl;
-                f << "  i_dir_" << n.id << " [label=\"" << n.type << "#" << n.id << " " << n.name << "\", width=2]" << endl;
+                f << "  i_point_" << n.stepId << " [shape=point]" << endl;
+                f << "  i_dir_" << n.stepId << " [label=\"" << n.type << "#" << n.stepId << " " << n.name << "\", width=2]" << endl;
                 f << "}" << endl;
-                f << "i_point_" << n.id << " -> " << "i_dir_" << n.id << endl;
+                f << "i_point_" << n.stepId << " -> " << "i_dir_" << n.stepId << endl;
             }
         }
 

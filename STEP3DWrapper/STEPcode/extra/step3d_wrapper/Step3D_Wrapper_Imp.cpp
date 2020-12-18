@@ -432,7 +432,7 @@ void Step3D_Wrapper_Imp::processGeometricInformation()
     // 1) Nodes position
     for (auto& node : m_nodes)
     {
-        auto mgrnode = m_instancelist->FindFileId(node.id);
+        auto mgrnode = m_instancelist->FindFileId(node.stepId);
         auto instance = mgrnode->GetApplication_instance();
         //PrintInstanceShort(instance);
 
@@ -444,7 +444,7 @@ void Step3D_Wrapper_Imp::processGeometricInformation()
         {
             m_errorCode = WrapperErrorCode::FILE_PROCESS;
             stringstream ss;
-            ss << "Not PD in m_PD2SDR_map[" << node.id << + "]";
+            ss << "Not PD in m_PD2SDR_map[" << node.stepId << + "]";
             m_errorMessage = ss.str();
             return;
         }
@@ -560,11 +560,11 @@ void Step3D_Wrapper_Imp::processPD(SDAI_Application_instance* instance)
     auto p = f->of_product_();
 
     Part_Wrapper node;
-    node.id = pd->StepFileId();
+    node.stepId = pd->StepFileId();
     node.type = "PD"; // pd->EntityName();
     node.name = p->name_().c_str();
 
-    cout << "PD #" << node.id << " " << node.name << "" << endl;
+    cout << "PD #" << node.stepId << " " << node.name << "" << endl;
 
     m_nodes.push_back(node);
 
@@ -599,7 +599,7 @@ void Step3D_Wrapper_Imp::processNAUO(SDAI_Application_instance* instance)
     //cout << "NAUO #" << nauo->StepFileId() << " (#" << related->id_().c_str() << ", #" << relating->id_().c_str() << ")" << endl;
 
     Relation_Wrapper relation;
-    relation.id = nauo->StepFileId();
+    relation.stepId = nauo->StepFileId();
     relation.type = "NUAO"; // nauo->EntityName();
     relation.name = nauo->name_().c_str();
     relation.relating_id = relating_pd->StepFileId();
@@ -905,20 +905,20 @@ void Step3D_Wrapper_Imp::fillDemoData()
 //    m_relations.push_back(Relation_Wrapper() = { 101, "NAO", "Nieto", 11, 7 });
 //#else
     Part_Wrapper node;
-    node.id = 3; node.type = "PD"; node.name = "Root";
+    node.stepId = 3; node.type = "PD"; node.name = "Root";
     Axis2_Placement_3d_Wrapper placement1;
     placement1.location[0] = 50;
     node.placement = placement1;
     m_nodes.push_back(node);
-    node.id = 11; node.type = "PD"; node.name = "Box";
+    node.stepId = 11; node.type = "PD"; node.name = "Box";
     m_nodes.push_back(node);
-    node.id = 7; node.type = "PD"; node.name = "Triangle";
+    node.stepId = 7; node.type = "PD"; node.name = "Triangle";
     m_nodes.push_back(node);
 
     Relation_Wrapper relation;
-    relation.id = 100; relation.type = "NAO"; node.name = "Hijo";
+    relation.stepId = 100; relation.type = "NAO"; node.name = "Hijo";
     m_relations.push_back(relation);
-    relation.id = 101; relation.type = "NAO"; node.name = "Nieto";
+    relation.stepId = 101; relation.type = "NAO"; node.name = "Nieto";
     m_relations.push_back(relation);
 //#endif
 }
@@ -935,7 +935,7 @@ public:
     bool load(std::string fname) override
     {
         // Load demo data
-        //Part_Wrapper node = { .id = 3, .type = };
+        //Part_Wrapper node = { .stepId = 3, .type = };
 
         m_nodes.push_back(Part_Wrapper() = { 3, "PD", "Root" });
         m_nodes.push_back(Part_Wrapper() = { 11, "PD", "Box" });

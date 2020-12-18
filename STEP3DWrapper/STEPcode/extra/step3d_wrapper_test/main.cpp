@@ -50,7 +50,7 @@ void processStep3DFile(std::string fname, bool drawGraph)
     std::list<Part_Wrapper> nodes = wrapper->getNodes();
     for (const Part_Wrapper& n : nodes)
     {
-        cout << "Node #" << n.id << " " << n.type << " " << n.name << endl;
+        cout << "Node #" << n.stepId << " " << n.type << " " << n.name << endl;
         
         cout << " --> placement.name: " << n.placement.name << endl;
 
@@ -76,7 +76,7 @@ void processStep3DFile(std::string fname, bool drawGraph)
     auto relations = wrapper->getRelations();
     for (const auto& n : relations)
     {
-        cout << "Relation #" << n.id << " " << n.type << " " << n.name << " for #" << n.relating_id << " --> #" << n.related_id << endl;
+        cout << "Relation #" << n.stepId << " " << n.type << " " << n.name << " for #" << n.relating_id << " --> #" << n.related_id << endl;
     }
 
     if (drawGraph)
