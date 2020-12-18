@@ -78,7 +78,7 @@ namespace DEHPSTEPAP242.ViewModel
 		/// </summary>
 		/// <param name="parts">List of geometric parts</param>
 		/// <param name="relations">List of part relations defining instances in the tree composition</param>
-		internal void UpdateHLR(STEP3D_Part[] parts, STEP3D_PartRelation[] relations)
+		public void UpdateHLR(STEP3D_Part[] parts, STEP3D_PartRelation[] relations)
 		{
 			// HLR Tree construction:
 			// Each Part could appears many times

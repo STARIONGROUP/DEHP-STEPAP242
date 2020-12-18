@@ -24,10 +24,13 @@
 
 namespace DEHPSTEPAP242.ViewModel.Interfaces
 {
+    using STEP3DAdapter;
+
     /// <summary>
     /// Interface definition for <see cref="DstBrowserHeaderViewModel"/>
     /// </summary>
     public interface IDstBrowserHeaderViewModel
     {
+        public void UpdateHeader(STEP3DFile step3d);
     }
 }

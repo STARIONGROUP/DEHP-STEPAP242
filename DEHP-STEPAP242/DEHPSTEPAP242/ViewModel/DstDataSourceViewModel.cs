@@ -119,11 +119,9 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void UpdateBrowserHeader()
 		{
-            var controller = dstController as DstController;
-            var step3d = controller.Step3DFile;
-            var bh = DstBrowserHeader as DstBrowserHeaderViewModel;
+            var step3d = dstController.Step3DFile;
 
-            bh.UpdateHeader(step3d);
+            DstBrowserHeader.UpdateHeader(step3d);
         }
 
         /// <summary>
@@ -131,11 +129,9 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void UpdateObjectBrowser()
 		{
-            var controller = dstController as DstController;
-            var step3d = controller.Step3DFile;
-            var ob = DstObjectBrowser as DstObjectBrowserViewModel;
+            var step3d = dstController.Step3DFile;
 
-            ob.UpdateHLR(step3d.Parts, step3d.Relations);
+            DstObjectBrowser.UpdateHLR(step3d.Parts, step3d.Relations);
         }
     }
 }

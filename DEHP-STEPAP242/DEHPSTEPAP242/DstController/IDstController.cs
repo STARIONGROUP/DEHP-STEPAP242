@@ -28,6 +28,8 @@ namespace DEHPSTEPAP242.DstController
 
     using Opc.Ua;
 
+    using STEP3DAdapter;
+
     /// <summary>
     /// Interface definition for <see cref="DstController"/>
     /// </summary>
@@ -41,6 +43,8 @@ namespace DEHPSTEPAP242.DstController
         void Load(string filename);
 
         bool IsFileOpen { get; }
+
+        public STEP3DFile Step3DFile { get; }
 
         /// <summary>
         /// Assert whether the <see cref="Services.OpcConnector.OpcSessionHandler.Session"/> is Open

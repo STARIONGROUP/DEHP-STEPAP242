@@ -160,7 +160,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// Update all BrowswerHeader values.
         /// </summary>
         /// <param name="step3d"></param>
-        internal void UpdateHeader(STEP3DFile step3d)
+        public void UpdateHeader(STEP3DFile step3d)
 		{
             FilePath = step3d.FileName;
 

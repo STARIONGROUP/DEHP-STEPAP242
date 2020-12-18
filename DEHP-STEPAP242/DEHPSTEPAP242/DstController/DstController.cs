@@ -98,15 +98,6 @@ namespace DEHPSTEPAP242.DstController
                 Debug.WriteLine($"Error message: { this.step3dFile.ErrorMessage }");
                 return;
             }
-
-            //var hdr = this.step3dFile.HeaderInfo;
-            //var parts = this.step3dFile.Parts;
-            //var relations = this.step3dFile.Relations;
         }
-
-        public STEP3D_HeaderInfo HeaderInfo()
-		{
-            return step3dFile.HeaderInfo;
-		}
     }
 }
