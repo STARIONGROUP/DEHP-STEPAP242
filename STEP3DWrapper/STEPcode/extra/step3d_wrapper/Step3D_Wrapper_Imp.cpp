@@ -601,6 +601,7 @@ void Step3D_Wrapper_Imp::processNAUO(SDAI_Application_instance* instance)
     Relation_Wrapper relation;
     relation.stepId = nauo->StepFileId();
     relation.type = "NUAO"; // nauo->EntityName();
+    relation.id = nauo->id_().c_str();
     relation.name = nauo->name_().c_str();
     relation.relating_id = relating_pd->StepFileId();
     relation.related_id = related_pd->StepFileId();

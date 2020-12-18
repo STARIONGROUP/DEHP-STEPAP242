@@ -175,28 +175,32 @@ namespace Step3D_Wrapper_Tests
 
             auto itRel = relations.begin();
             Assert::AreEqual(376, itRel->stepId);
-            Assert::AreEqual("'=>[0:1:1:1]'", itRel->name.c_str());
+            Assert::AreEqual("'9'", itRel->id.c_str());
+            //Assert::AreEqual("'=>[0:1:1:1]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(5, itRel->relating_id);
             Assert::AreEqual(367, itRel->related_id);
 
             itRel++;
             Assert::AreEqual(746, itRel->stepId);
-            Assert::AreEqual("'=>[0:1:1:2]'", itRel->name.c_str());
+            Assert::AreEqual("'10'", itRel->id.c_str());
+            //Assert::AreEqual("'=>[0:1:1:2]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(380, itRel->relating_id);
             Assert::AreEqual(737, itRel->related_id);
 
             itRel++;
             Assert::AreEqual(863, itRel->stepId);
-            Assert::AreEqual("'=>[0:1:1:3]'", itRel->name.c_str());
+            Assert::AreEqual("'11'", itRel->id.c_str());
+            //Assert::AreEqual("'=>[0:1:1:3]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(380, itRel->relating_id);
             Assert::AreEqual(854, itRel->related_id);
 
             itRel++;
             Assert::AreEqual(869, itRel->stepId);
-            Assert::AreEqual("'=>[0:1:1:4]'", itRel->name.c_str());
+            Assert::AreEqual("'12'", itRel->id.c_str());
+            //Assert::AreEqual("'=>[0:1:1:4]'", itRel->name.c_str());
             Assert::AreEqual("NUAO", itRel->type.c_str());
             Assert::AreEqual(5, itRel->relating_id);
             Assert::AreEqual(380, itRel->related_id);

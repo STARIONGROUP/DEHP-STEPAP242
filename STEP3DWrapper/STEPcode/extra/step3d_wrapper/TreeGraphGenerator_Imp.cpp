@@ -68,7 +68,7 @@ bool TreeGraphGenerator_Wrapper_Imp::buildDOT(TreeGraphStyle dottype)
         for (const auto& r : m_relations)
         {
             if (m_dot_relation_labeled)
-                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.stepId << " " << r.name <<"\"];" << endl;
+                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.stepId << " " << r.id <<"\"];" << endl;
             else
                 f << "I" << r.relating_id << " -> I" << r.related_id << ";" << endl;
         }
@@ -97,7 +97,7 @@ bool TreeGraphGenerator_Wrapper_Imp::buildDOT(TreeGraphStyle dottype)
         for (const auto& r : m_relations)
         {
             if (m_dot_relation_labeled)
-                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.stepId << " " << r.name << "\"];" << endl;
+                f << "I" << r.relating_id << " -> I" << r.related_id << " [label=\"" << r.type << "#" << r.stepId << " " << r.id << "\"];" << endl;
             else
                 f << "I" << r.relating_id << " -> I" << r.related_id << ";" << endl;
         }

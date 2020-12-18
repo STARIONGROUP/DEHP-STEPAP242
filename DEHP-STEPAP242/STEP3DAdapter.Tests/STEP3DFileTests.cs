@@ -108,12 +108,12 @@ namespace STEP3DAdapter.Tests
 #if DEBUG
 			foreach (var n in parts)
 			{
-				Console.WriteLine($"Part: #{n.id} {n.type} '{n.name}'");
+				Console.WriteLine($"Part: #{n.stepId} {n.type} '{n.name}'");
 			}
 			
 			foreach (var r in relations)
 			{
-				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.name}' for #{r.relating_id} --> #{r.related_id}");
+				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.id},{r.name}' for #{r.relating_id} --> #{r.related_id}");
 			}
 #endif
 
@@ -125,56 +125,60 @@ namespace STEP3DAdapter.Tests
 
 			/* Parts */
 			aPart = parts[0];
-			Assert.AreEqual(5, aPart.id);
+			Assert.AreEqual(5, aPart.stepId);
 			Assert.AreEqual("Part", aPart.name);
 			Assert.AreEqual("Shape_Representation", aPart.representation_type);
 
 			aPart = parts[1];
-			Assert.AreEqual(367, aPart.id);
+			Assert.AreEqual(367, aPart.stepId);
 			Assert.AreEqual("Caja", aPart.name);
 			Assert.AreEqual("Advanced_Brep_Shape_Representation", aPart.representation_type);
 
 			aPart = parts[2];
-			Assert.AreEqual(380, aPart.id);
+			Assert.AreEqual(380, aPart.stepId);
 			Assert.AreEqual("SubPart", aPart.name);
 			Assert.AreEqual("Shape_Representation", aPart.representation_type);
 
 			aPart = parts[3];
-			Assert.AreEqual(737, aPart.id);
+			Assert.AreEqual(737, aPart.stepId);
 			Assert.AreEqual("Cube", aPart.name);
 			Assert.AreEqual("Advanced_Brep_Shape_Representation", aPart.representation_type);
 
 			aPart = parts[4];
-			Assert.AreEqual(854, aPart.id);
+			Assert.AreEqual(854, aPart.stepId);
 			Assert.AreEqual("Cylinder", aPart.name);
 			Assert.AreEqual("Advanced_Brep_Shape_Representation", aPart.representation_type);
 
 			/* Parts-Relation */
 			aRelation = relations[0];
-			Assert.AreEqual(376, aRelation.id);
-			Assert.AreEqual("=>[0:1:1:1]", aRelation.name);
+			Assert.AreEqual(376, aRelation.stepId);
 			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual("9", aRelation.id);
+			Assert.AreEqual("=>[0:1:1:1]", aRelation.name);
 			Assert.AreEqual(5, aRelation.relating_id);
 			Assert.AreEqual(367, aRelation.related_id);
 
 			aRelation = relations[1];
-			Assert.AreEqual(746, aRelation.id);
-			Assert.AreEqual("=>[0:1:1:2]", aRelation.name);
+			Assert.AreEqual(746, aRelation.stepId);
 			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual("10", aRelation.id);
+			Assert.AreEqual("=>[0:1:1:2]", aRelation.name);
 			Assert.AreEqual(380, aRelation.relating_id);
 			Assert.AreEqual(737, aRelation.related_id);
 
 			aRelation = relations[2];
-			Assert.AreEqual(863, aRelation.id);
-			Assert.AreEqual("=>[0:1:1:3]", aRelation.name);
+			Assert.AreEqual(863, aRelation.stepId);
 			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual("11", aRelation.id);
+			Assert.AreEqual("=>[0:1:1:3]", aRelation.name);
 			Assert.AreEqual(380, aRelation.relating_id);
 			Assert.AreEqual(854, aRelation.related_id);
 
 			aRelation = relations[3];
-			Assert.AreEqual(869, aRelation.id);
-			Assert.AreEqual("=>[0:1:1:4]", aRelation.name);
+			Assert.AreEqual(869, aRelation.stepId);
 			Assert.AreEqual("NUAO", aRelation.type);
+			Assert.AreEqual("12", aRelation.id);
+			Assert.AreEqual("=>[0:1:1:4]", aRelation.name);
 			Assert.AreEqual(5, aRelation.relating_id);
 			Assert.AreEqual(380, aRelation.related_id);
 		}

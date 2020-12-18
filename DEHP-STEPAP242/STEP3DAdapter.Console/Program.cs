@@ -49,25 +49,25 @@ namespace STEP3DAdapter.Console
 
 			foreach (var p in parts)
 			{
-				System.Console.WriteLine($"Part: #{p.id} {p.type} '{p.name}'");
+				System.Console.WriteLine($"Part: #{p.stepId} {p.type} '{p.name}'");
 			}
 
 			foreach (var r in relations)
 			{
 				
-				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.name}' for #{r.relating_id} --> #{r.related_id}");
+				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.id},{r.name}' for #{r.relating_id} --> #{r.related_id}");
 			}
 
 #if WITH_RELATION_PART_REFERENCES
 			if (parts[0] == relations[0].relating_part)
 			{
 				System.Console.WriteLine("Equal");
-				System.Console.WriteLine($"Part: #{parts[0].id} {parts[0].type} <<{parts[0].name}>>");
+				System.Console.WriteLine($"Part: #{parts[0].stepId} {parts[0].type} <<{parts[0].name}>>");
 				System.Console.WriteLine($"Part: #{relations[0].relating_part.id} {relations[0].relating_part.type} <<{relations[0].relating_part.name}>>");
 
 				relations[0].relating_part.name = "New name for check if same object";
 
-				System.Console.WriteLine($"Part: #{parts[0].id} {parts[0].type} <<{parts[0].name}>>");
+				System.Console.WriteLine($"Part: #{parts[0].stepId} {parts[0].type} <<{parts[0].name}>>");
 				System.Console.WriteLine($"Part: #{relations[0].relating_part.id} {relations[0].relating_part.type} <<{relations[0].relating_part.name}>>");
 			}
 			else

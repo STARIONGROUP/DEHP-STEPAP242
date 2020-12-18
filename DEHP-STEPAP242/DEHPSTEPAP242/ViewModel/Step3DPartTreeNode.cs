@@ -33,14 +33,14 @@ namespace DEHPSTEPAP242.ViewModel
 		public string Name { get => part.name; }
 		public string Type { get => part.type; }
 		public string RepresentationType { get => part.representation_type; }
-		public int StepId { get => part.id; }
+		public int StepId { get => part.stepId; }
 
 		/// <summary>
 		/// Compose a reduced description of the ProductDefinition.
 		/// </summary>
 		public string Description
 		{
-			get => $"{part.type}#{part.id} '{part.name}'";
+			get => $"{part.type}#{part.stepId} '{part.name}'";
 		}
 		#endregion
 
@@ -53,11 +53,11 @@ namespace DEHPSTEPAP242.ViewModel
 		{
 			List<Step3DPartTreeNode> staff = new List<Step3DPartTreeNode>();
 
-			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { id = 5, type = "PD", name = "Part", representation_type = "Shape_Representation" }) { ID = 5 });
-			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { id = 367, type = "PD", name = "Caja", representation_type = "Advanced_Brep_Shape_Representation" }) { ID = 367, ParentID = 5 });
-			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { id = 380, type = "PD", name = "SubPart", representation_type = "Shape_Representation" }) { ID = 380, ParentID = 5 } );
-			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { id = 737, type = "PD", name = "Cube", representation_type = "Advanced_Brep_Shape_Representation" }) { ID = 737, ParentID = 380 });
-			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { id = 854, type = "PD", name = "Cylinder", representation_type = "Advanced_Brep_Shape_Representation" }) { ID = 854, ParentID = 380 });
+			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { stepId = 5, type = "PD", name = "Part", representation_type = "Shape_Representation" }) { ID = 5 });
+			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { stepId = 367, type = "PD", name = "Caja", representation_type = "Advanced_Brep_Shape_Representation" }) { ID = 367, ParentID = 5 });
+			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { stepId = 380, type = "PD", name = "SubPart", representation_type = "Shape_Representation" }) { ID = 380, ParentID = 5 } );
+			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { stepId = 737, type = "PD", name = "Cube", representation_type = "Advanced_Brep_Shape_Representation" }) { ID = 737, ParentID = 380 });
+			staff.Add(new Step3DPartTreeNode(new STEP3D_Part { stepId = 854, type = "PD", name = "Cylinder", representation_type = "Advanced_Brep_Shape_Representation" }) { ID = 854, ParentID = 380 });
 
 			// ID from id cannot be duplicated. Multiple usage of a PD must be modeled in a different way:
 			// ID and ParentID can be sequential numbers

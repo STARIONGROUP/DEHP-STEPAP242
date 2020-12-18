@@ -55,7 +55,7 @@ namespace STEP3DAdapter
 	public ref struct STEP3D_Part
 	{
 		// From product definition
-		int id;                               //!< PD.id (in the STEP file)
+		int stepId;                           //!< PD.stepId (in the STEP file)
 		String^ type;                         //!< ENTITY TYPE (STEP class name) = PD
 		String^ name;                         //!< PD.PDF.P.name
 
@@ -68,9 +68,10 @@ namespace STEP3DAdapter
 	/// </summary>
 	public ref struct STEP3D_PartRelation
 	{
-		int id;            //!< NAUO.id (in the STEP file)
-		String^ type;      //!< ENTITY TYPE (class name) = NAUO
-		String^ name;      //!< NAUO.label
+		int stepId;            //!< NAUO.stepId (in the STEP file)
+		String^ type;          //!< ENTITY TYPE (class name) = NAUO
+		String^ id;            //!< NAUO.id
+		String^ name;          //!< NAUO.name
 
 		int relating_id;   //!< PD.id of the parent (in the STEP file)
 		int related_id;    //!< PD.id of the child (in the STEP file)

@@ -21,7 +21,7 @@
 * 
 * String containing the last tagged git revision of the Stepcode repository.
 * 
-* Example: "git commit stepId: v0.8-241-ga9a7e0af, build timestamp 2020-11-23T19:58:17Z"
+* Example: "git commit id: v0.8-241-ga9a7e0af, build timestamp 2020-11-23T19:58:17Z"
 * 
 * Reference: <a href="https://github.com/stepcode/stepcode"></a>
 */
@@ -161,9 +161,10 @@ struct STEP3D_DLLAPI Part_Wrapper
 */
 struct STEP3D_DLLAPI Relation_Wrapper
 {
-    int stepId;        //!< NAUO.stepId (in the STEP file)
-    std::string type;  //!< ENTITY TYPE (class name) = NAUO
-    std::string name;  //!< NAUO.label
+    int stepId;          //!< NAUO.stepId (in the STEP file)
+    std::string type;    //!< ENTITY TYPE (class name) = NAUO
+    std::string id;      //!< NAUO.id
+    std::string name;    //!< NAUO.name
 
     int relating_id;   //!< PD.stepId of the parent (in the STEP file)
     int related_id;    //!< PD.stepId of the child (in the STEP file)

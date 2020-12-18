@@ -76,7 +76,7 @@ void processStep3DFile(std::string fname, bool drawGraph)
     auto relations = wrapper->getRelations();
     for (const auto& n : relations)
     {
-        cout << "Relation #" << n.stepId << " " << n.type << " " << n.name << " for #" << n.relating_id << " --> #" << n.related_id << endl;
+        cout << "Relation #" << n.stepId << " " << n.type << " " << n.id << " for #" << n.relating_id << " --> #" << n.related_id << endl;
     }
 
     if (drawGraph)

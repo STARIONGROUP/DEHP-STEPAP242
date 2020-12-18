@@ -129,12 +129,12 @@ namespace DEHPSTEPAP242.ViewModel
 
 			foreach (var p in parts)
 			{
-				idToPartMap.Add(p.id, p);
+				idToPartMap.Add(p.stepId, p);
 			}
 
 			foreach (var r in relations)
 			{
-				idToRelationMap.Add(r.id, r);
+				idToRelationMap.Add(r.stepId, r);
 
 				relatingParts.Add(r.relating_id);
 				relatedParts.Add(r.related_id);
@@ -148,7 +148,7 @@ namespace DEHPSTEPAP242.ViewModel
 		/// <returns>True is not used as related part</returns>
 		private bool IsIsolatedPart(STEP3D_Part part)
 		{
-			return relatedParts.Contains(part.id) == false;
+			return relatedParts.Contains(part.stepId) == false;
 		}
 
 		/// <summary>
@@ -232,9 +232,9 @@ namespace DEHPSTEPAP242.ViewModel
 			foreach(var id in childrenIds)
 			{
 				var child = FindPart(id);
-				var relation = FindRelation(e.StepId, child.id);
+				var relation = FindRelation(e.StepId, child.stepId);
 
-				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = e.ID, RelationLabel = relation?.name };
+				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = e.ID, RelationLabel = relation?.id };
 				entries.Add(node);
 
 				AddSubTree(entries, node, ref nextID);

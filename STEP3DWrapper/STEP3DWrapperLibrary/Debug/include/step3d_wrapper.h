@@ -122,16 +122,15 @@ struct STEP3D_DLLAPI Axis2_Placement_3d_Wrapper
 struct STEP3D_DLLAPI Part_Wrapper
 {
     // From definition
-    int id;                                   //!< PD.id (in the STEP file)
-    std::string type;                         //!< ENTITY TYPE (STEP class name) = PD
-    std::string name;                         //!< PD.PDF.P.name
+    int stepId;              //!< PD.stepId (in the STEP file)
+    std::string type;        //!< ENTITY TYPE (STEP class name) = PD
+    std::string name;        //!< PD.PDF.P.name
 
     // Others properties could be:
     // - P.description
     // - PDF.description
     // - PDC.life_cycle_stage
     // - PDC.AC.application
-
 
     // From used_representation (geometry)
     Axis2_Placement_3d_Wrapper placement;     //!< Geometry placement (local, not absolute) - from the R.items[]
@@ -140,7 +139,7 @@ struct STEP3D_DLLAPI Part_Wrapper
     // Other Representation properties could be:
     // - R.name (empty in all examples)
 
-    Part_Wrapper() : id(0) {}
+    Part_Wrapper() : stepId(0) {}
 };
 
 /**
@@ -162,12 +161,13 @@ struct STEP3D_DLLAPI Part_Wrapper
 */
 struct STEP3D_DLLAPI Relation_Wrapper
 {
-    int id;            //!< NAUO.id (in the STEP file)
-    std::string type;  //!< ENTITY TYPE (class name) = NAUO
-    std::string name;  //!< NAUO.label
+    int stepId;          //!< NAUO.stepId (in the STEP file)
+    std::string type;    //!< ENTITY TYPE (class name) = NAUO
+    std::string id;      //!< NAUO.id
+    std::string name;    //!< NAUO.name
 
-    int relating_id;   //!< PD.id of the parent (in the STEP file)
-    int related_id;    //!< PD.id of the child (in the STEP file)
+    int relating_id;   //!< PD.stepId of the parent (in the STEP file)
+    int related_id;    //!< PD.stepId of the child (in the STEP file)
 
     // From transformation:
     // - CDSR.PDS.definition == NAUO (should match the current NAUO entity)

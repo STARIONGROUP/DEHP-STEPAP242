@@ -133,7 +133,6 @@ namespace DEHPSTEPAP242.ViewModel
 		{
             var controller = dstController as DstController;
             var step3d = controller.Step3DFile;
-
             var ob = DstObjectBrowser as DstObjectBrowserViewModel;
 
             ob.UpdateHLR(step3d.Parts, step3d.Relations);

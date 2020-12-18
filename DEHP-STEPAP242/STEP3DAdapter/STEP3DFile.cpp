@@ -110,7 +110,7 @@ STEP3D_Part^ STEP3DAdapter::STEP3DFile::createPart(const Part_Wrapper& pw)
 {
     STEP3D_Part^ part = gcnew STEP3D_Part();
     
-    part->id = pw.id;
+    part->stepId = pw.stepId;
     part->name = Tools::toUnquotedString(pw.name);
     part->type = Tools::toString(pw.type);
 
@@ -125,9 +125,10 @@ STEP3D_PartRelation^ STEP3DAdapter::STEP3DFile::createRelationPart(const Relatio
 {
     STEP3D_PartRelation^ relation = gcnew STEP3D_PartRelation();
     
-    relation->id = rw.id;
-    relation->name = Tools::toUnquotedString(rw.name);
+    relation->stepId = rw.stepId;
     relation->type = Tools::toString(rw.type);
+    relation->id = Tools::toUnquotedString(rw.id);
+    relation->name = Tools::toUnquotedString(rw.name);
 
     relation->relating_id = rw.relating_id;
     relation->related_id = rw.related_id;
@@ -138,13 +139,13 @@ STEP3D_PartRelation^ STEP3DAdapter::STEP3DFile::createRelationPart(const Relatio
 
     for each (auto part in m_parts)
     {
-        if (!withRelating && (part->id == relation->relating_id))
+        if (!withRelating && (part->stepId == relation->relating_id))
         {
             relation->relating_part = part;
             withRelating = true;
         }
 
-        if (!withRelated && (part->id == relation->related_id))
+        if (!withRelated && (part->stepId == relation->related_id))
         {
             relation->related_part = part;
             withRelating = true;
