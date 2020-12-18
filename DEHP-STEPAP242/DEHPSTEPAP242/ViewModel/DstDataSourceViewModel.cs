@@ -71,23 +71,6 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /// <summary>
-        /// Executes the <see cref="DataSourceViewModel.ConnectCommand"/>
-        /// </summary>
-        protected override void ConnectCommandExecute()
-        {
-            if (this.dstController.IsSessionOpen)
-            {
-                this.dstController.CloseSession();
-            }
-            else
-            {
-                this.NavigationService.ShowDialog<DstLogin>();
-            }
-
-            this.UpdateConnectButtonText(this.dstController.IsSessionOpen);
-        }
-
-        /// <summary>
         /// Load a new STEP AP242 file.
         /// </summary>
         protected override void LoadFileCommandExecute()

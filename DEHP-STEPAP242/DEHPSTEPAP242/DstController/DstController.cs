@@ -28,9 +28,6 @@ namespace DEHPSTEPAP242.DstController
 	using System.Threading.Tasks;
 
     using DEHPSTEPAP242.Enumerator;
-    using DEHPSTEPAP242.Services.OpcConnector.Interfaces;
-
-    using Opc.Ua;
 
     using STEP3DAdapter;
 
@@ -49,44 +46,14 @@ namespace DEHPSTEPAP242.DstController
 		public bool IsFileOpen => this.step3dFile?.HasFailed == false;
 
         /// <summary>
-        /// The <see cref="IOpcClientService"/> that handles the OPC connection with EcosimPro
+        /// This should be returns <see cref="Task"/>.
+        /// 
+        /// public async Task XXX()
+        /// {
+        ///     await method();
+        /// }
         /// </summary>
-        private readonly IOpcClientService opcClientService;
-        
-        /// <summary>
-        /// Assert whether the <see cref="Services.OpcConnector.OpcSessionHandler.Session"/> is Open
-        /// </summary>
-        public bool IsSessionOpen =>  this.opcClientService.OpcClientStatusCode == OpcClientStatusCode.Connected;
-
-        /// <summary>
-        /// Initializes a new <see cref="DstController"/>
-        /// </summary>
-        /// <param name="opcClientService">The <see cref="IOpcClientService"/></param>
-        public DstController(IOpcClientService opcClientService)
-        {
-            this.opcClientService = opcClientService;
-        }
-
-        /// <summary>
-        /// Connects to the provided endpoint
-        /// </summary>
-        /// <param name="endpoint">The end point url eg. often opc.tcp:// representing the opc protocol</param>
-        /// <param name="autoAcceptConnection">An assert whether the certificate should be auto accepted if valid</param>
-        /// <param name="credential">The <see cref="IUserIdentity"/> default = null in case server does not require authentication</param>
-        /// <returns>A <see cref="Task"/></returns>
-        public async Task Connect(string endpoint, bool autoAcceptConnection = true, IUserIdentity credential = null)
-        {
-            await this.opcClientService.Connect(endpoint, autoAcceptConnection, credential);
-        }
-        
-        /// <summary>
-        /// Closes the <see cref="Services.OpcConnector.OpcSessionHandler.Session"/>
-        /// </summary>
-        public void CloseSession()
-        {
-            this.opcClientService.CloseSession();
-        }
-
+        /// <param name="filename"></param>
 		public void Load(string filename)
 		{
             //Logger.Error($"Loading file: {filename}");

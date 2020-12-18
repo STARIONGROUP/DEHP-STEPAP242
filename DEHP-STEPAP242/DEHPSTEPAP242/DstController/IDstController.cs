@@ -45,24 +45,5 @@ namespace DEHPSTEPAP242.DstController
         bool IsFileOpen { get; }
 
         public STEP3DFile Step3DFile { get; }
-
-        /// <summary>
-        /// Assert whether the <see cref="Services.OpcConnector.OpcSessionHandler.Session"/> is Open
-        /// </summary>
-        bool IsSessionOpen { get; }
-
-        /// <summary>
-        /// Connects to the provided endpoint
-        /// </summary>
-        /// <param name="endpoint">The end point url eg. often opc.tcp:// representing the opc protocol</param>
-        /// <param name="autoAcceptConnection">An assert whether the certificate should be auto accepted if valid</param>
-        /// <param name="credential">The <see cref="IUserIdentity"/> default = null in case server does not require authentication</param>
-        /// <returns>A <see cref="Task"/></returns>
-        Task Connect(string endpoint, bool autoAcceptConnection = true, IUserIdentity credential = null);
-
-        /// <summary>
-        /// Closes the <see cref="Services.OpcConnector.OpcSessionHandler.Session"/>
-        /// </summary>
-        void CloseSession();
     }
 }

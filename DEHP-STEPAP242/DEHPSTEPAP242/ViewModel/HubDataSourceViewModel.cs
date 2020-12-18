@@ -82,10 +82,47 @@ namespace DEHPSTEPAP242.ViewModel
             this.InitializeCommands();
         }
 
+		protected override void InitializeCommands()
+		{
+			base.InitializeCommands();
+
+            this.ConnectCommand = ReactiveCommand.Create();
+            this.ConnectCommand.Subscribe(_ => this.ConnectCommandExecute());
+        }
+
+		/// <summary>
+		/// The connect text for the connect button
+		/// </summary>
+		private const string ConnectText = "Connect";
+
         /// <summary>
-        /// Executes the <see cref="DataSourceViewModel.ConnectCommand"/>
+        /// The disconnect text for the connect button
         /// </summary>
-        protected override void ConnectCommandExecute()
+        private const string DisconnectText = "Disconnect";
+
+        /// <summary>
+        /// Backing field for <see cref="ConnectButtonText"/>
+        /// </summary>
+        private string connectButtonText = ConnectText;
+
+        /// <summary>
+        /// Gets or sets the name
+        /// </summary>
+        public string ConnectButtonText
+        {
+            get => this.connectButtonText;
+            set => this.RaiseAndSetIfChanged(ref this.connectButtonText, value);
+        }
+
+        /// <summary>
+        /// <see cref="ReactiveCommand{T}"/> for connecting to a data source
+        /// </summary>
+        public ReactiveCommand<object> ConnectCommand { get; set; }
+
+        /// <summary>
+        /// Executes the <see cref="HubDataSourceViewModel.ConnectCommand"/>
+        /// </summary>
+        void ConnectCommandExecute()
         {
             if (this.hubController.IsSessionOpen)
             {
@@ -99,7 +136,16 @@ namespace DEHPSTEPAP242.ViewModel
             this.UpdateConnectButtonText(this.hubController.IsSessionOpen);
         }
 
-		protected override void LoadFileCommandExecute()
+        /// <summary>
+        /// Updates the <see cref="ConnectButtonText"/>
+        /// </summary>
+        /// <param name="isSessionOpen">Assert whether the the button text should be <see cref="ConnectText"/> or <see cref="DisconnectText"/></param>
+        void UpdateConnectButtonText(bool isSessionOpen)
+        {
+            this.ConnectButtonText = isSessionOpen ? DisconnectText : ConnectText;
+        }
+
+        protected override void LoadFileCommandExecute()
 		{
 			throw new NotImplementedException();
 		}

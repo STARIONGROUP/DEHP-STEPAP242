@@ -43,21 +43,6 @@ namespace DEHPSTEPAP242.ViewModel
         private string loadButtonText = LoadText;
 
         /// <summary>
-        /// The connect text for the connect button
-        /// </summary>
-        private const string ConnectText = "Connect";
-
-        /// <summary>
-        /// The disconnect text for the connect button
-        /// </summary>
-        private const string DisconnectText = "Disconnect";
-
-        /// <summary>
-        /// Backing field for <see cref="ConnectButtonText"/>
-        /// </summary>
-        private string connectButtonText = ConnectText;
-        
-        /// <summary>
         /// Gets the <see cref="INavigationService"/>
         /// </summary>
         protected readonly INavigationService NavigationService;
@@ -69,6 +54,15 @@ namespace DEHPSTEPAP242.ViewModel
         protected DataSourceViewModel(INavigationService navigationService)
         {
             this.NavigationService = navigationService;
+        }
+
+        /// <summary>
+        /// Initializes the <see cref="ReactiveCommand{T}"/>
+        /// </summary>
+        protected virtual void InitializeCommands()
+        {
+            this.LoadFileCommand = ReactiveCommand.Create();
+            this.LoadFileCommand.Subscribe(_ => this.LoadFileCommandExecute());
         }
 
         /// <summary>
@@ -86,49 +80,8 @@ namespace DEHPSTEPAP242.ViewModel
         public ReactiveCommand<object> LoadFileCommand { get; set; }
 
         /// <summary>
-        /// Gets or sets the name
-        /// </summary>
-        public string ConnectButtonText
-        {
-            get => this.connectButtonText;
-            set => this.RaiseAndSetIfChanged(ref this.connectButtonText, value);
-        }
-        
-        /// <summary>
-        /// <see cref="ReactiveCommand{T}"/> for connecting to a data source
-        /// </summary>
-        public ReactiveCommand<object> ConnectCommand { get; set; }
-
-        /// <summary>
-        /// Initializes the <see cref="ReactiveCommand{T}"/>
-        /// </summary>
-        protected virtual void InitializeCommands()
-        {
-            this.ConnectCommand = ReactiveCommand.Create();
-            this.ConnectCommand.Subscribe(_ => this.ConnectCommandExecute());
-
-            this.LoadFileCommand = ReactiveCommand.Create();
-            this.LoadFileCommand.Subscribe(_ => this.LoadFileCommandExecute());
-        }
-
-        /// <summary>
         /// Executes the <see cref="LoadFileCommand"/>
         /// </summary>
         protected abstract void LoadFileCommandExecute();
-
-        /// <summary>
-        /// Executes the <see cref="ConnectCommand"/>
-        /// </summary>
-        protected abstract void ConnectCommandExecute();
-
-        /// <summary>
-        /// Updates the <see cref="ConnectButtonText"/>
-        /// </summary>
-        /// <param name="isSessionOpen">Assert whether the the button text should be <see cref="ConnectText"/> or <see cref="DisconnectText"/></param>
-        protected void UpdateConnectButtonText(bool isSessionOpen)
-        {
-            this.ConnectButtonText = isSessionOpen ? DisconnectText : ConnectText;
-        }
-
     }
 }

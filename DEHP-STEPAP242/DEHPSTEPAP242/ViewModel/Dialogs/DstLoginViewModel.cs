@@ -152,38 +152,38 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 (username, password, requiresAuthentication, uri) =>
                     (!string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(username) || !requiresAuthentication) && !string.IsNullOrEmpty(uri));
             
-            this.LoginCommand = ReactiveCommand.CreateAsyncTask(canLogin, async _ => await this.ExecuteLogin());
+            //this.LoginCommand = ReactiveCommand.CreateAsyncTask(canLogin, async _ => await this.ExecuteLogin());
         }
 
         /// <summary>
         /// Executes login command
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        private async Task ExecuteLogin()
-        {
-            this.statusBarControlView.Append("Loggin in...");
-
-            try
-            {
-                var credentials = this.RequiresAuthentication ? new UserIdentity(this.UserName, this.Password) : null;
-                await this.dstController.Connect(this.Uri, true, credentials);
-                this.LoginSuccessfull = this.dstController.IsSessionOpen;
-
-                if (this.LoginSuccessfull)
-                {
-                    this.statusBarControlView.Append("Loggin successful");
-                    await Task.Delay(1000);
-                    this.CloseWindowBehavior?.Close();
-                }
-                else
-                {
-                    this.statusBarControlView.Append($"Loggin failed", StatusBarMessageSeverity.Info);
-                }
-            }
-            catch (Exception exception)
-            {
-                this.statusBarControlView.Append($"Loggin failed: {exception.Message}", StatusBarMessageSeverity.Error);
-            }
-        }
+        //private async Task ExecuteLogin()
+        //{
+        //    this.statusBarControlView.Append("Loggin in...");
+        //
+        //    try
+        //    {
+        //        var credentials = this.RequiresAuthentication ? new UserIdentity(this.UserName, this.Password) : null;
+        //        await this.dstController.Connect(this.Uri, true, credentials);
+        //        this.LoginSuccessfull = this.dstController.IsSessionOpen;
+        //
+        //        if (this.LoginSuccessfull)
+        //        {
+        //            this.statusBarControlView.Append("Loggin successful");
+        //            await Task.Delay(1000);
+        //            this.CloseWindowBehavior?.Close();
+        //        }
+        //        else
+        //        {
+        //            this.statusBarControlView.Append($"Loggin failed", StatusBarMessageSeverity.Info);
+        //        }
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        this.statusBarControlView.Append($"Loggin failed: {exception.Message}", StatusBarMessageSeverity.Error);
+        //    }
+        //}
     }
 }
