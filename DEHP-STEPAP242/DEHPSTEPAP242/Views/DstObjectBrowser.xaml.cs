@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstBrowserHeader.xaml.cs" company="RHEA System S.A.">
+// <copyright file="DstObjectBrowser.xaml.cs" company="RHEA System S.A.">
 //    Copyright (c) 2015-2020 RHEA System S.A.
 //
 //    Author: Sam Gerené, Alex Vorobiev, Alexander van Delft, Nathanael Smiechowski.
@@ -24,24 +24,22 @@
 
 namespace DEHPSTEPAP242.Views
 {
-    using System.Windows.Controls;
-
-	using DEHPSTEPAP242.ViewModel.Interfaces;
+	using DEHPSTEPAP242.ViewModel;
+	using System.Windows.Controls;
 
 	/// <summary>
-	/// Interaction logic for <see cref="DstBrowserHeader"/> XAML
+	/// Interaction logic for DstObjectBrowser.xaml
 	/// </summary>
-	public partial class DstBrowserHeader : UserControl
+	public partial class DstObjectBrowser : UserControl
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DstBrowserHeader"/> class.
+        /// Initializes a new <see cref="DstObjectBrowser" instance representanding a <see cref="TreeListControl"/>
         /// </summary>
-        public DstBrowserHeader()
+        public DstObjectBrowser()
         {
-            //IDstBrowserHeaderViewModel dstBrowserHeaderViewModel
-            //this.DataContext = dstBrowserHeaderViewModel;
-
             this.InitializeComponent();
+
+            //treeListView.ExpandAllNodes();
         }
     }
 }

@@ -40,8 +40,8 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <views:DstBrowserHeader DataContext="{Binding DstSourceViewModel.DstBrowserHeader}" Grid.Row="1" />
-                                    <views:TreeListControl Grid.Row="2"></views:TreeListControl>
+                                    <views:DstBrowserHeader Grid.Row="1" DataContext="{Binding DstSourceViewModel.DstBrowserHeader}" />
+                                    <views:DstObjectBrowser Grid.Row="2" DataContext="{Binding DstSourceViewModel.DstObjectBrowser}" />
                                 </Grid>
                             </Grid>
                         </dxdo:LayoutPanel>
@@ -62,7 +62,7 @@
                                     <Button Grid.Column="1" Height="40" HorizontalAlignment="Center" Content="Change Transfert Direction"/>
                                     <Path Grid.Column="2" Stretch="Fill" Fill="DarkGray" Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z" HorizontalAlignment="Left" MaxHeight="30" RenderTransformOrigin=".5,.5"/>
                                 </Grid>
-                                <views:TreeListControl  Grid.Row="1"></views:TreeListControl>
+                                <views:DstObjectBrowser  Grid.Row="1"></views:DstObjectBrowser>
                             </Grid>
                         </dxdo:LayoutPanel>
                         <dxdo:LayoutPanel MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="Hub Data Source">
@@ -78,7 +78,7 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <common:HubBrowserHeader DataContext="{Binding HubDataSourceViewModel.HubBrowserHeader}" Grid.Row="1" />
+                                    <common:HubBrowserHeader Grid.Row="1" DataContext="{Binding HubDataSourceViewModel.HubBrowserHeader}" />
                                     <objectBrowser:ObjectBrowser Grid.Row="2">
                                         <objectBrowser:ObjectBrowser.DataContext>
                                             <Binding Path="HubDataSourceViewModel.ObjectBrowser"></Binding>

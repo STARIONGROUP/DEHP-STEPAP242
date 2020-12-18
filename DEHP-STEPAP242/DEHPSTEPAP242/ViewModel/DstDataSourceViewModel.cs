@@ -49,15 +49,22 @@ namespace DEHPSTEPAP242.ViewModel
         public IDstBrowserHeaderViewModel DstBrowserHeader { get; }
 
         /// <summary>
+        /// Gets the <see cref="IDstObjectBrowserViewModel"/>
+        /// </summary>
+        public IDstObjectBrowserViewModel DstObjectBrowser { get; }
+
+        /// <summary>
         /// Initializes a new <see cref="DstDataSourceViewModel"/>
         /// </summary>
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="dstBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
-        public DstDataSourceViewModel(INavigationService navigationService, IDstController dstController, IDstBrowserHeaderViewModel dstBrowserHeader) : base(navigationService)
+        public DstDataSourceViewModel(INavigationService navigationService, IDstController dstController, IDstBrowserHeaderViewModel dstBrowserHeader, IDstObjectBrowserViewModel dstObjectBrowser) : base(navigationService)
         {
             this.dstController = dstController;
             this.DstBrowserHeader = dstBrowserHeader;
+            this.DstObjectBrowser = dstObjectBrowser;
+
             this.InitializeCommands();
 
             //this.ConnectCommand.Subscribe(_ => this.LoadFileCommandExecute());
@@ -80,33 +87,56 @@ namespace DEHPSTEPAP242.ViewModel
             this.UpdateConnectButtonText(this.dstController.IsSessionOpen);
         }
 
+        /// <summary>
+        /// Load a new STEP AP242 file.
+        /// </summary>
         protected override void LoadFileCommandExecute()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+
             if (openFileDialog.ShowDialog() == true)
 			{
-                //txtEditor.Text = File.ReadAllText(openFileDialog.FileName);
                 Debug.WriteLine($"Load file: {openFileDialog.FileName}");
 
-                this.dstController.Load(openFileDialog.FileName);
+                dstController.Load(openFileDialog.FileName);
+
+                if (!dstController.IsFileOpen)
+				{
+                    Debug.WriteLine($"dstController.Load failed");
+                    return;
+				}
+
+                // Update strategy: local update when load finished
+                UpdateBrowserHeader();
+                UpdateObjectBrowser();
 
                 Debug.WriteLine($"dstController.Load finished");
             }
+        }
 
+        /// <summary>
+        /// Upate the <see cref="DstBrowserHeaderViewModel">
+        /// </summary>
+        private void UpdateBrowserHeader()
+		{
+            var controller = dstController as DstController;
+            var step3d = controller.Step3DFile;
+            var bh = DstBrowserHeader as DstBrowserHeaderViewModel;
 
-            /*
-            if (this.dstController.IsSessionOpen)
-            {
-                this.dstController.CloseSession();
-            }
-            else
-            {
-                //this.NavigationService.ShowDialog<DstLogin>();
-                this.NavigationService.ShowDialog<DstLoadStepFile>();
-            }
+            bh.UpdateHeader(step3d);
+        }
 
-            this.UpdateConnectButtonText(this.dstController.IsSessionOpen);
-            */
+        /// <summary>
+        /// Upate the <see cref="DstObjectBrowserViewModel">
+        /// </summary>
+        private void UpdateObjectBrowser()
+		{
+            var controller = dstController as DstController;
+            var step3d = controller.Step3DFile;
+
+            var ob = DstObjectBrowser as DstObjectBrowserViewModel;
+
+            ob.UpdateHLR(step3d.Parts, step3d.Relations);
         }
     }
 }

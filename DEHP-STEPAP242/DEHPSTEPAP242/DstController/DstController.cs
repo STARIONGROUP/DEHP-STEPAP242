@@ -44,7 +44,9 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private STEP3DFile step3dFile;
 
-        public bool IsFileOpen => this.step3dFile?.HasFailed == false;
+		public STEP3DFile Step3DFile { get => step3dFile; }
+
+		public bool IsFileOpen => this.step3dFile?.HasFailed == false;
 
         /// <summary>
         /// The <see cref="IOpcClientService"/> that handles the OPC connection with EcosimPro
@@ -101,5 +103,10 @@ namespace DEHPSTEPAP242.DstController
             //var parts = this.step3dFile.Parts;
             //var relations = this.step3dFile.Relations;
         }
+
+        public STEP3D_HeaderInfo HeaderInfo()
+		{
+            return step3dFile.HeaderInfo;
+		}
     }
 }

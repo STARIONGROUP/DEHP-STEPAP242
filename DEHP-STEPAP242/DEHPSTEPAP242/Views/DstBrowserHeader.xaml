@@ -5,29 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:views="clr-namespace:DEHPSTEPAP242.Views" 
-             d:DesignHeight="60" d:DesignWidth="400" mc:Ignorable="d">
+             d:DesignHeight="140" d:DesignWidth="400" mc:Ignorable="d">
     <UserControl.ToolTip>
         <ToolTip>
             <StackPanel Orientation="Vertical">
                 <StackPanel Margin="3" Orientation="Horizontal">
-                    <TextBlock FontWeight="Bold" Text="Model:" />
-                    <TextBlock Margin="3,0,0,0" />
+                    <TextBlock FontWeight="Bold" Text="Author:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding Author}" />
                 </StackPanel>
                 <StackPanel Margin="3" Orientation="Horizontal">
-                    <TextBlock FontWeight="Bold" Text="Iteration:" />
-                    <TextBlock Margin="3,0,0,0" />
+                    <TextBlock FontWeight="Bold" Text="Organization:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding Organization}" />
                 </StackPanel>
                 <StackPanel Margin="3" Orientation="Horizontal">
-                    <TextBlock FontWeight="Bold" Text="Person:" />
-                    <TextBlock />
-                </StackPanel>
-                <StackPanel Margin="3" Orientation="Horizontal">
-                    <TextBlock FontWeight="Bold" Text="Domain of Expertise:" />
-                    <TextBlock Margin="3,0,0,0" />
+                    <TextBlock FontWeight="Bold" Text="Time Stamp:" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding TimeStamp}" />
                 </StackPanel>
                 <StackPanel Margin="3" Orientation="Horizontal">
                     <TextBlock FontWeight="Bold" Text="Source:" />
-                    <TextBlock Margin="3,0,0,0" Text="{Binding DataSource}" />
+                    <TextBlock Margin="3,0,0,0" Text="{Binding FilePath}" />
                 </StackPanel>
             </StackPanel>
         </ToolTip>
@@ -38,30 +34,48 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Filename:" />
-        <TextBlock Grid.Row="0" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Grid.ColumnSpan="3" Text="Here the path to selected input file"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Current File:" />
+        <TextBlock Grid.Row="0" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Grid.ColumnSpan="5" Text="{Binding FilePath}" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Source:" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Grid.ColumnSpan="5" Text="{Binding Name}" />
         
-        <TextBlock Grid.Row="1" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Model:" />
-        <TextBlock Grid.Row="1" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Description:" />
+        <TextBlock Grid.Row="2" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Description}" />
 
-        <TextBlock Grid.Row="1" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Data-Source:" />
-        <TextBlock Grid.Row="1" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" Text="{Binding DataSource}" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="2" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Implementation Level:" />
+        <TextBlock Grid.Row="2" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding ImplementationLevel}" />
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Iteration: " />
-        <TextBlock Grid.Row="2" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="2" Grid.Column="4" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Time Stamp:" />
+        <TextBlock Grid.Row="2" Grid.Column="5" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding TimeStamp}" />
 
-        <TextBlock Grid.Row="2" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Person: " />
-        <TextBlock Grid.Row="2" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="3" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Author:" />
+        <TextBlock Grid.Row="3" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Author}" />
 
-        <TextBlock Grid.Row="3" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Domain Of Expertise:" />
-        <TextBlock Grid.Row="3" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="3" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Organization:" />
+        <TextBlock Grid.Row="3" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Organization}" />
+
+        <TextBlock Grid.Row="3" Grid.Column="4" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Originating System:" />
+        <TextBlock Grid.Row="3" Grid.Column="5" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding OriginatingSystem}" />
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Preprocessor: " />
+        <TextBlock Grid.Row="4" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Preprocessor}" />
+
+        <TextBlock Grid.Row="4" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Authorization:" />
+        <TextBlock Grid.Row="4" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Authorization}" />
+
+        <TextBlock Grid.Row="4" Grid.Column="4" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="File Schema:" />
+        <TextBlock Grid.Row="4" Grid.Column="5" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding FileSchema}" />
     </Grid>
 </UserControl>
