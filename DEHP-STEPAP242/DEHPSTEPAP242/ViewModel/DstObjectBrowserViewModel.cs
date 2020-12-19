@@ -41,7 +41,7 @@ namespace DEHPSTEPAP242.ViewModel
 		/// Helper structure to speedup tree searches.
 		/// See FindChildren().
 		/// </summary>
-		private readonly Dictionary<int, List<int>> partChildren = new Dictionary<int, List<int>>();
+		private readonly Dictionary<int, List<(STEP3D_Part, STEP3D_PartRelation)>> partChildren = new Dictionary<int, List<(STEP3D_Part, STEP3D_PartRelation)>>();
 
 		/// <summary>
 		/// Keep track of Parts used as parent of an Assembly.
@@ -161,23 +161,23 @@ namespace DEHPSTEPAP242.ViewModel
 		/// Geth Children of a part.
 		/// </summary>
 		/// <param name="partId">Relating Part (parent)</param>
-		/// <returns>List of Part id related to</returns>
-		private List<int> FindChildren(int partId)
+		/// <returns>List of child Part and PartRelation generating the instance</returns>
+		private List<(STEP3D_Part, STEP3D_PartRelation)> FindChildren(int partId)
 		{
 			if (partChildren.ContainsKey(partId) == false)
 			{
 				// Create cached list the first time is required
-				var ids = new List<int>();
+				var childrenRelation = new List<(STEP3D_Part, STEP3D_PartRelation)>();
 
 				foreach (var r in relations)
 				{
 					if (r.relating_id == partId)
 					{
-						ids.Add(r.related_id);
+						childrenRelation.Add((FindPart(r.related_id), r));
 					}
 				}
 
-				partChildren.Add(partId, ids);
+				partChildren.Add(partId, childrenRelation);
 			}
 
 			return partChildren[partId];
@@ -194,28 +194,6 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Find the Relation of two parts.
-		/// 
-		/// Note: it is not expected to have duplicated relations 
-		/// for the same pair (relating, related).
-		/// </summary>
-		/// <param name="relatingId"></param>
-		/// <param name="relatedId"></param>
-		/// <returns>A <see cref="STEP3D_PartRelation"/> or null if fails</returns>
-		private STEP3D_PartRelation FindRelation(int relatingId, int relatedId)
-		{
-			foreach (var r in relations)
-			{
-				if (r.relating_id == relatingId && r.related_id == relatedId)
-				{
-					return r;
-				}
-			}
-
-			return null;
-		}
-
-		/// <summary>
 		/// Add children of a tree node.
 		/// </summary>
 		/// <param name="entries">tree container to fill</param>
@@ -223,14 +201,14 @@ namespace DEHPSTEPAP242.ViewModel
 		/// <param name="nextID">global tree ID for next creation operation</param>
 		private void AddSubTree(List<Step3DPartTreeNode> entries, Step3DPartTreeNode e, ref int nextID )
 		{
-			var childrenIds = FindChildren(e.StepId);
+			var children = FindChildren(e.StepId);
 
-			foreach(var id in childrenIds)
+			foreach(var cr in children)
 			{
-				var child = FindPart(id);
-				var relation = FindRelation(e.StepId, child.stepId);
+				var child = cr.Item1;
+				var relation = cr.Item2;
 
-				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = e.ID, RelationLabel = relation?.id };
+				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = e.ID, RelationLabel = relation.id };
 				entries.Add(node);
 
 				AddSubTree(entries, node, ref nextID);
