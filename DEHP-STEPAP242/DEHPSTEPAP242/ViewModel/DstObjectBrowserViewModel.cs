@@ -14,16 +14,24 @@ namespace DEHPSTEPAP242.ViewModel
 	/// 
 	/// Information is provided as a Self-Referential Data Source.
 	/// 
+	/// To represent data in a tree structure, the data source should contain the following fields:
+	/// - Key Field: This field should contain unique values used to identify nodes.
+	/// - Parent Field: This field should contain values that indicate parent nodes.
+	/// 
 	/// <seealso cref="Step3DPartTreeNode"/>
 	/// </summary>
 	public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel
 	{
 		/// <summary>
-		/// Self-referential data source content.
+		/// List of geometric parts.
+		/// 
+		/// A part could be the container of parts.
 		/// </summary>
-		private List<Step3DPartTreeNode> step3DHLR;
-
 		private STEP3D_Part[] parts;
+
+		/// <summary>
+		/// List of relations between geometric parts
+		/// </summary>
 		private STEP3D_PartRelation[] relations;
 
 		/// <summary>
@@ -52,6 +60,15 @@ namespace DEHPSTEPAP242.ViewModel
 		/// Keep track of Parts used as childs of an Assembly.
 		/// </summary>
 		private readonly HashSet<int> relatingParts = new HashSet<int>();
+
+		/// <summary>
+		/// Self-referential data source content.
+		/// 
+		/// Using the following service columns:
+		/// - Key Field --> Step3DPartTreeNode.ID
+		/// - Parent Field --> Step3DPartTreeNode.ParentID
+		/// </summary>
+		private List<Step3DPartTreeNode> step3DHLR = new List<Step3DPartTreeNode>();
 
 		/// <summary>
 		/// Gets or sets the Step3D High Level Representation structure.
@@ -158,35 +175,35 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Geth Children of a part.
+		/// Gets Children of a Part.
 		/// </summary>
-		/// <param name="partId">Relating Part (parent)</param>
+		/// <param name="parentId">StepId of a relating Part (parent)</param>
 		/// <returns>List of child Part and PartRelation generating the instance</returns>
-		private List<(STEP3D_Part, STEP3D_PartRelation)> FindChildren(int partId)
+		private List<(STEP3D_Part, STEP3D_PartRelation)> FindChildren(int parentId)
 		{
-			if (partChildren.ContainsKey(partId) == false)
+			if (partChildren.ContainsKey(parentId) == false)
 			{
 				// Create cached list the first time is required
 				var childrenRelation = new List<(STEP3D_Part, STEP3D_PartRelation)>();
 
 				foreach (var r in relations)
 				{
-					if (r.relating_id == partId)
+					if (r.relating_id == parentId)
 					{
 						childrenRelation.Add((FindPart(r.related_id), r));
 					}
 				}
 
-				partChildren.Add(partId, childrenRelation);
+				partChildren.Add(parentId, childrenRelation);
 			}
 
-			return partChildren[partId];
+			return partChildren[parentId];
 		}
 
 		/// <summary>
-		/// Find the Part object from its StepId.
+		/// Finds the Part object from its StepId.
 		/// </summary>
-		/// <param name="partId">Step Id of the part</param>
+		/// <param name="partId">Step Id of a Part</param>
 		/// <returns>A <see cref="STEP3D_Part"/></returns>
 		private STEP3D_Part FindPart(int partId)
 		{
@@ -194,21 +211,21 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
-		/// Add children of a tree node.
+		/// Adds children of a tree node.
 		/// </summary>
 		/// <param name="entries">tree container to fill</param>
-		/// <param name="e">parent node</param>
+		/// <param name="parent">parent node</param>
 		/// <param name="nextID">global tree ID for next creation operation</param>
-		private void AddSubTree(List<Step3DPartTreeNode> entries, Step3DPartTreeNode e, ref int nextID )
+		private void AddSubTree(List<Step3DPartTreeNode> entries, Step3DPartTreeNode parent, ref int nextID )
 		{
-			var children = FindChildren(e.StepId);
+			var children = FindChildren(parent.StepId);
 
 			foreach(var cr in children)
 			{
 				var child = cr.Item1;
 				var relation = cr.Item2;
 
-				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = e.ID, RelationLabel = relation.id };
+				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = parent.ID, RelationLabel = relation.id };
 				entries.Add(node);
 
 				AddSubTree(entries, node, ref nextID);

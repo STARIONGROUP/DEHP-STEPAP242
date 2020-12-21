@@ -11,9 +11,9 @@
     <dxg:TreeListControl Name="treeList" ItemsSource="{Binding Step3DHLR}">
 
         <dxg:TreeListControl.View>
-        <dxg:TreeListView Name="treeListView" AutoWidth="False" 
-                          KeyFieldName="ID" ParentFieldName="ParentID"
-                          HorizontalScrollbarVisibility="Auto"/>
+            <dxg:TreeListView Name="treeListView" AutoWidth="False" 
+                              KeyFieldName="ID" ParentFieldName="ParentID"
+                              HorizontalScrollbarVisibility="Auto"/>
         </dxg:TreeListControl.View>
 
         
