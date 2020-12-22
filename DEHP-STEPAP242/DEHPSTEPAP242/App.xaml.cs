@@ -30,10 +30,12 @@ namespace DEHPSTEPAP242
 
     using DEHPCommon;
     using DEHPCommon.Services.NavigationService;
+    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
 
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Services.OpcConnector;
     using DEHPSTEPAP242.Services.OpcConnector.Interfaces;
+    using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.ViewModel;
     using DEHPSTEPAP242.ViewModel.Dialogs;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
@@ -89,6 +91,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<OpcSessionReconnectHandler>().As<IOpcSessionReconnectHandler>().SingleInstance();
             containerBuilder.RegisterType<OpcClientService>().As<IOpcClientService>().SingleInstance();
             containerBuilder.RegisterType<DstController.DstController>().As<IDstController>().SingleInstance();
+            containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
         }
 
         /// <summary>
