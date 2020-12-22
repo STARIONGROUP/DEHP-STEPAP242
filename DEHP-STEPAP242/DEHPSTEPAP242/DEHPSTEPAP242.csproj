@@ -17,6 +17,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Services\**" />
+    <Page Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\OpcClient.Config.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="6.0.0" />
     <PackageReference Include="DEHPCommon" Version="1.0.90" />
     <PackageReference Include="DevExpress.WindowsDesktop.Wpf.Layout" Version="20.1.8" />
@@ -46,15 +57,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\OpcClient.Config.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Update="Views\DstBrowserHeader.xaml">
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

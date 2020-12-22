@@ -27,8 +27,6 @@ namespace DEHPSTEPAP242.DstController
 	using System.Diagnostics;
 	using System.Threading.Tasks;
 
-    using DEHPSTEPAP242.Enumerator;
-
     using STEP3DAdapter;
 
     /// <summary>
