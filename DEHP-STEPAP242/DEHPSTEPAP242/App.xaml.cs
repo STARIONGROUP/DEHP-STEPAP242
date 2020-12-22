@@ -99,7 +99,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstBrowserHeaderViewModel>().As<IDstBrowserHeaderViewModel>();
             containerBuilder.RegisterType<DstObjectBrowserViewModel>().As<IDstObjectBrowserViewModel>();
             containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();
-            containerBuilder.RegisterType<DstLoginViewModel>().As<IDstLoginViewModel>();
+            containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
         }
     }
 }

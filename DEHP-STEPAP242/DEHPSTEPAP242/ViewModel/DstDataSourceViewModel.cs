@@ -66,8 +66,6 @@ namespace DEHPSTEPAP242.ViewModel
             this.DstObjectBrowser = dstObjectBrowser;
 
             this.InitializeCommands();
-
-            //this.ConnectCommand.Subscribe(_ => this.LoadFileCommandExecute());
         }
 
         /// <summary>
@@ -75,26 +73,10 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         protected override void LoadFileCommandExecute()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+            this.NavigationService.ShowDialog<DstLoadFile>();
 
-            if (openFileDialog.ShowDialog() == true)
-			{
-                Debug.WriteLine($"Load file: {openFileDialog.FileName}");
-
-                dstController.Load(openFileDialog.FileName);
-
-                if (!dstController.IsFileOpen)
-				{
-                    Debug.WriteLine($"dstController.Load failed");
-                    return;
-				}
-
-                // Update strategy: local update when load finished
-                UpdateBrowserHeader();
-                UpdateObjectBrowser();
-
-                Debug.WriteLine($"dstController.Load finished");
-            }
+            UpdateBrowserHeader();
+            UpdateObjectBrowser();
         }
 
         /// <summary>

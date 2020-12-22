@@ -27,14 +27,14 @@ namespace DEHPSTEPAP242.Views.Dialogs
 	using System.Windows;
 
     /// <summary>
-    /// Interaction logic for DstLogin.xaml
+    /// Interaction logic for DstLoadFile.xaml
     /// </summary>
-    public partial class DstLogin : Window
+    public partial class DstLoadFile : Window
     {
         /// <summary>
-        /// Initializes a new <see cref="DstLogin"/>
+        /// Initializes a new <see cref="DstLoadFile"/>
         /// </summary>
-        public DstLogin()
+        public DstLoadFile()
         {
             InitializeComponent();
         }

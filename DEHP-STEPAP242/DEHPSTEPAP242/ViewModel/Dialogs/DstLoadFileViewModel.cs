@@ -43,7 +43,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     /// <summary>
     /// The view-model for the Login that allows users to open a STEP-AP242 file.
     /// </summary>
-    public class DstLoginViewModel : ReactiveObject, IDstLoginViewModel, ICloseWindowViewModel
+    public class DstLoadFileViewModel : ReactiveObject, IDstLoadFileViewModel, ICloseWindowViewModel
     {
         /// <summary>
         /// The <see cref="IDstController"/> instance
@@ -94,11 +94,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 		public ReactiveCommand<object> LoadFileCommand { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DstLoginViewModel"/> class.
+        /// Initializes a new instance of the <see cref="DstLoadFileViewModel"/> class.
         /// </summary>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="statusBarControlView">The <see cref="IStatusBarControlViewModel"/></param>
-        public DstLoginViewModel(IDstController dstController, IStatusBarControlViewModel statusBarControlView, IUserPreferenceService<AppSettings> userPreferenceService)
+        public DstLoadFileViewModel(IDstController dstController, IStatusBarControlViewModel statusBarControlView, IUserPreferenceService<AppSettings> userPreferenceService)
         {
             this.dstController = dstController;
             this.statusBarControlView = statusBarControlView;

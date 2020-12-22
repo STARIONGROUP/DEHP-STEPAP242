@@ -31,9 +31,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
     using ReactiveUI;
 
     /// <summary>
-    /// Interface definiton for <see cref="DstLoginViewModel"/>
+    /// Interface definiton for <see cref="DstLoadFileViewModel"/>
     /// </summary>
-    public interface IDstLoginViewModel
+    public interface IDstLoadFileViewModel
     {
         /// <summary>
         /// Current path to a STEP file.
