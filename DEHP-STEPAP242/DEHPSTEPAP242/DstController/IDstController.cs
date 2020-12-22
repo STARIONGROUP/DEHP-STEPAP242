@@ -26,8 +26,6 @@ namespace DEHPSTEPAP242.DstController
 {
     using System.Threading.Tasks;
 
-    using Opc.Ua;
-
     using STEP3DAdapter;
 
     /// <summary>

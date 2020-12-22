@@ -35,7 +35,6 @@
     <PackageReference Include="DevExpress.Wpf.Grid" Version="20.1.8" />
     <PackageReference Include="DevExpress.Wpf.Layout" Version="20.1.8" />
     <PackageReference Include="DevExpress.Wpf.Navigation" Version="20.1.8" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.363.107" />
     <PackageReference Include="reactiveui-core.Net40" Version="6.5.0" />
     <PackageReference Include="Splat.Net40" Version="1.6.2" />
   </ItemGroup>
