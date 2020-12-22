@@ -25,22 +25,23 @@
 namespace DEHPSTEPAP242.ViewModel.Dialogs
 {
     using System;
-    using System.Reactive;
-    using System.Threading.Tasks;
+    using System.IO;
+
+	using Microsoft.Win32;
+	using ReactiveUI;
 
     using DEHPCommon.Enumerators;
     using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+	using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
 
-    using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+	using DEHPSTEPAP242.DstController;
+	using DEHPSTEPAP242.Settings;
+	using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
 
-    using Opc.Ua;
-
-    using ReactiveUI;
 
     /// <summary>
-    /// The view-model for the Login that allows users to connect to a OPC UA datasource
+    /// The view-model for the Login that allows users to open a STEP-AP242 file.
     /// </summary>
     public class DstLoginViewModel : ReactiveObject, IDstLoginViewModel, ICloseWindowViewModel
     {
@@ -55,105 +56,160 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         private readonly IStatusBarControlViewModel statusBarControlView;
 
         /// <summary>
-        /// Backing field for the <see cref="UserName"/> property
+        /// The <see cref="IUserPreferenceService{AppSettings}"/> instance
         /// </summary>
-        private string username;
+        private readonly IUserPreferenceService<AppSettings> userPreferenceService;
 
-        /// <summary>
-        /// Gets or sets server username value
-        /// </summary>
-        public string UserName
-        {
-            get => this.username;
-            set => this.RaiseAndSetIfChanged(ref this.username, value);
-        }
-
-        /// <summary>
-        /// Backing field for the <see cref="Password"/> property
-        /// </summary>
-        private string password;
-
-        /// <summary>
-        /// Gets or sets server password value
-        /// </summary>
-        public string Password
-        {
-            get => this.password;
-            set => this.RaiseAndSetIfChanged(ref this.password, value);
-        }
-
-        /// <summary>
-        /// Backing field for the <see cref="Uri"/> property
-        /// </summary>
-        private string uri;
-
-        /// <summary>
-        /// Gets or sets server uri
-        /// </summary>
-        public string Uri
-        {
-            get => this.uri;
-            set => this.RaiseAndSetIfChanged(ref this.uri, value);
-        }
-
-        /// <summary>
-        /// Backing field for the <see cref="LoginSuccessfull"/> property
-        /// </summary>
-        private bool loginSuccessfull;
-
-        /// <summary>
-        /// Gets or sets login succesfully flag
-        /// </summary>
-        public bool LoginSuccessfull
-        {
-            get => this.loginSuccessfull;
-            private set => this.RaiseAndSetIfChanged(ref this.loginSuccessfull, value);
-        }
-
-        /// <summary>
-        /// Backing field for <see cref="RequiresAuthentication"/>
-        /// </summary>
-        private bool requiresAuthentication;
-
-        /// <summary>
-        /// Gets or sets an assert whether the specified <see cref="Uri"/> endpoint requires authentication
-        /// </summary>
-        public bool RequiresAuthentication
-        {
-            get => this.requiresAuthentication;
-            set => this.RaiseAndSetIfChanged(ref this.requiresAuthentication, value);
-        }
-        
-        /// <summary>
-        /// Gets the server login command
-        /// </summary>
-        public ReactiveCommand<Unit> LoginCommand { get; private set; }
-        
         /// <summary>
         /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
         /// </summary>
         public ICloseWindowBehavior CloseWindowBehavior { get; set; }
+
+        private string filePath;
+
+        /// <summary>
+        /// Gets or sets the current path to a STEP file.
+        /// </summary>
+		public string FilePath 
+        { 
+            get => filePath;
+            set => this.RaiseAndSetIfChanged(ref this.filePath, value);
+        }
+
+        /// <summary>
+        /// List of recent opened STEP files.
+        /// </summary>
+        public ReactiveList<string> RecentFiles { get; private set; } = new ReactiveList<string> { ChangeTrackingEnabled = true };
+
+        /// <summary>
+        /// Load STEP-AP242 file from the local machine.
+        /// 
+        /// <seealso cref="FilePath"/>
+        /// </summary>
+        public ReactiveCommand<object> SelectFileCommand { get; private set; }
+
+        /// <summary>
+        /// Loads the current <see cref="FilePath"/> and closes the window.
+        /// </summary>
+		public ReactiveCommand<object> LoadFileCommand { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DstLoginViewModel"/> class.
         /// </summary>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="statusBarControlView">The <see cref="IStatusBarControlViewModel"/></param>
-        public DstLoginViewModel(IDstController dstController, IStatusBarControlViewModel statusBarControlView)
+        public DstLoginViewModel(IDstController dstController, IStatusBarControlViewModel statusBarControlView, IUserPreferenceService<AppSettings> userPreferenceService)
         {
             this.dstController = dstController;
             this.statusBarControlView = statusBarControlView;
+            this.userPreferenceService = userPreferenceService;
 
-            var canLogin = this.WhenAnyValue(
-                vm => vm.UserName,
-                vm => vm.Password,
-                vm => vm.RequiresAuthentication,
-                vm => vm.Uri,
-                (username, password, requiresAuthentication, uri) =>
-                    (!string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(username) || !requiresAuthentication) && !string.IsNullOrEmpty(uri));
-            
-            //this.LoginCommand = ReactiveCommand.CreateAsyncTask(canLogin, async _ => await this.ExecuteLogin());
+            PopulateRecentFiles();
+            InitializeCommands();
+
+            if (RecentFiles.IsEmpty == false)
+			{
+                // Initialize using the last opened file
+                FilePath = RecentFiles[0];
+			}
         }
+
+        /// <summary>
+        /// Instantiates the commands.
+        /// </summary>
+        private void InitializeCommands()
+		{
+            SelectFileCommand = ReactiveCommand.Create();
+            SelectFileCommand.Subscribe(_ => SelectFileCommandExecute());
+
+            // Load File button is activated when the FilePath points to a existing file
+            var canLoadFile = this.WhenAnyValue(vm => vm.FilePath, (fn) => File.Exists(fn));
+
+            LoadFileCommand = ReactiveCommand.Create(canLoadFile);
+            LoadFileCommand.Subscribe(_ => LoadFileCommandExecute());
+        }
+
+        /// <summary>
+        /// Executes the <see cref="SelectFileCommand"/>
+        /// </summary>
+        protected void SelectFileCommandExecute()
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Filter = "STEP-AP242|*.step;*.stp|All types|*.*",
+                InitialDirectory = Path.GetDirectoryName(FilePath)
+            };
+
+			if (dlg.ShowDialog() == true)
+			{
+                FilePath = dlg.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Executes the <see cref="LoadFileCommand"/>
+        /// </summary>
+        protected void LoadFileCommandExecute()
+        {
+            statusBarControlView.Append("Loading file...");
+
+            dstController.Load(FilePath);
+
+            if (dstController.IsFileOpen)
+            {
+                statusBarControlView.Append("Load successful");
+
+                AddToRecentFiles(FilePath);
+                SaveRecentFiles();
+
+                CloseWindowBehavior?.Close();
+            }
+            else
+            {
+                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
+            }
+        }
+
+        /// <summary>
+        /// Loads the saved recent files into the <see cref="RecentFiles"/>
+        /// </summary>
+        private void PopulateRecentFiles()
+        {
+            userPreferenceService.Read();
+            RecentFiles.Clear();
+            RecentFiles.AddRange(this.userPreferenceService.UserPreferenceSettings.RecentFiles);
+        }
+
+        /// <summary>
+        /// Adds a file name to the <see cref="RecentFiles"/> list.
+        /// 
+        /// It behaves as a stack: the last used in the first in the list (more recent).
+        /// 
+        /// Duplicated entries are silently ignored.
+        /// </summary>
+        /// <param name="filename">Full path to a file</param>
+        private void AddToRecentFiles(string filename)
+        {
+            // First files are the latest used
+            if (RecentFiles.Contains(filename))
+            {
+                RecentFiles.Remove(filename);
+            }
+
+            RecentFiles.Insert(0, filename);
+        }
+
+        /// <summary>
+        /// Updates and saves the recent files into the <see cref="RecentFiles"/>
+        /// </summary>
+        private void SaveRecentFiles()
+        {
+            userPreferenceService.UserPreferenceSettings.RecentFiles.Clear();
+            userPreferenceService.UserPreferenceSettings.RecentFiles.AddRange(RecentFiles);
+
+            userPreferenceService.Save();
+        }
+
 
         /// <summary>
         /// Executes login command

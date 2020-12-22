@@ -36,38 +36,20 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
     public interface IDstLoginViewModel
     {
         /// <summary>
-        /// Gets or sets server username value
+        /// Current path to a STEP file.
         /// </summary>
-        string UserName { get; set; }
+        string FilePath { get; set; }
 
         /// <summary>
-        /// Gets or sets server password value
+        /// Load STEP-AP242 file.
+        /// 
+        /// Uses the <see cref="FilePath"/> value.
         /// </summary>
-        string Password { get; set; }
+        ReactiveCommand<object> LoadFileCommand { get; }
 
-        /// <summary>
-        /// Gets or sets server uri
-        /// </summary>
-        string Uri { get; set; }
-
-        /// <summary>
-        /// Gets or sets login succesfully flag
-        /// </summary>
-        bool LoginSuccessfull { get; }
-
-        /// <summary>
-        /// Gets or sets an assert whether the specified <see cref="Uri"/> endpoint requires authentication
-        /// </summary>
-        bool RequiresAuthentication { get; set; }
-
-        /// <summary>
-        /// Gets the server login command
-        /// </summary>
-        ReactiveCommand<Unit> LoginCommand { get; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
-        /// </summary>
-        ICloseWindowBehavior CloseWindowBehavior { get; set; }
+		/// <summary>
+		/// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
+		/// </summary>
+		ICloseWindowBehavior CloseWindowBehavior { get; set; }
     }
 }

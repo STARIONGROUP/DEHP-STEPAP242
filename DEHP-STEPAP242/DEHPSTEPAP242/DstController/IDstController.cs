@@ -35,11 +35,12 @@ namespace DEHPSTEPAP242.DstController
     /// </summary>
     public interface IDstController
     {
+        Task LoadFile(string filename);
+
         /// <summary>
-        /// Load the STEP-AP242 file format
+        /// Load a STEP-AP242 file.
         /// </summary>
         /// <param name="filename">Full path to file</param>
-        /// <returns>A <see cref="Task"/></returns>
         void Load(string filename);
 
         bool IsFileOpen { get; }

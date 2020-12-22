@@ -43,7 +43,23 @@ namespace DEHPSTEPAP242.DstController
 
 		public STEP3DFile Step3DFile { get => step3dFile; }
 
-		public bool IsFileOpen => this.step3dFile?.HasFailed == false;
+		public bool IsFileOpen => step3dFile?.HasFailed == false;
+
+        /// <summary>
+        /// Load a STEP-AP242 file.
+        /// <param name="filename"></param>
+		public void Load(string filename)
+		{
+            //Logger.Error($"Loading file: {filename}");
+
+            step3dFile = new STEP3DFile(filename);
+
+            if (step3dFile.HasFailed)
+            {
+                Debug.WriteLine($"Error message: { step3dFile.ErrorMessage }");
+                return;
+            }
+        }
 
         /// <summary>
         /// This should be returns <see cref="Task"/>.
@@ -54,17 +70,9 @@ namespace DEHPSTEPAP242.DstController
         /// }
         /// </summary>
         /// <param name="filename"></param>
-		public void Load(string filename)
+		public Task LoadFile(string filename)
 		{
-            //Logger.Error($"Loading file: {filename}");
-
-            this.step3dFile = new STEP3DFile(filename);
-
-            if (this.step3dFile.HasFailed)
-            {
-                Debug.WriteLine($"Error message: { this.step3dFile.ErrorMessage }");
-                return;
-            }
-        }
-    }
+			throw new System.NotImplementedException();
+		}
+	}
 }

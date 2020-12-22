@@ -8,77 +8,83 @@
         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
-        Title="Connections"
-        mc:Ignorable="d" Height="422" d:DesignWidth="409" MinWidth="600"  Width="400">
+        Title="Load file"
+        mc:Ignorable="d" Height="400" Width="600" d:DesignWidth="400" MinWidth="400" MinHeight="300">
     <dxmvvm:Interaction.Behaviors>
         <behaviors:CloseWindowBehavior/>
     </dxmvvm:Interaction.Behaviors>
-    <Window.Resources>
-        <ResourceDictionary>
-            <Style x:Key="IsReadOnlyStyle" TargetType="{x:Type Control}">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding LoginSuccessfull}" Value="True">
-                        <Setter Property="IsEnabled" Value="False" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding LoginSuccessfull}" Value="False">
-                        <Setter Property="IsEnabled" Value="True" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </ResourceDictionary>
-    </Window.Resources>
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <RibbonTwoLineText VerticalAlignment="Center" MaxWidth="400" Grid.Row="0" Grid.Column="0" Text="Enter Opc Server Address Running from EcosimPro and Credentials if Needed" HorizontalAlignment="Left" HasTwoLines="True" FontSize="18" />
+    
+    <Border Margin="10">
 
-        <Grid Grid.Row="1" VerticalAlignment="Center">
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="2*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="140" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
 
-            <!--  Server  -->
-            <dxlc:LayoutItemLabel Grid.Row="0" Grid.Column="0" Height="Auto" Margin="5" Content="Server address" FontSize="12" />
-            <dxe:TextEdit Style="{StaticResource IsReadOnlyStyle}" Grid.Row="0" Grid.Column="1" Height="Auto" Margin="5" FontSize="12" Text="{Binding Path=Uri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <RibbonTwoLineText VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="Load STEP-AP242 file" HorizontalAlignment="Left" FontSize="18" />
 
-            <dxe:CheckEdit IsChecked="{Binding RequiresAuthentication}" Padding="5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="The server requires authentication"></dxe:CheckEdit>
+            <Grid Grid.Row="1" Name="selectFileGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
 
-            <!--  Username  -->
-            <dxlc:LayoutItemLabel Grid.Row="2" Grid.Column="0" Height="Auto" Margin="5" Content="Username" FontSize="12" />
-            <dxe:TextEdit Style="{StaticResource IsReadOnlyStyle}" IsEnabled="{Binding RequiresAuthentication}" Grid.Row="2" Grid.Column="1" Height="Auto" Margin="5" FontSize="12" Text="{Binding Path=UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <!-- File Path section -->
+                <dxlc:LayoutItemLabel Grid.Row="0" Grid.Column="0" Height="Auto" Margin="5" Content="File:" FontSize="12" />
 
-            <!--  Password  -->
-            <dxlc:LayoutItemLabel Grid.Row="3" Grid.Column="0" Height="Auto" Margin="5" Content="Password" FontSize="12" />
-            <dxe:PasswordBoxEdit Style="{StaticResource IsReadOnlyStyle}" IsEnabled="{Binding RequiresAuthentication}" Name="PasswordBoxEdit" Grid.Row="3" Grid.Column="1" Height="Auto" Margin="5" FontSize="12"
-                                 Text="{Binding Path=Password, Mode=TwoWay}" />
+                <Grid Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
+                    <TextBox x:Name="FilePath" Margin="5,5,0,5" Text="{Binding FilePath, BindsDirectlyToSource=True, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <Button Grid.Column="1"
+                        MinWidth="40"
+                        Height="Auto"
+                        MaxWidth="40"
+                        Margin="5"
+                        FontSize="12"
+                        Command="{Binding SelectFileCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{dx:DXImage Image=LoadFrom_16x16.png}" Stretch="Uniform" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                
+                <!-- Recent Files section -->
+                <dxlc:LayoutItemLabel Grid.Row="1" Grid.Column="0" Height="Auto" Margin="5" Content="Recent Files:" FontSize="12" />
+
+                <ListBox x:Name="RecentFilesListBox" Grid.Row="2" Grid.Column="1" Margin="5" ItemsSource="{Binding RecentFiles}" MouseDoubleClick="RecentFilesListBox_MouseDoubleClick">
+                    
+                </ListBox>
+            </Grid>
+
+            <Grid Grid.Row="2" Name="buttonGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="LoadButton" Grid.Column="2" Height="Auto" MinWidth="100" Margin="5" HorizontalAlignment="Right" 
+                        Command="{Binding LoadFileCommand}" Width="117" >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Open" />
+                        <Image Height="24" Width="24" Source="{dx:DXImage Image=Open2_32x32.png}" Stretch="Uniform" />
+                    </StackPanel>
+                </Button>
+
+            </Grid>
         </Grid>
-
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" Source="{dx:DXImage Image=Apply_32x32.png}" Visibility="{Binding Path=LoginSuccessfull, Converter={dxmvvm:BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged}" />
-            
-            <Button Grid.Column="2" Height="Auto" MinWidth="100" Margin="5" HorizontalAlignment="Right" Command="{Binding LoginCommand}" Width="117"
-                    Visibility="{Binding Path=LoginSuccessfull, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}, UpdateSourceTrigger=PropertyChanged}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Login" />
-                    <Image Height="24" Width="24" Source="{dx:DXImage Image=Right_32x32.png}" Stretch="Uniform" />
-                </StackPanel>
-            </Button>
-        </Grid>
-    </Grid>
+    </Border>
 </Window>
