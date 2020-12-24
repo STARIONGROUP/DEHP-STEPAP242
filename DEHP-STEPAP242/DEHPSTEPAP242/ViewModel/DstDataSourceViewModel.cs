@@ -75,6 +75,8 @@ namespace DEHPSTEPAP242.ViewModel
         {
             this.NavigationService.ShowDialog<DstLoadFile>();
 
+            // TODO: how to know that the dialog was closed without loading a file --> nothing to update
+
             UpdateBrowserHeader();
             UpdateObjectBrowser();
         }
@@ -96,7 +98,7 @@ namespace DEHPSTEPAP242.ViewModel
 		{
             var step3d = dstController.Step3DFile;
 
-            DstObjectBrowser.UpdateHLR(step3d.Parts, step3d.Relations);
+            DstObjectBrowser.UpdateHLR(step3d);
         }
     }
 }

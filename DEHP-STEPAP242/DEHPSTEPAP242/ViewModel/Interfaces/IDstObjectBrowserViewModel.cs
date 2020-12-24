@@ -26,6 +26,6 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
 		/// </summary>
 		/// <param name="parts">List of geometric parts</param>
 		/// <param name="relations">List of part relations defining instances in the tree composition</param>
-		public void UpdateHLR(STEP3D_Part[] parts, STEP3D_PartRelation[] relations);
+		public void UpdateHLR(STEP3DFile step3d);
 	}
 }

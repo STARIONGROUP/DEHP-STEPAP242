@@ -93,9 +93,8 @@ namespace DEHPSTEPAP242.ViewModel
 		/// Any <see cref="STEP3D_Part"/> item without <see cref="STEP3D_PartRelation"/> 
 		/// defining a specific instance, it will placed as child of the main root item.
 		/// </summary>
-		/// <param name="parts">List of geometric parts</param>
-		/// <param name="relations">List of part relations defining instances in the tree composition</param>
-		public void UpdateHLR(STEP3D_Part[] parts, STEP3D_PartRelation[] relations)
+		/// <param name="step3d">A <see cref="STEP3DFile"/> instance</param>
+		public void UpdateHLR(STEP3DFile step3d)
 		{
 			// HLR Tree construction:
 			// Each Part could appears many times
@@ -111,10 +110,14 @@ namespace DEHPSTEPAP242.ViewModel
 			//
 			// The global identification of a Part instance is the full path of IDs.
 
-			this.parts = parts;
-			this.relations = relations;
-
-			InitializeAuxiliaryData();
+			if (step3d != null)
+			{
+				InitializeAuxiliaryData(step3d.Parts, step3d.Relations);
+			}
+			else
+			{
+				InitializeAuxiliaryData(new STEP3D_Part[0], new STEP3D_PartRelation[0]);
+			}
 
 			var entries = new List<Step3DPartTreeNode>();
 
@@ -138,10 +141,13 @@ namespace DEHPSTEPAP242.ViewModel
 		/// <summary>
 		/// Fill the auxiliary HasSet/Dictionary to speedup the tree construction.
 		/// </summary>
-		/// <param name="parts"></param>
-		/// <param name="relations"></param>
-		private void InitializeAuxiliaryData()
+		/// <param name="parts">List of geometric parts</param>
+		/// <param name="relations">List of part relations defining instances in the tree composition</param>
+		private void InitializeAuxiliaryData(STEP3D_Part[] parts, STEP3D_PartRelation[] relations)
 		{
+			this.parts = parts;
+			this.relations = relations;
+
 			idToPartMap.Clear();
 			idToRelationMap.Clear();
 			partChildren.Clear();  // Constructed at FindChildren() call
