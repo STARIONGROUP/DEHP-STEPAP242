@@ -224,6 +224,11 @@ namespace STEP3DAdapter
 		array<STEP3D_PartRelation^>^ m_relations;
 
 		/// <summary>
+		/// Initialize instance
+		/// </summary>
+		void initializeEmpty();
+
+		/// <summary>
 		/// Convert from unmanaged to managed data.
 		/// </summary>
 		void convertHeaderInfo();

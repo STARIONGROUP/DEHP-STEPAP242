@@ -8,6 +8,8 @@ using namespace STEP3DAdapter;
 
 STEP3DFile::STEP3DFile(String^ fileName)
 {
+    initializeEmpty();
+
     m_wrapper = CreateIStep3D_Wrapper();
 
     if (m_wrapper->load(STEP3DAdapter::Tools::toStdString(fileName)))
@@ -38,6 +40,13 @@ STEP3DFile::~STEP3DFile()
 STEP3DFile::!STEP3DFile()
 {
     m_wrapper->Release();
+}
+
+void STEP3DAdapter::STEP3DFile::initializeEmpty()
+{
+    m_headerInfo = gcnew STEP3D_HeaderInfo();
+    m_parts = gcnew array<STEP3D_Part^>(0);
+    m_relations = gcnew array<STEP3D_PartRelation^>(0);
 }
 
 void STEP3DAdapter::STEP3DFile::convertHeaderInfo()
