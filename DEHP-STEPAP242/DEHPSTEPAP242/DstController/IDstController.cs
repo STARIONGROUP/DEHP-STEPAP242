@@ -33,7 +33,11 @@ namespace DEHPSTEPAP242.DstController
     /// </summary>
     public interface IDstController
     {
-        Task LoadFile(string filename);
+        /// <summary>
+        /// Load a STEP-AP242 file asynchronusly.
+        /// </summary>
+        /// <param name="filename">Full path to file</param>
+        Task LoadAsync(string filename);
 
         /// <summary>
         /// Load a STEP-AP242 file.
@@ -42,6 +46,8 @@ namespace DEHPSTEPAP242.DstController
         void Load(string filename);
 
         bool IsFileOpen { get; }
+
+        public bool IsLoading { get; }
 
         public STEP3DFile Step3DFile { get; }
     }

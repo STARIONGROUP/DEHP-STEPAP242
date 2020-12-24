@@ -24,8 +24,8 @@
 
 namespace DEHPSTEPAP242.DstController
 {
-	using System.Diagnostics;
-	using System.Threading.Tasks;
+    using System.Diagnostics;
+    using System.Threading.Tasks;
 
     using STEP3DAdapter;
 
@@ -39,24 +39,33 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private STEP3DFile step3dFile;
 
-		public STEP3DFile Step3DFile { get => step3dFile; }
+        public STEP3DFile Step3DFile { get => step3dFile; }
 
-		public bool IsFileOpen => step3dFile?.HasFailed == false;
+        public bool IsFileOpen => step3dFile?.HasFailed == false;
+
+        private bool isLoading;
+        public bool IsLoading
+        {
+            get => isLoading;
+            private set => isLoading = value;
+        }
 
         /// <summary>
         /// Load a STEP-AP242 file.
         /// <param name="filename"></param>
-		public void Load(string filename)
-		{
+        public void Load(string filename)
+        {
             //Logger.Error($"Loading file: {filename}");
+            IsLoading = true;
 
             step3dFile = new STEP3DFile(filename);
 
             if (step3dFile.HasFailed)
             {
                 Debug.WriteLine($"Error message: { step3dFile.ErrorMessage }");
-                return;
             }
+
+            IsLoading = false;
         }
 
         /// <summary>
@@ -68,9 +77,10 @@ namespace DEHPSTEPAP242.DstController
         /// }
         /// </summary>
         /// <param name="filename"></param>
-		public Task LoadFile(string filename)
-		{
-			throw new System.NotImplementedException();
-		}
-	}
+        public async Task LoadAsync(string filename)
+        {
+            //var t = await Task.Run([step3dFile]() => { step3dFile = new STEP3DFile(filename); } );
+            await Task.Run( () => Load(filename) );
+        }
+    }
 }

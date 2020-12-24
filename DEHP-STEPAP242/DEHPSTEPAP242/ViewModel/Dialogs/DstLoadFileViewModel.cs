@@ -27,17 +27,17 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using System;
     using System.IO;
 
-	using Microsoft.Win32;
-	using ReactiveUI;
+    using Microsoft.Win32;
+    using ReactiveUI;
 
     using DEHPCommon.Enumerators;
     using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-	using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
+    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
 
-	using DEHPSTEPAP242.DstController;
-	using DEHPSTEPAP242.Settings;
-	using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+    using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Settings;
+    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
 
 
     /// <summary>
@@ -65,15 +65,29 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         public ICloseWindowBehavior CloseWindowBehavior { get; set; }
 
+        //public int WindowWidth { get; set; }
+        //public int WindowHeight { get; set; }
+
         private string filePath;
 
         /// <summary>
         /// Gets or sets the current path to a STEP file.
         /// </summary>
-		public string FilePath 
+        public string FilePath 
         { 
             get => filePath;
             set => this.RaiseAndSetIfChanged(ref this.filePath, value);
+        }
+
+        private bool loadingFile;
+
+        /// <summary>
+        /// Gets or sets the current loading task status.
+        /// </summary>
+        public bool IsLoadingFile
+        {
+            get => loadingFile;
+            private set => this.RaiseAndSetIfChanged(ref this.loadingFile, value);
         }
 
         /// <summary>
@@ -91,7 +105,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Loads the current <see cref="FilePath"/> and closes the window.
         /// </summary>
-		public ReactiveCommand<object> LoadFileCommand { get; private set; }
+        public ReactiveCommand<object> LoadFileCommand { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DstLoadFileViewModel"/> class.
@@ -108,25 +122,31 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             InitializeCommands();
 
             if (RecentFiles.IsEmpty == false)
-			{
+            {
                 // Initialize using the last opened file
                 FilePath = RecentFiles[0];
-			}
+            }
+
+            //WindowHeight = 500;
+            //WindowWidth = 500;
         }
 
         /// <summary>
         /// Instantiates the commands.
         /// </summary>
         private void InitializeCommands()
-		{
+        {
             SelectFileCommand = ReactiveCommand.Create();
             SelectFileCommand.Subscribe(_ => SelectFileCommandExecute());
 
             // Load File button is activated when the FilePath points to a existing file
-            var canLoadFile = this.WhenAnyValue(vm => vm.FilePath, (fn) => File.Exists(fn));
+            var canLoadFile = this.WhenAnyValue(
+                vm => vm.FilePath,
+                vm => vm.IsLoadingFile,
+                (fn, loading) => File.Exists(fn) && !loading);
 
             LoadFileCommand = ReactiveCommand.Create(canLoadFile);
-            LoadFileCommand.Subscribe(_ => LoadFileCommandExecute());
+            LoadFileCommand.Subscribe(_ => LoadFileCommandExecuteAsync());
         }
 
         /// <summary>
@@ -140,8 +160,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 InitialDirectory = Path.GetDirectoryName(FilePath)
             };
 
-			if (dlg.ShowDialog() == true)
-			{
+            if (dlg.ShowDialog() == true)
+            {
                 FilePath = dlg.FileName;
             }
         }
@@ -151,9 +171,36 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         protected void LoadFileCommandExecute()
         {
+            IsLoadingFile = true;
             statusBarControlView.Append("Loading file...");
 
             dstController.Load(FilePath);
+
+            IsLoadingFile = false;
+
+            if (dstController.IsFileOpen)
+            {
+                statusBarControlView.Append("Load successful");
+
+                AddToRecentFiles(FilePath);
+                SaveRecentFiles();
+
+                CloseWindowBehavior?.Close();
+            }
+            else
+            {
+                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
+            }
+        }
+
+        protected async void LoadFileCommandExecuteAsync()
+        {
+            IsLoadingFile = true; 
+            statusBarControlView.Append("Loading file...");
+            
+            await dstController.LoadAsync(FilePath);
+
+            IsLoadingFile = false;
 
             if (dstController.IsFileOpen)
             {
