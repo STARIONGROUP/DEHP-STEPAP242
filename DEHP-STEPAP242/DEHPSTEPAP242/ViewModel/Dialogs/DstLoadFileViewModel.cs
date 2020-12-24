@@ -140,6 +140,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             SelectFileCommand.Subscribe(_ => SelectFileCommandExecute());
 
             // Load File button is activated when the FilePath points to a existing file
+            // TODO: see how to use dstController.IsLoading in a reactive way
             var canLoadFile = this.WhenAnyValue(
                 vm => vm.FilePath,
                 vm => vm.IsLoadingFile,
@@ -193,6 +194,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
+        /// <summary>
+        /// Executes the <see cref="LoadFileCommand"/> asynchronously
+        /// </summary>
         protected async void LoadFileCommandExecuteAsync()
         {
             IsLoadingFile = true; 
@@ -256,37 +260,5 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             userPreferenceService.Save();
         }
-
-
-        /// <summary>
-        /// Executes login command
-        /// </summary>
-        /// <returns>The <see cref="Task"/></returns>
-        //private async Task ExecuteLogin()
-        //{
-        //    this.statusBarControlView.Append("Loggin in...");
-        //
-        //    try
-        //    {
-        //        var credentials = this.RequiresAuthentication ? new UserIdentity(this.UserName, this.Password) : null;
-        //        await this.dstController.Connect(this.Uri, true, credentials);
-        //        this.LoginSuccessfull = this.dstController.IsSessionOpen;
-        //
-        //        if (this.LoginSuccessfull)
-        //        {
-        //            this.statusBarControlView.Append("Loggin successful");
-        //            await Task.Delay(1000);
-        //            this.CloseWindowBehavior?.Close();
-        //        }
-        //        else
-        //        {
-        //            this.statusBarControlView.Append($"Loggin failed", StatusBarMessageSeverity.Info);
-        //        }
-        //    }
-        //    catch (Exception exception)
-        //    {
-        //        this.statusBarControlView.Append($"Loggin failed: {exception.Message}", StatusBarMessageSeverity.Error);
-        //    }
-        //}
     }
 }

@@ -35,15 +35,35 @@ namespace DEHPSTEPAP242.DstController
     public class DstController : IDstController
     {
         /// <summary>
-        /// The <see cref="STEP3DFile"/> that handles the interaction with a STEP-AP242 file/
+        /// The <see cref="STEP3DFile"/> that handles the interaction with a STEP-AP242 file.
         /// </summary>
         private STEP3DFile step3dFile;
 
-        public STEP3DFile Step3DFile { get => step3dFile; }
+        /// <summary>
+        /// Gets or sets the <see cref="STEP3DFile"/> instance.
+        /// 
+        /// <seealso cref="Load"/>
+        /// <seealso cref="LoadAsync"/>
+        /// </summary>
+        public STEP3DFile Step3DFile
+        { 
+            get => step3dFile;
+            private set => step3dFile = value;
+        }
 
+        /// <summary>
+        /// Returns the status of the last load action.
+        /// </summary>
         public bool IsFileOpen => step3dFile?.HasFailed == false;
 
+        /// <summary>
+        /// The <see cref="IsLoading"/> that indicates the loading status flag.
+        /// </summary>
         private bool isLoading;
+
+        /// <summary>
+        /// Gets or sets the status flag for the load action.
+        /// </summary>
         public bool IsLoading
         {
             get => isLoading;
@@ -51,35 +71,31 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
-        /// Load a STEP-AP242 file.
-        /// <param name="filename"></param>
+        /// Loads a STEP-AP242 file.
+        /// <param name="filename">Full path to a STEP-AP242 file</param>
         public void Load(string filename)
         {
             //Logger.Error($"Loading file: {filename}");
             IsLoading = true;
 
-            step3dFile = new STEP3DFile(filename);
+            var step = new STEP3DFile(filename);
 
-            if (step3dFile.HasFailed)
+            if (step.HasFailed)
             {
-                Debug.WriteLine($"Error message: { step3dFile.ErrorMessage }");
+                Debug.WriteLine($"Error message: { step.ErrorMessage }");
             }
+
+            Step3DFile = step;
 
             IsLoading = false;
         }
 
         /// <summary>
-        /// This should be returns <see cref="Task"/>.
-        /// 
-        /// public async Task XXX()
-        /// {
-        ///     await method();
-        /// }
+        /// Loads a STEP-AP242 file asynchronously.
         /// </summary>
-        /// <param name="filename"></param>
+        /// <param name="filename">Full path to a STEP-AP242 file</param>
         public async Task LoadAsync(string filename)
         {
-            //var t = await Task.Run([step3dFile]() => { step3dFile = new STEP3DFile(filename); } );
             await Task.Run( () => Load(filename) );
         }
     }
