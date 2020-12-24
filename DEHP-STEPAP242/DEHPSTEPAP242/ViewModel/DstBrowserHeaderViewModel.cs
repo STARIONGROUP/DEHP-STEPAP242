@@ -162,6 +162,26 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="step3d"></param>
         public void UpdateHeader(STEP3DFile step3d)
 		{
+            if (step3d == null)
+            {
+                FilePath = "<unloaded>";
+
+                Description = "";
+                ImplementationLevel = "";
+
+                Name = "";
+                TimeStamp = "";
+                Author = "";
+                Organization = "";
+                PreprocessorVersion = "";
+                OriginatingSystem = "";
+                Authorization = "";
+
+                FileSchema = "";
+
+                return;
+            }
+
             FilePath = step3d.FileName;
 
             var hdr = step3d.HeaderInfo;
