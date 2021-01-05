@@ -45,6 +45,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     /// </summary>
     public class DstLoadFileViewModel : ReactiveObject, IDstLoadFileViewModel, ICloseWindowViewModel
     {
+        #region Private Members
+
         /// <summary>
         /// The <see cref="IDstController"/> instance
         /// </summary>
@@ -60,25 +62,102 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private readonly IUserPreferenceService<AppSettings> userPreferenceService;
 
+        #endregion
+
+        #region IDstLoadFileViewModel interface
+
         /// <summary>
-        /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
+        /// Backing field for <see cref="FilePath"/>
         /// </summary>
-        public ICloseWindowBehavior CloseWindowBehavior { get; set; }
-
-        //public int WindowWidth { get; set; }
-        //public int WindowHeight { get; set; }
-
         private string filePath;
 
         /// <summary>
         /// Gets or sets the current path to a STEP file.
         /// </summary>
-        public string FilePath 
-        { 
+        public string FilePath
+        {
             get => filePath;
             set => this.RaiseAndSetIfChanged(ref this.filePath, value);
         }
 
+        /// <summary>
+        /// Loads the current <see cref="FilePath"/> and closes the window.
+        /// </summary>
+        public ReactiveCommand<object> LoadFileCommand { get; private set; }
+
+        /// <summary>
+        /// Executes the <see cref="LoadFileCommand"/>
+        /// </summary>
+        protected void LoadFileCommandExecute()
+        {
+            IsLoadingFile = true;
+            statusBarControlView.Append("Loading file...");
+
+            dstController.Load(FilePath);
+
+            IsLoadingFile = false;
+
+            if (dstController.IsFileOpen)
+            {
+                statusBarControlView.Append("Load successful");
+
+                AddToRecentFiles(FilePath);
+                SaveRecentFiles();
+
+                CloseWindowBehavior?.Close();
+            }
+            else
+            {
+                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
+            }
+        }
+
+        /// <summary>
+        /// Executes the <see cref="LoadFileCommand"/> asynchronously
+        /// </summary>
+        protected async void LoadFileCommandExecuteAsync()
+        {
+            IsLoadingFile = true;
+            statusBarControlView.Append("Loading file...");
+
+            await dstController.LoadAsync(FilePath);
+
+            IsLoadingFile = false;
+
+            if (dstController.IsFileOpen)
+            {
+                statusBarControlView.Append("Load successful");
+
+                AddToRecentFiles(FilePath);
+                SaveRecentFiles();
+
+                CloseWindowBehavior?.Close();
+            }
+            else
+            {
+                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
+            }
+        }
+
+        #endregion
+
+        #region ICloseWindowViewModel interface
+
+        /// <summary>
+        /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
+        /// </summary>
+        public ICloseWindowBehavior CloseWindowBehavior { get; set; }
+
+        #endregion
+
+        #region Public Reactive Properties
+
+        //public int WindowWidth { get; set; }
+        //public int WindowHeight { get; set; }
+
+        /// <summary>
+        /// Backing field for <see cref="IsLoadingFile"/>
+        /// </summary>
         private bool loadingFile;
 
         /// <summary>
@@ -102,10 +181,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         public ReactiveCommand<object> SelectFileCommand { get; private set; }
 
-        /// <summary>
-        /// Loads the current <see cref="FilePath"/> and closes the window.
-        /// </summary>
-        public ReactiveCommand<object> LoadFileCommand { get; private set; }
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DstLoadFileViewModel"/> class.
@@ -130,6 +208,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             //WindowHeight = 500;
             //WindowWidth = 500;
         }
+
+        #endregion
+
+        #region Protected/Private Methods
 
         /// <summary>
         /// Instantiates the commands.
@@ -164,60 +246,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (dlg.ShowDialog() == true)
             {
                 FilePath = dlg.FileName;
-            }
-        }
-
-        /// <summary>
-        /// Executes the <see cref="LoadFileCommand"/>
-        /// </summary>
-        protected void LoadFileCommandExecute()
-        {
-            IsLoadingFile = true;
-            statusBarControlView.Append("Loading file...");
-
-            dstController.Load(FilePath);
-
-            IsLoadingFile = false;
-
-            if (dstController.IsFileOpen)
-            {
-                statusBarControlView.Append("Load successful");
-
-                AddToRecentFiles(FilePath);
-                SaveRecentFiles();
-
-                CloseWindowBehavior?.Close();
-            }
-            else
-            {
-                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
-            }
-        }
-
-        /// <summary>
-        /// Executes the <see cref="LoadFileCommand"/> asynchronously
-        /// </summary>
-        protected async void LoadFileCommandExecuteAsync()
-        {
-            IsLoadingFile = true; 
-            statusBarControlView.Append("Loading file...");
-            
-            await dstController.LoadAsync(FilePath);
-
-            IsLoadingFile = false;
-
-            if (dstController.IsFileOpen)
-            {
-                statusBarControlView.Append("Load successful");
-
-                AddToRecentFiles(FilePath);
-                SaveRecentFiles();
-
-                CloseWindowBehavior?.Close();
-            }
-            else
-            {
-                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
             }
         }
 
@@ -260,5 +288,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             userPreferenceService.Save();
         }
+
+        #endregion
     }
 }

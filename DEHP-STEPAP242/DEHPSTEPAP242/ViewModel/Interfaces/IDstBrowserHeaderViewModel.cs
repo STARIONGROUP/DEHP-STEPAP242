@@ -31,6 +31,6 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     /// </summary>
     public interface IDstBrowserHeaderViewModel
     {
-        public void UpdateHeader(STEP3DFile step3d);
+        public void UpdateHeader();
     }
 }

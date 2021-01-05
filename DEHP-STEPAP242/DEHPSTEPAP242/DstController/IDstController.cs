@@ -34,18 +34,6 @@ namespace DEHPSTEPAP242.DstController
     public interface IDstController
     {
         /// <summary>
-        /// Loads a STEP-AP242 file asynchronusly.
-        /// </summary>
-        /// <param name="filename">Full path to file</param>
-        Task LoadAsync(string filename);
-
-        /// <summary>
-        /// Loads a STEP-AP242 file.
-        /// </summary>
-        /// <param name="filename">Full path to file</param>
-        void Load(string filename);
-
-        /// <summary>
         /// Returns the status of the last load action.
         /// </summary>
         bool IsFileOpen { get; }
@@ -59,5 +47,17 @@ namespace DEHPSTEPAP242.DstController
         /// Gets the <see cref="STEP3DFile"/> instance.
         /// </summary>
         public STEP3DFile Step3DFile { get; }
+
+        /// <summary>
+        /// Loads a STEP-AP242 file.
+        /// </summary>
+        /// <param name="filename">Full path to file</param>
+        void Load(string filename);
+
+        /// <summary>
+        /// Loads a STEP-AP242 file asynchronusly.
+        /// </summary>
+        /// <param name="filename">Full path to file</param>
+        Task LoadAsync(string filename);
     }
 }

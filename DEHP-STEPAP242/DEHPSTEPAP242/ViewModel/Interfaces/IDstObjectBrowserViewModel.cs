@@ -13,6 +13,11 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
 	public interface IDstObjectBrowserViewModel
 	{
 		/// <summary>
+		/// Gets or sets the assert indicating whether the view is busy
+		/// </summary>
+		bool IsBusy { get; set; }
+
+		/// <summary>
 		/// Self-referential data source content.
 		/// 
 		/// Using the following service columns:
@@ -26,6 +31,6 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
 		/// </summary>
 		/// <param name="parts">List of geometric parts</param>
 		/// <param name="relations">List of part relations defining instances in the tree composition</param>
-		public void UpdateHLR(STEP3DFile step3d);
+		public void UpdateHLR();
 	}
 }

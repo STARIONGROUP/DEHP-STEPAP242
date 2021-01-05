@@ -24,8 +24,6 @@
 
 namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
 {
-    using System.Reactive;
-
     using DEHPCommon.UserInterfaces.Behaviors;
 
     using ReactiveUI;
@@ -47,9 +45,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         /// </summary>
         ReactiveCommand<object> LoadFileCommand { get; }
 
-		/// <summary>
-		/// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
-		/// </summary>
-		ICloseWindowBehavior CloseWindowBehavior { get; set; }
+        /// <summary>
+        /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
+        /// </summary>
+        ICloseWindowBehavior CloseWindowBehavior { get; set; }
     }
 }

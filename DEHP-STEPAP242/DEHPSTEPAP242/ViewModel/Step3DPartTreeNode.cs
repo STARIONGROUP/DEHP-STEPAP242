@@ -3,6 +3,7 @@ namespace DEHPSTEPAP242.ViewModel
 {
 	using System;
 	using System.Collections.Generic;
+	
 	using STEP3DAdapter;
 
 	/// <summary>
@@ -14,12 +15,8 @@ namespace DEHPSTEPAP242.ViewModel
 	{
 		internal STEP3D_Part part;
 
-		public Step3DPartTreeNode(STEP3D_Part part)
-		{
-			this.part = part;
-		}
+		#region HLR Tree Indexes
 
-#region HLR tree indexes
 		/// <summary>
 		/// Auxiliary index for tree control.
 		/// </summary>
@@ -29,10 +26,10 @@ namespace DEHPSTEPAP242.ViewModel
 		/// Auxiliary parent index for tree control.
 		/// </summary>
 		public int ParentID { get; set; }
-		
-#endregion
 
-#region access to Part fields
+		#endregion
+
+		#region Part Fields
 
 		/// <summary>
 		/// Get Part name.
@@ -66,9 +63,25 @@ namespace DEHPSTEPAP242.ViewModel
 
 		public string RelationLabel { get; set; }
 
-#endregion
+		#endregion
+
+		#region Constructor
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="part">Reference to STEP 3D part entity from the controller</param>
+		public Step3DPartTreeNode(STEP3D_Part part)
+		{
+			this.part = part;
+		}
+
+		#endregion
 	}
 
+	/// <summary>
+	/// Helper to construct a mock HLR model.
+	/// </summary>
 	public static class MockStep3DTree
 	{
 		public static List<Step3DPartTreeNode> GetTree()

@@ -29,5 +29,14 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     /// </summary>
     public interface IDstDataSourceViewModel
     {
+        /// <summary>
+        /// Gets the <see cref="IDstBrowserHeaderViewModel"/>
+        /// </summary>
+        public IDstBrowserHeaderViewModel DstBrowserHeader { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IDstObjectBrowserViewModel"/>
+        /// </summary>
+        public IDstObjectBrowserViewModel DstObjectBrowser { get; }
     }
 }

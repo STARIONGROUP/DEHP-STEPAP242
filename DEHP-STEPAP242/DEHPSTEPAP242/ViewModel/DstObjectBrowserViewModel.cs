@@ -1,10 +1,13 @@
 ﻿
 namespace DEHPSTEPAP242.ViewModel
 {
+	using System;
 	using System.Collections.Generic;
 	using ReactiveUI;
 
+	using DEHPSTEPAP242.DstController;
 	using DEHPSTEPAP242.ViewModel.Interfaces;
+
 	using STEP3DAdapter;
 
 	/// <summary>
@@ -22,6 +25,10 @@ namespace DEHPSTEPAP242.ViewModel
 	/// </summary>
 	public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel
 	{
+		#region Private Members
+
+		private IDstController dstController;
+
 		/// <summary>
 		/// List of geometric parts.
 		/// 
@@ -68,6 +75,28 @@ namespace DEHPSTEPAP242.ViewModel
 		/// - Key Field --> Step3DPartTreeNode.ID
 		/// - Parent Field --> Step3DPartTreeNode.ParentID
 		/// </summary>
+
+		#endregion
+
+		#region IDstObjectBrowserViewModel interface
+
+		/// <summary>
+		/// Backing field for <see cref="IsBusy"/>
+		/// </summary>
+		private bool isBusy;
+
+		/// <summary>
+		/// Gets or sets the assert indicating whether the view is busy
+		/// </summary>
+		public bool IsBusy
+		{
+			get => this.isBusy;
+			set => this.RaiseAndSetIfChanged(ref this.isBusy, value);
+		}
+
+		/// <summary>
+		/// Backing field for <see cref="Step3DHLR"/>
+		/// </summary>
 		private List<Step3DPartTreeNode> step3DHLR = new List<Step3DPartTreeNode>();
 
 		/// <summary>
@@ -94,7 +123,7 @@ namespace DEHPSTEPAP242.ViewModel
 		/// defining a specific instance, it will placed as child of the main root item.
 		/// </summary>
 		/// <param name="step3d">A <see cref="STEP3DFile"/> instance</param>
-		public void UpdateHLR(STEP3DFile step3d)
+		public void UpdateHLR()
 		{
 			// HLR Tree construction:
 			// Each Part could appears many times
@@ -109,6 +138,14 @@ namespace DEHPSTEPAP242.ViewModel
 			// in some place to retrieve the information of the specific association.
 			//
 			// The global identification of a Part instance is the full path of IDs.
+
+			if (dstController.IsLoading)
+			{
+				IsBusy = true;
+				return;
+			}
+
+			STEP3DFile step3d = dstController.Step3DFile;
 
 			if (step3d != null)
 			{
@@ -136,7 +173,22 @@ namespace DEHPSTEPAP242.ViewModel
 			}
 
 			Step3DHLR = entries;
+			IsBusy = false;
 		}
+
+		#endregion
+
+		#region Constructor
+
+		public DstObjectBrowserViewModel(IDstController dstController)
+		{
+			this.dstController = dstController;
+			this.WhenAnyValue(x => x.dstController.IsLoading).Subscribe(_ => this.UpdateHLR());
+		}
+
+		#endregion
+
+		#region Private Methods
 
 		/// <summary>
 		/// Fill the auxiliary HasSet/Dictionary to speedup the tree construction.
@@ -237,5 +289,7 @@ namespace DEHPSTEPAP242.ViewModel
 				AddSubTree(entries, node, ref nextID);
 			}
 		}
+
+		#endregion
 	}
 }

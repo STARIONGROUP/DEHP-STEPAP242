@@ -24,25 +24,31 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
+    using System;
+    using ReactiveUI;
+
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Views.Dialogs;
-	using Microsoft.Win32;
-	using System.Diagnostics;
 
-	/// <summary>
-	/// The <see cref="DstDataSourceViewModel"/> is the view model for the panel that will display controls and data relative to EcosimPro
-	/// </summary>
-	public sealed class DstDataSourceViewModel : DataSourceViewModel, IDstDataSourceViewModel
+    /// <summary>
+    /// The <see cref="DstDataSourceViewModel"/> is the view model for the panel that will display controls and data relative to EcosimPro
+    /// </summary>
+    public sealed class DstDataSourceViewModel : DataSourceViewModel, IDstDataSourceViewModel
     {
+        #region Private Members
+
         /// <summary>
         /// The <see cref="IDstController"/>
         /// </summary>
         private readonly IDstController dstController;
-        
+
+        #endregion
+
+        #region IDstDataSourceViewModel interface
         /// <summary>
         /// Gets the <see cref="IDstBrowserHeaderViewModel"/>
         /// </summary>
@@ -52,6 +58,10 @@ namespace DEHPSTEPAP242.ViewModel
         /// Gets the <see cref="IDstObjectBrowserViewModel"/>
         /// </summary>
         public IDstObjectBrowserViewModel DstObjectBrowser { get; }
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// Initializes a new <see cref="DstDataSourceViewModel"/>
@@ -68,37 +78,25 @@ namespace DEHPSTEPAP242.ViewModel
             this.InitializeCommands();
         }
 
+        #endregion
+
+        #region Protected Methods
+
         /// <summary>
         /// Load a new STEP AP242 file.
         /// </summary>
         protected override void LoadFileCommandExecute()
         {
+            // Indicate the IsBusy == true state
+
+            this.DstObjectBrowser.IsBusy = true;
+
             this.NavigationService.ShowDialog<DstLoadFile>();
 
-            // TODO: how to know that the dialog was closed without loading a file --> nothing to update
-
-            UpdateBrowserHeader();
-            UpdateObjectBrowser();
+            // Indicate the IsBusy == false state
+            this.DstObjectBrowser.IsBusy = false;
         }
 
-        /// <summary>
-        /// Upate the <see cref="DstBrowserHeaderViewModel">
-        /// </summary>
-        private void UpdateBrowserHeader()
-		{
-            var step3d = dstController.Step3DFile;
-
-            DstBrowserHeader.UpdateHeader(step3d);
-        }
-
-        /// <summary>
-        /// Upate the <see cref="DstObjectBrowserViewModel">
-        /// </summary>
-        private void UpdateObjectBrowser()
-		{
-            var step3d = dstController.Step3DFile;
-
-            DstObjectBrowser.UpdateHLR(step3d);
-        }
+        #endregion
     }
 }

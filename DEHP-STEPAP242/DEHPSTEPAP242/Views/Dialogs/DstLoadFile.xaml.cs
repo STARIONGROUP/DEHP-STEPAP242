@@ -24,7 +24,7 @@
 
 namespace DEHPSTEPAP242.Views.Dialogs
 {
-	using System.Windows;
+    using System.Windows;
 
     /// <summary>
     /// Interaction logic for DstLoadFile.xaml
@@ -44,12 +44,14 @@ namespace DEHPSTEPAP242.Views.Dialogs
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-		private void RecentFilesListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-		{
+        private void RecentFilesListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
             if (RecentFilesListBox.SelectedItem != null)
             {
                 FilePath.Text = RecentFilesListBox.SelectedItem.ToString();
+
+                //LoadButton.Click()
             }
         }
-	}
+    }
 }

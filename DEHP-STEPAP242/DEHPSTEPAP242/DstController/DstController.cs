@@ -26,16 +26,20 @@ namespace DEHPSTEPAP242.DstController
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    
+    using ReactiveUI;
 
     using STEP3DAdapter;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data from and to EcosimPro
     /// </summary>
-    public class DstController : IDstController
+    public class DstController : ReactiveObject, IDstController
     {
+        #region IDstController interface
+
         /// <summary>
-        /// The <see cref="STEP3DFile"/> that handles the interaction with a STEP-AP242 file.
+        /// Backing field for <see cref="Step3DFile"/>
         /// </summary>
         private STEP3DFile step3dFile;
 
@@ -67,7 +71,7 @@ namespace DEHPSTEPAP242.DstController
         public bool IsLoading
         {
             get => isLoading;
-            private set => isLoading = value;
+            private set => this.RaiseAndSetIfChanged(ref isLoading, value);
         }
 
         /// <summary>
@@ -75,15 +79,19 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="filename">Full path to a STEP-AP242 file</param>
         public void Load(string filename)
         {
-            //Logger.Error($"Loading file: {filename}");
             IsLoading = true;
 
             var step = new STEP3DFile(filename);
 
             if (step.HasFailed)
             {
+                // Do not update?
                 Debug.WriteLine($"Error message: { step.ErrorMessage }");
             }
+            //else
+            //{
+            //    Step3DFile = step;
+            //}
 
             Step3DFile = step;
 
@@ -98,5 +106,7 @@ namespace DEHPSTEPAP242.DstController
         {
             await Task.Run( () => Load(filename) );
         }
+
+        #endregion
     }
 }

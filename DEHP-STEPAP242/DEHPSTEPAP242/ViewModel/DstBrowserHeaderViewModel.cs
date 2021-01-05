@@ -24,20 +24,27 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-	using ReactiveUI;
+    using System;
+    using ReactiveUI;
     
-	using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Views;
-	using STEP3DAdapter;
+    using DEHPSTEPAP242.DstController;
 
-	/// <summary>
-	/// The <see cref="DstBrowserHeaderViewModel"/> is the view model the <see cref="DstBrowserHeader"/>
-	/// </summary>
-	public class DstBrowserHeaderViewModel : ReactiveObject, IDstBrowserHeaderViewModel
+    using STEP3DAdapter;
+
+    /// <summary>
+    /// The <see cref="DstBrowserHeaderViewModel"/> is the view model the <see cref="DstBrowserHeader"/>
+    /// </summary>
+    public class DstBrowserHeaderViewModel : ReactiveObject, IDstBrowserHeaderViewModel
     {
-		private string fileName = "<unloaded>";
+        #region Private Members
 
-        #region step3d header information private members
+        private IDstController dstController;
+
+        #endregion
+
+        #region Private Members (STEP 3D Header Information)
 
         // FILE_DESCRIPTION
         private string description;
@@ -57,13 +64,20 @@ namespace DEHPSTEPAP242.ViewModel
 
         #endregion
 
-		/// <summary>
-		/// Gets or sets the full file name.
-		/// </summary>
-		public string FilePath
+        #region Reactive Properties
+
+        /// <summary>
+        /// Backing field for <see cref="FilePath"/>
+        /// </summary>
+        private string filePath = "<unloaded>";
+
+        /// <summary>
+        /// Gets or sets the current path to a STEP file.
+        /// </summary>
+        public string FilePath
         {
-            get => this.fileName;
-            set => this.RaiseAndSetIfChanged(ref this.fileName, value);
+            get => this.filePath;
+            set => this.RaiseAndSetIfChanged(ref this.filePath, value);
         }
 
         /// <summary>
@@ -156,28 +170,31 @@ namespace DEHPSTEPAP242.ViewModel
             set => this.RaiseAndSetIfChanged(ref this.file_schema, value);
         }
 
+        #endregion
+
+        #region IDstBrowserHeaderViewModel interface
+
         /// <summary>
         /// Update all BrowswerHeader values.
         /// </summary>
         /// <param name="step3d"></param>
-        public void UpdateHeader(STEP3DFile step3d)
-		{
-            if (step3d == null)
+        public void UpdateHeader()
+        {
+            if (dstController.IsLoading)
             {
-                FilePath = "<unloaded>";
+                // TODO: block the UI??
 
-                Description = "";
-                ImplementationLevel = "";
+                InitializeValues();
+                FilePath = "LOADING A FILE...";
 
-                Name = "";
-                TimeStamp = "";
-                Author = "";
-                Organization = "";
-                PreprocessorVersion = "";
-                OriginatingSystem = "";
-                Authorization = "";
+                return;
+            }
 
-                FileSchema = "";
+            STEP3DFile step3d = dstController.Step3DFile;
+
+            if (step3d == null || step3d.HasFailed)
+            {
+                InitializeValues();
 
                 return;
             }
@@ -201,5 +218,40 @@ namespace DEHPSTEPAP242.ViewModel
 
             FileSchema = hdr.file_schema;
         }
+
+        #endregion
+
+        #region Constructor
+        
+        public DstBrowserHeaderViewModel(IDstController dstController)
+        {
+            this.dstController = dstController;
+
+            this.WhenAnyValue(x => x.dstController.IsLoading).Subscribe(_ => this.UpdateHeader());
+        }
+        
+        #endregion
+
+        #region Private Methods
+
+        private void InitializeValues()
+        {
+            FilePath = "<unloaded>";
+
+            Description = "";
+            ImplementationLevel = "";
+
+            Name = "";
+            TimeStamp = "";
+            Author = "";
+            Organization = "";
+            PreprocessorVersion = "";
+            OriginatingSystem = "";
+            Authorization = "";
+
+            FileSchema = "";
+        }
+
+        #endregion
     }
 }
