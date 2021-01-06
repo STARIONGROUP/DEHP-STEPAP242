@@ -26,6 +26,8 @@ namespace DEHPSTEPAP242.Views.Dialogs
 {
     using System.Windows;
 
+    using DEHPSTEPAP242.ViewModel.Dialogs;
+
     /// <summary>
     /// Interaction logic for DstLoadFile.xaml
     /// </summary>
@@ -40,17 +42,21 @@ namespace DEHPSTEPAP242.Views.Dialogs
         }
 
         /// <summary>
-        /// Updates FilePath with selected item.
+        /// Close evente validation.
+        /// 
+        /// It is not possible to close the window during the Load operation.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RecentFilesListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (RecentFilesListBox.SelectedItem != null)
-            {
-                FilePath.Text = RecentFilesListBox.SelectedItem.ToString();
+            // Check that there is not a Loading task in progress
+            var vm = (DstLoadFileViewModel) DataContext;
 
-                //LoadButton.Click()
+            if (vm.IsLoadingFile)
+            {
+                MessageBox.Show("Loading file in progress, plase wait.", "Loading File");
+                e.Cancel = true;
             }
         }
     }

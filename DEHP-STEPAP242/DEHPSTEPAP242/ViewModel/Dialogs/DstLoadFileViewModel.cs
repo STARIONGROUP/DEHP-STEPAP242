@@ -156,6 +156,20 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         //public int WindowHeight { get; set; }
 
         /// <summary>
+        /// Backing field for <see cref="MainLabel"/>
+        /// </summary>
+        private string mainLabel;
+
+        /// <summary>
+        /// Gets or sets the main label title.
+        /// </summary>
+        public string MainLabel
+        {
+            get => mainLabel;
+            private set => this.RaiseAndSetIfChanged(ref this.mainLabel, value);
+        }
+
+        /// <summary>
         /// Backing field for <see cref="IsLoadingFile"/>
         /// </summary>
         private bool loadingFile;
@@ -196,17 +210,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.statusBarControlView = statusBarControlView;
             this.userPreferenceService = userPreferenceService;
 
-            PopulateRecentFiles();
+            InitializeUI();
             InitializeCommands();
-
-            if (RecentFiles.IsEmpty == false)
-            {
-                // Initialize using the last opened file
-                FilePath = RecentFiles[0];
-            }
-
-            //WindowHeight = 500;
-            //WindowWidth = 500;
         }
 
         #endregion
@@ -214,15 +219,40 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         #region Protected/Private Methods
 
         /// <summary>
+        /// Initializes the User Interface components
+        /// </summary>
+        private void InitializeUI()
+        {
+            // Initialize main title and subscribe to any change
+            UpdateMainLabel();
+            this.WhenAnyValue(vm => vm.IsLoadingFile).Subscribe(_ => UpdateMainLabel());
+
+            // Load recent files and initialize with the last opened file
+            PopulateRecentFiles();
+
+            if (RecentFiles.IsEmpty == false)
+            {
+                FilePath = RecentFiles[0];
+            }
+
+            //WindowHeight = 500;
+            //WindowWidth = 500;
+        }
+
+        /// <summary>
         /// Instantiates the commands.
         /// </summary>
         private void InitializeCommands()
         {
-            SelectFileCommand = ReactiveCommand.Create();
+            // Select File is only available when no loading task is in progress
+            var canSelectFile = this.WhenAnyValue(
+                vm => vm.IsLoadingFile,
+                (loading) => !loading);
+
+            SelectFileCommand = ReactiveCommand.Create(canSelectFile);
             SelectFileCommand.Subscribe(_ => SelectFileCommandExecute());
 
             // Load File button is activated when the FilePath points to a existing file
-            // TODO: see how to use dstController.IsLoading in a reactive way
             var canLoadFile = this.WhenAnyValue(
                 vm => vm.FilePath,
                 vm => vm.IsLoadingFile,
@@ -246,6 +276,21 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (dlg.ShowDialog() == true)
             {
                 FilePath = dlg.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Updates main title label according to the <see cref="IsLoadingFile"/> status.
+        /// </summary>
+        private void UpdateMainLabel()
+        {
+            if (IsLoadingFile)
+            {
+                MainLabel = "Loading STEP-AP242 file... please wait";
+            }
+            else
+            {
+                MainLabel = "Load STEP-AP242 file";
             }
         }
 
