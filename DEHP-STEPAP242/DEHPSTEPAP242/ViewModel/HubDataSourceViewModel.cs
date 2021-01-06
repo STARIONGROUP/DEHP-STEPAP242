@@ -82,18 +82,18 @@ namespace DEHPSTEPAP242.ViewModel
             this.InitializeCommands();
         }
 
-		protected override void InitializeCommands()
-		{
-			base.InitializeCommands();
+        protected override void InitializeCommands()
+        {
+            base.InitializeCommands();
 
             this.ConnectCommand = ReactiveCommand.Create();
             this.ConnectCommand.Subscribe(_ => this.ConnectCommandExecute());
         }
 
-		/// <summary>
-		/// The connect text for the connect button
-		/// </summary>
-		private const string ConnectText = "Connect";
+        /// <summary>
+        /// The connect text for the connect button
+        /// </summary>
+        private const string ConnectText = "Connect";
 
         /// <summary>
         /// The disconnect text for the connect button
@@ -145,9 +145,12 @@ namespace DEHPSTEPAP242.ViewModel
             this.ConnectButtonText = isSessionOpen ? DisconnectText : ConnectText;
         }
 
+        /// <summary>
+        /// Loads a STEP file stored in the server.
+        /// </summary>
         protected override void LoadFileCommandExecute()
-		{
-			throw new NotImplementedException();
-		}
-	}
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
