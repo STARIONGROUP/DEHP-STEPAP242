@@ -34,6 +34,7 @@ namespace DEHPSTEPAP242
 
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Settings;
+    using DEHPSTEPAP242.Services.FileStoreService;
     using DEHPSTEPAP242.ViewModel;
     using DEHPSTEPAP242.ViewModel.Dialogs;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
@@ -85,6 +86,7 @@ namespace DEHPSTEPAP242
         private static void RegisterTypes(ContainerBuilder containerBuilder)
         {
             containerBuilder.RegisterType<DstController.DstController>().As<IDstController>().SingleInstance();
+            containerBuilder.RegisterType<FileStoreService>().As<IFileStoreService>().SingleInstance();
             containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
         }
 
@@ -95,7 +97,10 @@ namespace DEHPSTEPAP242
         private static void RegisterViewModels(ContainerBuilder containerBuilder)
         {
             containerBuilder.RegisterType<MainWindowViewModel>().As<IMainWindowViewModel>().SingleInstance();
+            // Hub
             containerBuilder.RegisterType<HubDataSourceViewModel>().As<IHubDataSourceViewModel>();
+            containerBuilder.RegisterType<HubFileStoreBrowserViewModel>().As<IHubFileStoreBrowserViewModel>();
+            // Dst
             containerBuilder.RegisterType<DstBrowserHeaderViewModel>().As<IDstBrowserHeaderViewModel>();
             containerBuilder.RegisterType<DstObjectBrowserViewModel>().As<IDstObjectBrowserViewModel>();
             containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();

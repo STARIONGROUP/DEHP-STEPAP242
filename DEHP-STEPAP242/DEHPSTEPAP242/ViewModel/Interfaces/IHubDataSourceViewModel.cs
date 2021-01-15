@@ -44,6 +44,11 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         IHubBrowserHeaderViewModel HubBrowserHeader { get; }
 
         /// <summary>
+        /// The <see cref="IHubFileStoreBrowserViewModel"/>
+        /// </summary>
+        IHubFileStoreBrowserViewModel HubFileStoreBrowser { get; }
+
+        /// <summary>
         /// Gets or sets the name
         /// </summary>
         string ConnectButtonText { get; set; }

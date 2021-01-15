@@ -65,28 +65,45 @@
                                 <views:DstObjectBrowser  Grid.Row="1"></views:DstObjectBrowser>
                             </Grid>
                         </dxdo:LayoutPanel>
+                        
+                        <!-- Hub Data Source panel -->
                         <dxdo:LayoutPanel MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="Hub Data Source">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"></RowDefinition>
                                     <RowDefinition></RowDefinition>
                                 </Grid.RowDefinitions>
+                                <!-- Hub Connect section -->
                                 <Button Width="150" Height="40" HorizontalAlignment="Center" Content="{Binding HubDataSourceViewModel.ConnectButtonText}" Command="{Binding HubDataSourceViewModel.ConnectCommand}"/>
-                                <Grid Grid.Row="1" Background="AliceBlue">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <common:HubBrowserHeader Grid.Row="1" DataContext="{Binding HubDataSourceViewModel.HubBrowserHeader}" />
-                                    <objectBrowser:ObjectBrowser Grid.Row="2">
-                                        <objectBrowser:ObjectBrowser.DataContext>
-                                            <Binding Path="HubDataSourceViewModel.ObjectBrowser"></Binding>
-                                        </objectBrowser:ObjectBrowser.DataContext>
-                                    </objectBrowser:ObjectBrowser>
-                                </Grid>
+                                <!-- Hub Content section -->
+                                <!-- BorderThickness="0,0,0,1" -->
+                                <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderThickness="0" Padding="0">
+                                    <TabItem Header="Model">
+                                        <Grid Background="AliceBlue">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <!-- Hub Content Header -->
+                                            <common:HubBrowserHeader Grid.Row="0" DataContext="{Binding HubDataSourceViewModel.HubBrowserHeader}" />
+                                            <!-- Hub Content Object Tree -->
+                                            <objectBrowser:ObjectBrowser Grid.Row="1">
+                                                <objectBrowser:ObjectBrowser.DataContext>
+                                                    <Binding Path="HubDataSourceViewModel.ObjectBrowser"></Binding>
+                                                </objectBrowser:ObjectBrowser.DataContext>
+                                            </objectBrowser:ObjectBrowser>
+                                        </Grid>
+                                    </TabItem>
+                                    <TabItem Header="File Store">
+                                        <!-- Files -->
+                                        <views:HubFileStoreBrowser DataContext="{Binding HubDataSourceViewModel.HubFileStoreBrowser}" />
+                                    </TabItem>
+                                </TabControl>
+                                
+                                
                             </Grid>
                         </dxdo:LayoutPanel>
+                        
                     </dxdo:LayoutGroup>
                     <dxdo:LayoutGroup ItemHeight="3*" Orientation="Horizontal">
                         <dxdo:LayoutPanel HorizontalAlignment="Stretch" AllowClose="False" Caption="Mapping"  dxdo:AutoHideGroup.AutoHideType="Left" AllowDrag="False" AllowFloat="False" AllowMove="False" >

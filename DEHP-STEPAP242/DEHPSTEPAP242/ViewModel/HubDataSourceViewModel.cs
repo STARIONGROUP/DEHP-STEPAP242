@@ -25,6 +25,7 @@
 namespace DEHPSTEPAP242.ViewModel
 {
     using System;
+    using System.Linq;
     using System.Reactive;
     using System.Threading.Tasks;
 
@@ -63,7 +64,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IHubBrowserHeaderViewModel"/>
         /// </summary>
         public IHubBrowserHeaderViewModel HubBrowserHeader { get; set; }
-        
+
+        /// <summary>
+        /// The <see cref="IHubFileStoreBrowserViewModel"/>
+        /// </summary>
+        public IHubFileStoreBrowserViewModel HubFileStoreBrowser { get; private set; }
+
         /// <summary>
         /// Initializes a new <see cref="HubDataSourceViewModel"/>
         /// </summary>
@@ -73,12 +79,13 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="treeSelectorService">The <see cref="IObjectBrowserTreeSelectorService"/></param>
         /// <param name="hubBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         public HubDataSourceViewModel(INavigationService navigationService, IHubController hubController, IObjectBrowserViewModel objectBrowser, 
-            IObjectBrowserTreeSelectorService treeSelectorService, IHubBrowserHeaderViewModel hubBrowserHeader) : base(navigationService)
+            IObjectBrowserTreeSelectorService treeSelectorService, IHubBrowserHeaderViewModel hubBrowserHeader, IHubFileStoreBrowserViewModel hubFileBrowser) : base(navigationService)
         {
             this.hubController = hubController;
             this.treeSelectorService = treeSelectorService;
             this.ObjectBrowser = objectBrowser;
             this.HubBrowserHeader = hubBrowserHeader;
+            this.HubFileStoreBrowser = hubFileBrowser;
             this.InitializeCommands();
         }
 

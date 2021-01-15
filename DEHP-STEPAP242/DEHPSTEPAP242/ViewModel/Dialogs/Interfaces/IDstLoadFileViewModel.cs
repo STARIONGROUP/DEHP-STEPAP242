@@ -34,7 +34,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
     public interface IDstLoadFileViewModel
     {
         /// <summary>
-        /// Current path to a STEP file.
+        /// Current path to a STEP file
         /// </summary>
         string FilePath { get; set; }
 
