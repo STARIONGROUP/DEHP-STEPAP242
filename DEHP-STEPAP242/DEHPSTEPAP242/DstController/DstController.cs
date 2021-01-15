@@ -29,6 +29,8 @@ namespace DEHPSTEPAP242.DstController
     
     using ReactiveUI;
 
+    using NLog;
+
     using STEP3DAdapter;
 
     /// <summary>
@@ -36,6 +38,11 @@ namespace DEHPSTEPAP242.DstController
     /// </summary>
     public class DstController : ReactiveObject, IDstController
     {
+        /// <summary>
+        /// The current class <see cref="NLog.Logger"/>
+        /// </summary>
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         #region IDstController interface
 
         /// <summary>
@@ -85,8 +92,7 @@ namespace DEHPSTEPAP242.DstController
 
             if (step.HasFailed)
             {
-                // Do not update?
-                Debug.WriteLine($"Error message: { step.ErrorMessage }");
+                logger.Error($"Error loading STEP file: { step.ErrorMessage }");
             }
             //else
             //{
