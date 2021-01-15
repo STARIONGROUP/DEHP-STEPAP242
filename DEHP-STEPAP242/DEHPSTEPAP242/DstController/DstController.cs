@@ -32,6 +32,7 @@ namespace DEHPSTEPAP242.DstController
     using NLog;
 
     using STEP3DAdapter;
+    using System;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data from and to EcosimPro
@@ -92,13 +93,15 @@ namespace DEHPSTEPAP242.DstController
 
             if (step.HasFailed)
             {
-                logger.Error($"Error loading STEP file: { step.ErrorMessage }");
-            }
-            //else
-            //{
-            //    Step3DFile = step;
-            //}
+                IsLoading = false;
 
+                // In case of error the current Step3DFile is not updated (keep previous)
+                logger.Error($"Error loading STEP file: { step.ErrorMessage }");
+
+                throw new InvalidOperationException($"Error loading STEP file: { step.ErrorMessage }");
+            }
+
+            // Update the new instance only when a load success
             Step3DFile = step;
 
             IsLoading = false;

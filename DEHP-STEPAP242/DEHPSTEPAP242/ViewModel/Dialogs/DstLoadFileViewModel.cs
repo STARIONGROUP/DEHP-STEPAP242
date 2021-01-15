@@ -86,33 +86,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         public ReactiveCommand<object> LoadFileCommand { get; private set; }
 
         /// <summary>
-        /// Executes the <see cref="LoadFileCommand"/>
-        /// </summary>
-        protected void LoadFileCommandExecute()
-        {
-            IsLoadingFile = true;
-            statusBarControlView.Append("Loading file...");
-
-            dstController.Load(FilePath);
-
-            IsLoadingFile = false;
-
-            if (dstController.IsFileOpen)
-            {
-                statusBarControlView.Append("Load successful");
-
-                AddToRecentFiles(FilePath);
-                SaveRecentFiles();
-
-                CloseWindowBehavior?.Close();
-            }
-            else
-            {
-                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
-            }
-        }
-
-        /// <summary>
         /// Executes the <see cref="LoadFileCommand"/> asynchronously
         /// </summary>
         protected async void LoadFileCommandExecuteAsync()
@@ -120,22 +93,29 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             IsLoadingFile = true;
             statusBarControlView.Append("Loading file...");
 
-            await dstController.LoadAsync(FilePath);
-
-            IsLoadingFile = false;
-
-            if (dstController.IsFileOpen)
+            try
             {
-                statusBarControlView.Append("Load successful");
+                await dstController.LoadAsync(FilePath);
 
-                AddToRecentFiles(FilePath);
-                SaveRecentFiles();
+                IsLoadingFile = false;
 
-                CloseWindowBehavior?.Close();
+                if (dstController.IsFileOpen)
+                {
+                    statusBarControlView.Append("Load successful");
+
+                    AddToRecentFiles(FilePath);
+                    SaveRecentFiles();
+
+                    CloseWindowBehavior?.Close();
+                }
             }
-            else
+            catch (InvalidOperationException e)
             {
-                statusBarControlView.Append($"Load failed: {dstController.Step3DFile.ErrorMessage}", StatusBarMessageSeverity.Error);
+                statusBarControlView.Append(e.Message, StatusBarMessageSeverity.Error);
+            }
+            finally
+            {
+                IsLoadingFile = false;
             }
         }
 
