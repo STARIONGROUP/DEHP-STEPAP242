@@ -3,7 +3,7 @@
 	using CDP4Common.EngineeringModelData;
 
 	/// <summary>
-	/// Service to store and cache files downloaded from the Hub.
+	/// Service to store and cache files downloaded from the <see cref="DomainFileStore"/>.
 	/// </summary>
 	public interface IFileStoreService
 	{
