@@ -24,8 +24,10 @@
 
 namespace DEHPSTEPAP242.DstController
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
-
+    using DEHPCommon.Enumerators;
+    using DEHPSTEPAP242.ViewModel;
     using STEP3DAdapter;
 
     /// <summary>
@@ -41,12 +43,12 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets or sets the status flag for the load action.
         /// </summary>
-        public bool IsLoading { get; }
+        bool IsLoading { get; }
 
         /// <summary>
         /// Gets the <see cref="STEP3DFile"/> instance.
         /// </summary>
-        public STEP3DFile Step3DFile { get; }
+        STEP3DFile Step3DFile { get; }
 
         /// <summary>
         /// Loads a STEP-AP242 file.
@@ -59,5 +61,17 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="filename">Full path to file</param>
         Task LoadAsync(string filename);
+
+        /// <summary>
+        /// Gets or sets the <see cref="MappingDirection"/>
+        /// </summary>
+        MappingDirection MappingDirection { get; set; }
+
+        /// <summary>
+        /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
+        /// </summary>
+        /// <param name="dst3DPart">The <see cref="Step3DPartTreeNode"/> data</param>
+        /// <returns>A awaitable assert whether the mapping was successful</returns>
+        bool Map(Step3DPartTreeNode dst3DPart);
     }
 }

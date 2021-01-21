@@ -24,25 +24,46 @@
 
 namespace DEHPSTEPAP242.DstController
 {
+    using System;
     using System.Diagnostics;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     
     using ReactiveUI;
 
     using NLog;
 
+    using CDP4Common.EngineeringModelData;
+    using DEHPCommon.Enumerators;
+    using DEHPCommon.HubController.Interfaces;
+    using DEHPCommon.MappingEngine;
+
+    using DEHPSTEPAP242.ViewModel;
     using STEP3DAdapter;
-    using System;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data from and to EcosimPro
     /// </summary>
     public class DstController : ReactiveObject, IDstController
     {
+        #region Private Members
+
+        /// <summary>
+        /// The <see cref="IMappingEngine"/>
+        /// </summary>
+        private readonly IMappingEngine mappingEngine;
+
+        /// <summary>
+        /// The <see cref="IHubController"/>
+        /// </summary>
+        private readonly IHubController hubController;
+
         /// <summary>
         /// The current class <see cref="NLog.Logger"/>
         /// </summary>
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        #endregion
 
         #region IDstController interface
 
@@ -83,6 +104,20 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
+        /// Backing field for the <see cref="MappingDirection"/>
+        /// </summary>
+        private MappingDirection mappingDirection;
+
+        /// <summary>
+        /// Gets or sets the <see cref="MappingDirection"/>
+        /// </summary>
+        public MappingDirection MappingDirection
+        {
+            get => this.mappingDirection;
+            set => this.RaiseAndSetIfChanged(ref this.mappingDirection, value);
+        }
+
+        /// <summary>
         /// Loads a STEP-AP242 file.
         /// <param name="filename">Full path to a STEP-AP242 file</param>
         public void Load(string filename)
@@ -116,6 +151,58 @@ namespace DEHPSTEPAP242.DstController
             await Task.Run( () => Load(filename) );
         }
 
+        /// <summary>
+        /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
+        /// </summary>
+        /// <param name="dst3DPart">The <see cref="Step3DPartTreeNode"/> data</param>
+        /// <returns>A awaitable assert whether the mapping was successful</returns>
+        public bool Map(Step3DPartTreeNode dst3DPart)
+        {
+            var (elements, maps) = ((IEnumerable<ElementDefinition>, IEnumerable<ExternalIdentifierMap>))
+                this.mappingEngine.Map(dst3DPart);
+
+            this.ElementDefinitionParametersDstVariablesMaps = elements;
+            this.ExternalIdentifierMaps = maps;
+            return true;
+        }
+
         #endregion
+
+        /// <summary>
+        /// Gets the collection of <see cref="ExternalIdentifierMap"/>s
+        /// </summary>
+        public IEnumerable<ExternalIdentifierMap> ExternalIdentifierMaps { get; private set; } = new List<ExternalIdentifierMap>();
+
+        /// <summary>
+        /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
+        /// </summary>
+        public IEnumerable<ElementDefinition> ElementDefinitionParametersDstVariablesMaps { get; private set; } = new List<ElementDefinition>();
+
+        #region Constructor
+
+        /// <summary>
+        /// Initializes a new <see cref="DstController"/>
+        /// </summary>
+        /// <param name="hubController">The <see cref="IHubController"/></param>
+        /// <param name="mappingEngine">The <<see cref="IMappingEngine"/></param>
+        public DstController(IHubController hubController, IMappingEngine mappingEngine)
+        {
+            this.hubController = hubController;
+            this.mappingEngine = mappingEngine;
+        }
+
+        #endregion
+
+        // /// <summary>
+        // /// Transfers the mapped variables to the Hub data source
+        // /// </summary>
+        // /// <returns>A <see cref="Task"/></returns>
+        // public async Task Transfer()
+        // {
+        //     await this.hubController.CreateOrUpdate(this.ElementDefinitionParametersDstVariablesMaps, true);
+        //     await this.hubController.CreateOrUpdate(this.ExternalIdentifierMaps, false);
+        // }
+
+
     }
 }

@@ -45,6 +45,8 @@ namespace DEHPSTEPAP242
 
     using DXSplashScreenViewModel = DevExpress.Mvvm.DXSplashScreenViewModel;
     using SplashScreen = DEHPCommon.UserInterfaces.Views.SplashScreen;
+    using DEHPCommon.MappingEngine;
+    using System.Reflection;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -88,6 +90,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstController.DstController>().As<IDstController>().SingleInstance();
             containerBuilder.RegisterType<FileStoreService>().As<IFileStoreService>().SingleInstance();
             containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
+            containerBuilder.RegisterType<MappingEngine>().As<IMappingEngine>().WithParameter(MappingEngine.ParameterName, Assembly.GetExecutingAssembly());
         }
 
         /// <summary>
@@ -105,6 +108,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstObjectBrowserViewModel>().As<IDstObjectBrowserViewModel>();
             containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();
             containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
+            //containerBuilder.RegisterType<MappingConfigurationDialogViewModel>().As<IMappingConfigurationDialogViewModel>();
         }
     }
 }

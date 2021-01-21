@@ -3,9 +3,18 @@ namespace DEHPSTEPAP242.ViewModel
 {
 	using System;
 	using System.Collections.Generic;
+
 	using ReactiveUI;
 
+	using CDP4Common.CommonData;
+	using DEHPCommon.Enumerators;
+	using DEHPCommon.HubController.Interfaces;
+	using DEHPCommon.Services.NavigationService;
+	using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+	using DEHPCommon.UserInterfaces.ViewModels;
+
 	using DEHPSTEPAP242.DstController;
+	using DEHPSTEPAP242.Views.Dialogs;
 	using DEHPSTEPAP242.ViewModel.Interfaces;
 
 	using STEP3DAdapter;
@@ -23,11 +32,28 @@ namespace DEHPSTEPAP242.ViewModel
 	/// 
 	/// <seealso cref="Step3DPartTreeNode"/>
 	/// </summary>
-	public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel
+	public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel, IHaveContextMenuViewModel
 	{
-		#region Private Members
+		#region Private Interface References
 
-		private IDstController dstController;
+		/// <summary>
+		/// The <see cref="IHubController"/>
+		/// </summary>
+		private readonly IHubController hubController;
+
+		/// <summary>
+		/// The <see cref="IDstController"/>
+		/// </summary>
+		private readonly IDstController dstController;
+
+		/// <summary>
+		/// The <see cref="INavigationService"/>
+		/// </summary>
+		private readonly INavigationService navigationService;
+
+		#endregion Private Interface References
+
+		#region Private Members
 
 		/// <summary>
 		/// List of geometric parts.
@@ -109,6 +135,20 @@ namespace DEHPSTEPAP242.ViewModel
 		}
 
 		/// <summary>
+		/// Backing field for <see cref="SelectedPart"/>
+		/// </summary>
+		private Step3DPartTreeNode selectedPart;
+
+		/// <summary>
+		/// Gets or sets the selected row that represents a <see cref="ReferenceDescription"/>
+		/// </summary>
+		public Step3DPartTreeNode SelectedPart
+		{
+			get => this.selectedPart;
+			set => this.RaiseAndSetIfChanged(ref this.selectedPart, value);
+		}
+
+		/// <summary>
 		/// Create the HLR tree from the Parts/Relations.
 		/// 
 		/// The HLR is a Self-Referential Data Source. In this approach
@@ -165,30 +205,121 @@ namespace DEHPSTEPAP242.ViewModel
 				if (IsIsolatedPart(p))
 				{
 					// Add to the maint Root
-					var node = new Step3DPartTreeNode(p) { ID = nextID++ };
+					var node = new Step3DPartTreeNode(p, null) { ID = nextID++ };
 					entries.Add(node);
 
 					AddSubTree(entries, node, ref nextID);
 				}
 			}
 
+			SelectedPart = null;
 			Step3DHLR = entries;
+
 			IsBusy = false;
+		}
+
+		#endregion
+
+		#region IHaveContextMenuViewModel interface
+
+		/// <summary>
+		/// Gets the Context Menu for this browser
+		/// </summary>
+		public ReactiveList<ContextMenuItemViewModel> ContextMenu { get; } = new ReactiveList<ContextMenuItemViewModel>();
+
+		/// <summary>
+		/// Gets the command that allows to map the selected things
+		/// </summary>
+		public ReactiveCommand<object> MapCommand { get; set; }
+
+		/// <summary>
+		/// Populate the context menu for this browser
+		/// </summary>
+		public void PopulateContextMenu()
+		{
+			ContextMenu.Clear();
+
+			if (SelectedPart is null)
+			{
+			    return;
+			}
+
+			ContextMenu.Add(new ContextMenuItemViewModel(
+					"Map selection", "",
+					MapCommand,
+					MenuItemKind.Export,
+					ClassKind.NotThing)
+				);
 		}
 
 		#endregion
 
 		#region Constructor
 
-		public DstObjectBrowserViewModel(IDstController dstController)
+		/// <summary>
+		/// Initializes a new <see cref="DstObjectBrowserViewModel"/>
+		/// </summary>
+		/// <param name="dstController">The <see cref="IDstController"/></param>
+		/// <param name="navigationService">The <see cref="INavigationService"/></param>
+		/// <param name="hubController">The <see cref="IHubController"/></param>
+		public DstObjectBrowserViewModel(IDstController dstController, INavigationService navigationService, IHubController hubController)
 		{
 			this.dstController = dstController;
-			this.WhenAnyValue(x => x.dstController.IsLoading).Subscribe(_ => this.UpdateHLR());
+			this.navigationService = navigationService;
+			this.hubController = hubController;
+
+			this.WhenAnyValue(vm => vm.dstController.IsLoading).Subscribe(_ => this.UpdateHLR());
+
+			this.WhenAnyValue(vm => vm.SelectedPart)
+				.Subscribe(_ => this.PopulateContextMenu());
+
+			InitializeCommands();
 		}
 
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Initializes the <see cref="ICommand"/> of this view model
+		/// </summary>
+		private void InitializeCommands()
+		{
+			//var canMap = this.WhenAny(
+			//	vm => vm.hubController.OpenIteration,
+			//	vm => vm.dstController.MappingDirection,
+			//    (iteration, mappingDirection) =>
+			//	iteration.Value != null && mappingDirection.Value is MappingDirection.FromDstToHub);
+			//
+			//MapCommand = ReactiveCommand.Create(canMap);
+			MapCommand = ReactiveCommand.Create();
+			MapCommand.Subscribe(_ => this.MapCommandExecute());
+
+			/*
+			var canMap = this.WhenAny(
+				//vm => vm.SelectedThing,
+				//vm => vm.SelectedThings.CountChanged,
+				vm => vm.hubController.OpenIteration,
+				vm => vm.dstController.MappingDirection,
+				//(selected, selection, iteration, mappingDirection) =>
+				//	iteration.Value != null && (selected.Value != null || this.SelectedThings.Any()) && mappingDirection.Value is MappingDirection.FromDstToHub);
+
+			this.MapCommand = ReactiveCommand.Create(canMap);
+			this.MapCommand.Subscribe(_ => this.MapCommandExecute());
+			*/
+		}
+
+		/// <summary>
+		/// Executes the <see cref="MapCommand"/>
+		/// </summary>
+		private void MapCommandExecute()
+		{
+			navigationService.ShowDialog<DstLoadFile>();
+
+			//var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
+			//viewModel.Variables.AddRange(this.SelectedThings);
+			//this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
+		}
 
 		/// <summary>
 		/// Fill the auxiliary HasSet/Dictionary to speedup the tree construction.
@@ -283,7 +414,12 @@ namespace DEHPSTEPAP242.ViewModel
 				var child = cr.Item1;
 				var relation = cr.Item2;
 
-				var node = new Step3DPartTreeNode(child) { ID = nextID++, ParentID = parent.ID, RelationLabel = relation.id };
+				var node = new Step3DPartTreeNode(child, relation) 
+				{ 
+					ID = nextID++, 
+					ParentID = parent.ID 
+				};
+
 				entries.Add(node);
 
 				AddSubTree(entries, node, ref nextID);
