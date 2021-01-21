@@ -9,15 +9,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
         Title="Load file"
-        mc:Ignorable="d" Height="400" Width="700" d:DesignHeight="400" d:DesignWidth="300" MinWidth="400" MinHeight="300"
-        Closing="Window_Closing">
+        mc:Ignorable="d" Height="400" Width="700" d:DesignHeight="400" d:DesignWidth="300" MinWidth="400" MinHeight="300">
     <dxmvvm:Interaction.Behaviors>
         <behaviors:CloseWindowBehavior/>
     </dxmvvm:Interaction.Behaviors>
-
-    <Window.InputBindings>
-        <KeyBinding Modifiers="Alt" Key="F4" Command="{Binding Path=ToDelegateCommandThatExecuteNothing}" />
-    </Window.InputBindings>
     
     <Border Margin="10">
 

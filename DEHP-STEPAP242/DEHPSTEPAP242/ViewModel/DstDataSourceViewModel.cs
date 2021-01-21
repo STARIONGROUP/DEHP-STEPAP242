@@ -87,14 +87,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         protected override void LoadFileCommandExecute()
         {
-            // Indicate the IsBusy == true state
-
-            this.DstObjectBrowser.IsBusy = true;
-
             this.NavigationService.ShowDialog<DstLoadFile>();
-
-            // Indicate the IsBusy == false state
-            this.DstObjectBrowser.IsBusy = false;
         }
 
         #endregion

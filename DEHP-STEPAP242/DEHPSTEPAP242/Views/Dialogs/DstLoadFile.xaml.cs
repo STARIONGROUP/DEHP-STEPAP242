@@ -26,8 +26,6 @@ namespace DEHPSTEPAP242.Views.Dialogs
 {
     using System.Windows;
 
-    using DEHPSTEPAP242.ViewModel.Dialogs;
-
     /// <summary>
     /// Interaction logic for DstLoadFile.xaml
     /// </summary>
@@ -39,25 +37,6 @@ namespace DEHPSTEPAP242.Views.Dialogs
         public DstLoadFile()
         {
             InitializeComponent();
-        }
-
-        /// <summary>
-        /// Close evente validation.
-        /// 
-        /// It is not possible to close the window during the Load operation.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // Check that there is not a Loading task in progress
-            var vm = (DstLoadFileViewModel) DataContext;
-
-            if (vm.IsLoadingFile)
-            {
-                MessageBox.Show("Loading file in progress, plase wait.", "Loading File");
-                e.Cancel = true;
-            }
         }
     }
 }
