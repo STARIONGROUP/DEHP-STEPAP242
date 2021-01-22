@@ -180,6 +180,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         public void CheckHubDependencies()
         {
+            if (hubController.OpenIteration is null) return;
+
             CheckFileTypes();
             CheckParameterTypes();
         }
