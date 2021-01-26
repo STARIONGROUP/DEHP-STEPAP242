@@ -6,6 +6,7 @@ namespace DEHPSTEPAP242.ViewModel
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Reactive.Linq;
+    using System.Threading.Tasks;
     
     using ReactiveUI;
 
@@ -16,7 +17,7 @@ namespace DEHPSTEPAP242.ViewModel
 
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Services.FileStoreService;
-    using System.Threading.Tasks;
+    using DEHPSTEPAP242.Services.DstHubService;
 
     /// <summary>
     /// Wrapper class to display <see cref="FileRevision"/>
@@ -32,8 +33,6 @@ namespace DEHPSTEPAP242.ViewModel
         public string CreatorFullName { get; private set; }
 
         internal FileRevision FileRev;
-        
-        private static readonly string APPLICATION_STEP = "application/step";
 
         /// <summary>
         /// Constructor
@@ -47,40 +46,6 @@ namespace DEHPSTEPAP242.ViewModel
             RevisionNumber = FileRev.RevisionNumber;
             ModifiedOn = FileRev.ModifiedOn;
             CreatorFullName = $"{FileRev.Creator.Person.GivenName} {FileRev.Creator.Person.Surname.ToUpper()}";
-        }
-
-        /// <summary>
-        /// Checks if it is a STEP file type
-        /// </summary>
-        /// <param name="fileRevision"></param>
-        /// <returns>True if is a STEP file</returns>
-        static public bool IsSTEPFileType(FileRevision fileRevision)
-        {
-            var fileType = FirstSTEPFileType(fileRevision);
-
-            if (fileType != null) return true;
-            else return false;
-        }
-
-        /// <summary>
-        /// First compatible STEP <see cref="FileType"/> of a <see cref="FileRevision"/>
-        /// </summary>
-        /// <param name="fileRevision">The <see cref="FileRevision"/></param>
-        /// <returns>First compatible FileType or null if not</returns>
-        static public FileType FirstSTEPFileType(FileRevision fileRevision)
-        {
-            var fileTypeList = fileRevision.FileType;
-
-            //Debug.WriteLine($"  fileType Extension Count: {fileTypeList.Count}");
-
-            var fileType = fileTypeList.FirstOrDefault(t => (t.Name == APPLICATION_STEP));
-
-            //if (fileType != null)
-            //{
-            //	Debug.WriteLine($"  fileType Extension: {fileType.Name} {fileType.ShortName} {fileType.Extension}");
-            //}
-
-            return fileType;
         }
     }
 
@@ -105,6 +70,8 @@ namespace DEHPSTEPAP242.ViewModel
         private readonly IStatusBarControlViewModel statusBarControlView;
 
         private readonly IFileStoreService fileStoreService;
+        
+        private readonly IDstHubService dstHubService;
 
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
@@ -171,14 +138,14 @@ namespace DEHPSTEPAP242.ViewModel
 
         #region Constructor
 
-        public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView, IFileStoreService fileStoreService)
+        public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView, IFileStoreService fileStoreService, IDstHubService dstHubService)
         {
             this.hubController = hubController;
             this.statusBarControlView = statusBarControlView;
             this.fileStoreService = fileStoreService;
+            this.dstHubService = dstHubService;
 
             HubFiles = new ReactiveList<HubFile>();
-            //CurrentFile = new HubFile();
 
             this.WhenAnyValue(x => x.hubController.OpenIteration).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
@@ -240,32 +207,15 @@ namespace DEHPSTEPAP242.ViewModel
         private void UpdateFileList()
         {
             Debug.WriteLine("UpdateFileList:");
-            Debug.WriteLine("---------------");
-            Debug.WriteLine($"Domain of Expertise: { hubController.CurrentDomainOfExpertise.Name }");
 
-            var dfStore = hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == hubController.CurrentDomainOfExpertise);
-
-            Debug.WriteLine($"Domain File Store: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
-
-            //foreach (var rev in dfStore.Revisions)
-            //{
-            //	var value = rev.Value;
-            //	Debug.WriteLine($"  Revision id={rev.Key}, Number={value.RevisionNumber}");
-            //}
-
+            var revisions = dstHubService.GetFileRevisions();
+            
             List<HubFile> hubfiles = new List<HubFile>();
 
-            Debug.WriteLine($"  Files Count: {dfStore.File.Count}");
-
-            foreach (var f in dfStore.File)
+            foreach (var rev in revisions)
             {
-                var cfrev = f.CurrentFileRevision;
-
-                if (HubFile.IsSTEPFileType(cfrev))
-                {
-                    var item = new HubFile(cfrev);
-                    hubfiles.Add(item);
-                }
+                var item = new HubFile(rev);
+                hubfiles.Add(item);
             }
 
             CurrentHubFile = null;

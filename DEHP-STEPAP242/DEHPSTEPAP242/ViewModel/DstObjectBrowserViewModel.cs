@@ -14,12 +14,11 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.UserInterfaces.ViewModels;
 
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.Views.Dialogs;
     using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.Services.DstHubService;
 
     using STEP3DAdapter;
-    using System.IO;
-    using CDP4Dal;
+    using System.Diagnostics;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -53,6 +52,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private readonly INavigationService navigationService;
 
+        /// <summary>
+        /// The <see cref="IDstHubService"/>
+        /// </summary>
+        private readonly IDstHubService dstHubService;
+        
         #endregion Private Interface References
 
         #region Private Members
@@ -247,8 +251,8 @@ namespace DEHPSTEPAP242.ViewModel
             }
 
             ContextMenu.Add(new ContextMenuItemViewModel(
-                    //"Map selection", "",
-                    $"Map {SelectedPart.Description}", "",
+                    "Map selection", "",
+                    //$"Map {SelectedPart.Description}", "",
                     MapCommand,
                     MenuItemKind.Export,
                     ClassKind.NotThing)
@@ -265,11 +269,13 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
-        public DstObjectBrowserViewModel(IDstController dstController, INavigationService navigationService, IHubController hubController)
+        /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
+        public DstObjectBrowserViewModel(IDstController dstController, INavigationService navigationService, IHubController hubController, IDstHubService dstHubService)
         {
             this.dstController = dstController;
             this.navigationService = navigationService;
             this.hubController = hubController;
+            this.dstHubService = dstHubService;
 
             this.WhenAnyValue(vm => vm.dstController.IsLoading)
                 .Subscribe(_ => this.UpdateHLR());
@@ -290,11 +296,16 @@ namespace DEHPSTEPAP242.ViewModel
                 vm => vm.SelectedPart,
                 vm => vm.hubController.OpenIteration,
                 vm => vm.dstController.MappingDirection,
-                (part, iteration, mappingDirection) =>
-                    part.Value !=null && iteration.Value != null && 
-                    mappingDirection.Value is MappingDirection.FromDstToHub
-            );
-            
+                vm => vm.isBusy,
+                (part, iteration, mappingDirection, busy) =>
+                    part.Value != null && iteration.Value != null && 
+                    mappingDirection.Value is MappingDirection.FromDstToHub &&
+                    !busy.Value
+                );
+
+            //TODO: debug line, for some reason MapCommand is not activated after a second load
+            canMap.Subscribe(x => Debug.WriteLine($"canMap event {x}"));
+
             MapCommand = ReactiveCommand.Create(canMap);
             MapCommand.Subscribe(_ => this.MapCommandExecute());
         }
@@ -304,49 +315,20 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void MapCommandExecute()
         {
+            // Testing code to upload a file
+            // =============================
             // Note: A File instance only holds the identification of a File, 
             // its owner and an optional lockedBy property. 
             // All other properties are held inside a FileRevision.
 
-
-            // Demo code to test upload file to hub
-            // All this code should be incorporated as a new HubController.Upload() method
-            //
-            // 1. read content file
-            // 2. push into the DomainFileStore
-
             string filePath = dstController.Step3DFile.FileName;
 
-            //FileStream fileStream = System.IO.File.OpenRead(filePath);
+            var file = this.dstHubService.FindFile(filePath);
 
-            //hubController.Upload();
-            //
-            //var fileRevision = new CDP4Common.EngineeringModelData.FileRevision(Guid.NewGuid(), null, null)
-            //{
-            //    CreatedOn = DateTime.UtcNow,
-            //    Name = Path.GetFileName(filePath),
-            //    ContentHash = StreamToHashComputer.CalculateSha1HashFromStream(fileStream),
-            //    LocalPath = filePath
-            //};
-            //
-            //string[] extensions = { "step", "stp" };
-            //
-            //fileRevision.FileType.AddRange(hubController.ComputeFileTypes(extensions, hubController.GetAllowedFileType(iteration), ref fileName));
-            //
-            //var file = new CDP4Common.EngineeringModelData.File(Guid.NewGuid(), null, null)
-            //{
-            //
-            //};
-            //
+            hubController.Upload(filePath, file);
 
 
-            //fileStore.File.Add(file);
 
-
-            hubController.Upload(filePath);
-
-
-            //navigationService.ShowDialog<DstLoadFile>();
 
             //var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
             //viewModel.Variables.AddRange(this.SelectedThings);

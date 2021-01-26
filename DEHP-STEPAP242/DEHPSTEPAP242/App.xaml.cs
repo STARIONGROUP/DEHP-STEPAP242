@@ -35,6 +35,7 @@ namespace DEHPSTEPAP242
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.Services.FileStoreService;
+    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel;
     using DEHPSTEPAP242.ViewModel.Dialogs;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
@@ -89,6 +90,7 @@ namespace DEHPSTEPAP242
         {
             containerBuilder.RegisterType<DstController.DstController>().As<IDstController>().SingleInstance();
             containerBuilder.RegisterType<FileStoreService>().As<IFileStoreService>().SingleInstance();
+            containerBuilder.RegisterType<DstHubService>().As<IDstHubService>().SingleInstance();
             containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
             containerBuilder.RegisterType<MappingEngine>().As<IMappingEngine>().WithParameter(MappingEngine.ParameterName, Assembly.GetExecutingAssembly());
         }
