@@ -324,10 +324,10 @@ namespace DEHPSTEPAP242.ViewModel
             IsBusy = true;
             statusBarControlView.Append("Downloading file from Hub...");
 
-            var session = hubController.Session;
-            var fileContent = await session.ReadFile(fileRevision);
-
-            fileStoreService.Add(fileRevision, fileContent);
+            using (var fstream = fileStoreService.AddFileStream(fileRevision))
+            {
+                await hubController.Download(fileRevision, fstream);
+            }
 
             statusBarControlView.Append("Download successful");
 
