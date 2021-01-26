@@ -19,11 +19,10 @@ namespace DEHPSTEPAP242.Services.DstHubService
 
     class DstHubService : IDstHubService
     {
-        private const string RDL_NAME = "Generic ECSS-E-TM-10-25 Reference Data Library";
-        private const string RDL_SHORT_NAME = "Generic_RDL";
-        private const string APPLICATION_TYPE_NAME = "application/step";
+        private static readonly string RDL_NAME = "Generic ECSS-E-TM-10-25 Reference Data Library";
+        private static readonly string RDL_SHORT_NAME = "Generic_RDL";
 
-        private static readonly string APPLICATION_STEP = "application/step";
+        private static readonly string APPLICATION_STEP_NAME = "application/step";
         private static readonly string[] APPLICATION_STEP_EXTENSIONS = { "step", "stp" };
 
         /// <summary>
@@ -91,7 +90,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
 
             //logger.Debug($"FileType Extension Count: {fileTypeList.Count}");
 
-            var fileType = fileTypeList.FirstOrDefault(t => (t.Name == APPLICATION_STEP));
+            var fileType = fileTypeList.FirstOrDefault(t => (t.Name == APPLICATION_STEP_NAME));
 
             //if (fileType != null)
             //{
@@ -204,13 +203,13 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 {
                     var fileType = new FileType(Guid.NewGuid(), null, null)
                     {
-                        Name = APPLICATION_TYPE_NAME,
-                        ShortName = APPLICATION_TYPE_NAME,
+                        Name = APPLICATION_STEP_NAME,
+                        ShortName = APPLICATION_STEP_NAME,
                         Extension = extension,
                         Container = rdl
                     };
 
-                    logger.Debug($"Adding missing STEP FileType {APPLICATION_TYPE_NAME} for .{extension}");
+                    logger.Debug($"Adding missing STEP FileType {APPLICATION_STEP_NAME} for .{extension}");
 
                     thingsToWrite.Add(fileType);
                 }
