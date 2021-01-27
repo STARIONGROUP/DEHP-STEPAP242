@@ -19,6 +19,7 @@ namespace DEHPSTEPAP242.ViewModel
 
     using STEP3DAdapter;
     using System.Diagnostics;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -251,8 +252,8 @@ namespace DEHPSTEPAP242.ViewModel
             }
 
             ContextMenu.Add(new ContextMenuItemViewModel(
-                    "Map selection", "",
-                    //$"Map {SelectedPart.Description}", "",
+                    //"Map selection", "",
+                    $"Map {SelectedPart.Description}", "",
                     MapCommand,
                     MenuItemKind.Export,
                     ClassKind.NotThing)
@@ -313,7 +314,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Executes the <see cref="MapCommand"/>
         /// </summary>
-        private void MapCommandExecute()
+        private async void MapCommandExecute()
         {
             // Testing code to upload a file
             // =============================
@@ -325,10 +326,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             var file = this.dstHubService.FindFile(filePath);
 
-            hubController.Upload(filePath, file);
-
-
-
+            await hubController.Upload(filePath, file);
 
             //var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
             //viewModel.Variables.AddRange(this.SelectedThings);

@@ -262,7 +262,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// File is downloaded from the Hub and stored locally.
         /// <seealso cref="FileStoreService"/>.
         /// </summary>
-        protected void DownloadFileCommandExecute()
+        protected async Task DownloadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
@@ -276,7 +276,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             using (var fstream = fileStoreService.AddFileStream(fileRevision))
             {
-                hubController.Download(fileRevision, fstream);
+                await hubController.Download(fileRevision, fstream);
             }
 
             statusBarControlView.Append("Download successful");
@@ -290,7 +290,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// File is loaded from the local storage <see cref="FileStoreService"/>.
         /// If file does not exists, it is first downloaded.
         /// </summary>
-        protected void LoadFileCommandExecute()
+        protected async Task LoadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
@@ -301,7 +301,7 @@ namespace DEHPSTEPAP242.ViewModel
             
             if (fileStoreService.Exists(fileRevision) == false)
             {
-                DownloadFileCommandExecute();
+                await DownloadFileCommandExecute();
             }
 
             IsBusy = true;
