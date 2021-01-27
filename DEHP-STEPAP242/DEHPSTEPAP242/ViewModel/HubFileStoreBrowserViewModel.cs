@@ -192,10 +192,10 @@ namespace DEHPSTEPAP242.ViewModel
                 (x) => IsValidCurrentHubFile(x));
             
             LoadFileCommand = ReactiveCommand.Create(fileSelected);
-            LoadFileCommand.Subscribe(_ => LoadFileCommandExecuteAsync());
+            LoadFileCommand.Subscribe(_ => LoadFileCommandExecute());
 
             DownloadFileCommand = ReactiveCommand.Create(fileSelected);
-            DownloadFileCommand.Subscribe(_ => DownloadFileCommandExecuteAsync());
+            DownloadFileCommand.Subscribe(_ => DownloadFileCommandExecute());
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// File is downloaded from the Hub and stored locally.
         /// <seealso cref="FileStoreService"/>.
         /// </summary>
-        protected async Task DownloadFileCommandExecuteAsync()
+        protected void DownloadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
@@ -276,7 +276,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             using (var fstream = fileStoreService.AddFileStream(fileRevision))
             {
-                await hubController.Download(fileRevision, fstream);
+                hubController.Download(fileRevision, fstream);
             }
 
             statusBarControlView.Append("Download successful");
@@ -290,7 +290,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// File is loaded from the local storage <see cref="FileStoreService"/>.
         /// If file does not exists, it is first downloaded.
         /// </summary>
-        protected async Task LoadFileCommandExecuteAsync()
+        protected void LoadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
@@ -301,7 +301,7 @@ namespace DEHPSTEPAP242.ViewModel
             
             if (fileStoreService.Exists(fileRevision) == false)
             {
-                await DownloadFileCommandExecuteAsync();
+                DownloadFileCommandExecute();
             }
 
             IsBusy = true;
