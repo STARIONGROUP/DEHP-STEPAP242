@@ -77,27 +77,27 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// </remarks>
         public List<Step3dRowViewModel> CreateHLR(STEP3DFile step3d)
         {
-            var entries = new List<Step3dRowViewModel>();
-
             if (step3d is null)
-            {
-                InitializeAuxiliaryData(step3d.Parts, step3d.Relations);
-            }
-            else
             {
                 InitializeAuxiliaryData(new STEP3D_Part[0], new STEP3D_PartRelation[0]);
             }
+            else
+            {
+                InitializeAuxiliaryData(step3d.Parts, step3d.Relations);
+            }
 
+            var entries = new List<Step3dRowViewModel>();
             int nextID = 1;
 
             foreach (var p in this.parts)
             {
                 if (IsIsolatedPart(p))
                 {
-                    // Add to the maint Root
+                    // Orphan parts are added to the maint Root
                     var node = new Step3dRowViewModel(p, null) { ID = nextID++ };
                     entries.Add(node);
 
+                    // Process part's childs
                     AddSubTree(entries, node, ref nextID);
                 }
             }
@@ -123,12 +123,12 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
 
             // Fill auxiliary helper structures
 
-            foreach (var p in parts)
+            foreach (var p in this.parts)
             {
                 idToPartMap.Add(p.stepId, p);
             }
 
-            foreach (var r in relations)
+            foreach (var r in this.relations)
             {
                 idToRelationMap.Add(r.stepId, r);
 
@@ -140,7 +140,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// <summary>
         /// Verify if a Part does not belong to any other Part
         /// </summary>
-        /// <param name="part"></param>
+        /// <param name="part">A <see cref="STEP3D_Part"/></param>
         /// <returns>True is not used as related part</returns>
         private bool IsIsolatedPart(STEP3D_Part part)
         {
@@ -174,10 +174,10 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         }
 
         /// <summary>
-        /// Finds the Part object from its StepId.
+        /// Finds the <see cref="STEP3D_Part"/> object from its StepId.
         /// </summary>
-        /// <param name="partId">Step Id of a Part</param>
-        /// <returns>A <see cref="STEP3D_Part"/></returns>
+        /// <param name="partId">Step File Id</param>
+        /// <returns>The <see cref="STEP3D_Part"/> with requested Id</returns>
         private STEP3D_Part FindPart(int partId)
         {
             return idToPartMap[partId];
@@ -186,9 +186,9 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// <summary>
         /// Adds children of a tree node.
         /// </summary>
-        /// <param name="entries">tree container to fill</param>
-        /// <param name="parent">parent node</param>
-        /// <param name="nextID">global tree ID for next creation operation</param>
+        /// <param name="entries">Tree container to fill</param>
+        /// <param name="parent">Parent row node</param>
+        /// <param name="nextID">Global tree ID for next creation operation</param>
         private void AddSubTree(ICollection<Step3dRowViewModel> entries, Step3dRowViewModel parent, ref int nextID)
         {
             var children = FindChildren(parent.StepId);
