@@ -5,6 +5,7 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     using System.Collections.Generic;
 
     using DEHPSTEPAP242.ViewModel.Rows;
+    using ReactiveUI;
 
     ///	<summary>
     /// Interface definition for <see cref="DstObjectBrowserViewModel"/> is the
