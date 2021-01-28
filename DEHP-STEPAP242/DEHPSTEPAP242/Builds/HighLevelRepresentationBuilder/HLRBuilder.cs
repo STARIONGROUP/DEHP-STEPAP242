@@ -31,18 +31,18 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
 
         /// <summary>
         /// Helper structure to speedup tree searches.
-        /// See FindPart().
+        /// <seealso cref="FindPart(int)"/>
         /// </summary>
         private readonly Dictionary<int, STEP3D_Part> idToPartMap = new Dictionary<int, STEP3D_Part>();
 
         /// <summary>
         /// Helper structure to speedup tree searches.
-        /// See FindRelation().
+        /// <seealso cref="InitializeAuxiliaryData"/>
         private readonly Dictionary<int, STEP3D_PartRelation> idToRelationMap = new Dictionary<int, STEP3D_PartRelation>();
 
         /// <summary>
         /// Helper structure to speedup tree searches.
-        /// See FindChildren().
+        /// <seealso cref="FindChildren(int)"/>
         /// </summary>
         private readonly Dictionary<int, List<(STEP3D_Part, STEP3D_PartRelation)>> partChildren = new Dictionary<int, List<(STEP3D_Part, STEP3D_PartRelation)>>();
 
@@ -55,7 +55,6 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// Keep track of Parts used as childs of an Assembly.
         /// </summary>
         private readonly HashSet<int> relatingParts = new HashSet<int>();
-
 
         /// <summary>
         /// Creates the High Level Representation (HLR) View Model for STEP AP242 file
@@ -80,7 +79,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         {
             var entries = new List<Step3dRowViewModel>();
 
-            if (step3d != null)
+            if (step3d is null)
             {
                 InitializeAuxiliaryData(step3d.Parts, step3d.Relations);
             }
