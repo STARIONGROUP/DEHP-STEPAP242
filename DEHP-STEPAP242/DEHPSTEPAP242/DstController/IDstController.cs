@@ -27,7 +27,8 @@ namespace DEHPSTEPAP242.DstController
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using DEHPCommon.Enumerators;
-    using DEHPSTEPAP242.ViewModel;
+    using DEHPSTEPAP242.ViewModel.Rows;
+
     using STEP3DAdapter;
 
     /// <summary>
@@ -70,8 +71,8 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
-        /// <param name="dst3DPart">The <see cref="Step3DPartTreeNode"/> data</param>
+        /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        bool Map(Step3DPartTreeNode dst3DPart);
+        bool Map(Step3dRowViewModel dst3DPart);
     }
 }

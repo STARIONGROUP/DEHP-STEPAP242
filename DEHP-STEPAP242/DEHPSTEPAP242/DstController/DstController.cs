@@ -40,6 +40,7 @@ namespace DEHPSTEPAP242.DstController
 
     using DEHPSTEPAP242.ViewModel;
     using STEP3DAdapter;
+    using DEHPSTEPAP242.ViewModel.Rows;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data from and to EcosimPro
@@ -154,9 +155,9 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
-        /// <param name="dst3DPart">The <see cref="Step3DPartTreeNode"/> data</param>
+        /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        public bool Map(Step3DPartTreeNode dst3DPart)
+        public bool Map(Step3dRowViewModel dst3DPart)
         {
             var (elements, maps) = ((IEnumerable<ElementDefinition>, IEnumerable<ExternalIdentifierMap>))
                 this.mappingEngine.Map(dst3DPart);

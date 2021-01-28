@@ -15,6 +15,7 @@ namespace DEHPSTEPAP242.ViewModel
 
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Services.DstHubService;
 
     using STEP3DAdapter;
@@ -32,7 +33,7 @@ namespace DEHPSTEPAP242.ViewModel
     /// - Key Field: This field should contain unique values used to identify nodes.
     /// - Parent Field: This field should contain values that indicate parent nodes.
     /// 
-    /// <seealso cref="Step3DPartTreeNode"/>
+    /// <seealso cref="Step3dRowViewModel"/>
     /// </summary>
     public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel, IHaveContextMenuViewModel
     {
@@ -130,12 +131,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Backing field for <see cref="Step3DHLR"/>
         /// </summary>
-        private List<Step3DPartTreeNode> step3DHLR = new List<Step3DPartTreeNode>();
+        private List<Step3dRowViewModel> step3DHLR = new List<Step3dRowViewModel>();
 
         /// <summary>
         /// Gets or sets the Step3D High Level Representation structure.
         /// </summary>
-        public List<Step3DPartTreeNode> Step3DHLR
+        public List<Step3dRowViewModel> Step3DHLR
         {
             get => this.step3DHLR;
             private set => this.RaiseAndSetIfChanged(ref this.step3DHLR, value);
@@ -144,12 +145,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Backing field for <see cref="SelectedPart"/>
         /// </summary>
-        private Step3DPartTreeNode selectedPart;
+        private Step3dRowViewModel selectedPart;
 
         /// <summary>
-        /// Gets or sets the selected row that represents a <see cref="Step3DPartTreeNode"/>
+        /// Gets or sets the selected row that represents a <see cref="Step3dRowViewModel"/>
         /// </summary>
-        public Step3DPartTreeNode SelectedPart
+        public Step3dRowViewModel SelectedPart
         {
             get => this.selectedPart;
             set => this.RaiseAndSetIfChanged(ref this.selectedPart, value);
@@ -203,7 +204,7 @@ namespace DEHPSTEPAP242.ViewModel
                 InitializeAuxiliaryData(new STEP3D_Part[0], new STEP3D_PartRelation[0]);
             }
 
-            var entries = new List<Step3DPartTreeNode>();
+            var entries = new List<Step3dRowViewModel>();
 
             int nextID = 1;
 
@@ -212,7 +213,7 @@ namespace DEHPSTEPAP242.ViewModel
                 if (IsIsolatedPart(p))
                 {
                     // Add to the maint Root
-                    var node = new Step3DPartTreeNode(p, null) { ID = nextID++ };
+                    var node = new Step3dRowViewModel(p, null) { ID = nextID++ };
                     entries.Add(node);
 
                     AddSubTree(entries, node, ref nextID);
@@ -417,7 +418,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="entries">tree container to fill</param>
         /// <param name="parent">parent node</param>
         /// <param name="nextID">global tree ID for next creation operation</param>
-        private void AddSubTree(List<Step3DPartTreeNode> entries, Step3DPartTreeNode parent, ref int nextID )
+        private void AddSubTree(List<Step3dRowViewModel> entries, Step3dRowViewModel parent, ref int nextID )
         {
             var children = FindChildren(parent.StepId);
 
@@ -426,7 +427,7 @@ namespace DEHPSTEPAP242.ViewModel
                 var child = cr.Item1;
                 var relation = cr.Item2;
 
-                var node = new Step3DPartTreeNode(child, relation) 
+                var node = new Step3dRowViewModel(child, relation) 
                 { 
                     ID = nextID++, 
                     ParentID = parent.ID 
