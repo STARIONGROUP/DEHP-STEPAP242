@@ -26,7 +26,7 @@ namespace DEHPSTEPAP242.ViewModel
     {
         public string FileName { get; private set; }
         public int RevisionNumber { get; private set; }
-        public DateTime ModifiedOn { get; private set; }
+        public DateTime CreatedOn { get; private set; }
 
         //		public string CreatorName { get; private set; }
         //		public string CreatorSurname { get; private set; }
@@ -44,7 +44,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             FileName = FileRev.Path;
             RevisionNumber = FileRev.RevisionNumber;
-            ModifiedOn = FileRev.ModifiedOn;
+            CreatedOn = FileRev.CreatedOn;
             CreatorFullName = $"{FileRev.Creator.Person.GivenName} {FileRev.Creator.Person.Surname.ToUpper()}";
         }
     }
@@ -190,9 +190,10 @@ namespace DEHPSTEPAP242.ViewModel
             var fileSelected = this.WhenAnyValue(
                 vm => vm.CurrentHubFile,
                 (x) => IsValidCurrentHubFile(x));
-            
+
             LoadFileCommand = ReactiveCommand.Create(fileSelected);
             LoadFileCommand.Subscribe(_ => LoadFileCommandExecute());
+            //this.LoadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.LoadFileCommandExecute());
 
             DownloadFileCommand = ReactiveCommand.Create(fileSelected);
             DownloadFileCommand.Subscribe(_ => DownloadFileCommandExecute());
