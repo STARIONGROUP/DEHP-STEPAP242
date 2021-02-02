@@ -1,0 +1,107 @@
+﻿<UserControl x:Class="DEHPSTEPAP242.Views.Dialogs.RowDetailsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:converters="clr-namespace:DEHPCommon.Converters;assembly=DEHPCommon"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:ListToElementUsageConverter x:Key="ListToElementUsageConverter" /></ResourceDictionary>
+    </UserControl.Resources>
+    <GroupBox Header="Selected Part" Margin="10" Padding="10">
+        <Grid Height="150">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Margin="5" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"></ColumnDefinition>
+                    <ColumnDefinition Width="6*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Content="Name:"/>
+                <Label Grid.Row="1" Content="Type:"/>
+                <Label Grid.Row="2" Content="ID:"/>
+                <Label Grid.Row="3" Content="Rep. Type:"/>
+                <Label Grid.Row="4" Content="Relation:"/>
+                <Label Grid.Row="5" Content="Relation ID:"/>
+
+                <Label Grid.Row="0" Grid.Column="1" Content="{Binding SelectedThing.Name}"/>
+                <Label Grid.Row="1" Grid.Column="1" Content="{Binding SelectedThing.Type}"/>
+                <Label Grid.Row="2" Grid.Column="1" Content="{Binding SelectedThing.StepId}"/>
+                <Label Grid.Row="3" Grid.Column="1" Content="{Binding SelectedThing.RepresentationType}"/>
+                <Label Grid.Row="4" Grid.Column="1" Content="{Binding SelectedThing.RelationLabel}"/>
+                <Label Grid.Row="5" Grid.Column="1" Content="0"/>
+            </Grid>
+            <Grid Margin="5" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"></ColumnDefinition>
+                    <ColumnDefinition Width="6*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <!-- TODO: rework required rows -->
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="Option:"></Label>
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="0" DisplayMember="ShortName" ValueMember="Name"
+                                                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedOption}"
+                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableOptions}" NullText="Select Option"/>
+                <Label Grid.Row="1" Grid.Column="0" Content="Element Definition:"></Label>
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="1" DisplayMember="ShortName" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                                                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedElementDefinition}" NullText="Create New Element Definition" AllowNullInput="True"
+                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableElementDefinitions}"/>
+                <Label Grid.Row="2" Grid.Column="0" Content="Update Element Usages:"></Label>
+                <!-- BEFORE DisplayMember="ElementDefinition.ShortName" -->
+                <!-- NOW the name of the EU instance -->
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="2" DisplayMember="Name"  ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                                                                  AutoComplete="True" EditValue="{Binding SelectedThing.SelectedElementUsages, Converter={StaticResource ListToElementUsageConverter}}" NullText="Create New Element Usage" AllowNullInput="True"
+                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableElementUsages}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedTokenComboBoxStyleSettings NewTokenPosition="Far" AllowEditTokens="False"/>
+                    </dxe:ComboBoxEdit.StyleSettings>
+                </dxe:ComboBoxEdit>
+
+                <!-- NOTE: ParameterType is NOT REQUIRED, we construct a Step3D parameter -->
+                <!--
+                <Label Grid.Row="3" Grid.Column="0" Content="Parameter type:"></Label>
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="3" DisplayMember="ShortName" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                                                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedParameterType}" NullText="Create New Parameter Type" AllowNullInput="True"
+                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableParameterTypes}"/>
+                 -->
+                <!-- TODO: selection of the parameter (or new) where to apply the information -->
+                <Label Grid.Row="4" Grid.Column="0" Content="Parameter:"></Label>
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="4" DisplayMember="UserFriendlyName" ValueMember="UserFriendlyShortName" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                                                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedParameter}" NullText="Create New Parameter" AllowNullInput="True"
+                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableParameters}"
+                                                                  ApplyItemTemplateToSelectedItem="True">
+                </dxe:ComboBoxEdit>
+                
+                <Label Grid.Row="5" Grid.Column="0" Content="Actual Finite State:"></Label>
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="5" DisplayMember="Name" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedActualFiniteState}" NullText="Select Finite State" AllowNullInput="True"
+                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableActualFiniteStates}"
+                                  ApplyItemTemplateToSelectedItem="True">
+                </dxe:ComboBoxEdit>
+            </Grid>
+        </Grid>
+    </GroupBox>
+</UserControl>

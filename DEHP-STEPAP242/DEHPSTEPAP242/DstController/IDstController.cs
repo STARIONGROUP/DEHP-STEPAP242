@@ -26,6 +26,7 @@ namespace DEHPSTEPAP242.DstController
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using CDP4Common.EngineeringModelData;
     using DEHPCommon.Enumerators;
     using DEHPSTEPAP242.ViewModel.Rows;
 
@@ -67,6 +68,33 @@ namespace DEHPSTEPAP242.DstController
         /// Gets or sets the <see cref="MappingDirection"/>
         /// </summary>
         MappingDirection MappingDirection { get; set; }
+
+        /// <summary>
+        /// Gets the collection of <see cref="ExternalIdentifierMap"/>s
+        /// </summary>
+        IEnumerable<ExternalIdentifierMap> AvailablExternalIdentifierMap { get; }
+
+        /// <summary>
+        /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
+        /// </summary>
+        IEnumerable<ElementDefinition> ElementDefinitionParametersDstStep3dMaps { get; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ExternalIdentifierMap"/>
+        /// </summary>
+        ExternalIdentifierMap ExternalIdentifierMap { get; set; }
+
+        /// <summary>
+        /// Gets the collection of <see cref="IdCorrespondences"/>
+        /// </summary>
+        List<IdCorrespondence> IdCorrespondences { get; }
+
+        /// <summary>
+        /// Creates and sets the <see cref="DstController.ExternalIdentifierMap"/>
+        /// </summary>
+        /// <param name="newName">The model name to use for creating the new <see cref="DstController.ExternalIdentifierMap"/></param>
+        /// <returns>A awaitable <see cref="ExternalIdentifierMap"/></returns>
+        Task<ExternalIdentifierMap> CreateExternalIdentifierMap(string newName);
 
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>

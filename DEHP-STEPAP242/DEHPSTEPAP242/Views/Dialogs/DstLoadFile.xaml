@@ -72,9 +72,11 @@
                                 <UserControl.Content>
                                     <Label Content="{Binding .}"/>
                                 </UserControl.Content>
+                                <!--
                                 <UserControl.InputBindings>
                                     <MouseBinding Gesture="LeftDoubleClick" Command="{Binding LoadFileCommand}"/>
                                 </UserControl.InputBindings>
+                                -->
                             </UserControl>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

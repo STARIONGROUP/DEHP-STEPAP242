@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:DEHPCommon.Converters;assembly=DEHPCommon"
-             xmlns:local="clr-namespace:DEHPSTEPAP242.Views.Rows"
              xmlns:common="clr-namespace:DEHPCommon.UserInterfaces.Views.Rows;assembly=DEHPCommon"
+             xmlns:local="clr-namespace:DEHPSTEPAP242.Views.Rows"
              mc:Ignorable="d" HorizontalAlignment="Stretch"
              d:DesignHeight="100" d:DesignWidth="1325">
     <UserControl.Resources>
@@ -20,7 +20,7 @@
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <local:MappingEcosimProThing DataContext="{Binding ThingEcosimPro}"></local:MappingEcosimProThing>
+        <local:MappingStep3dThing DataContext="{Binding ThingStep3d}"></local:MappingStep3dThing>
 
         <Path Grid.Column="1" Stretch="Fill" Fill="DarkGray" 
               Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z"

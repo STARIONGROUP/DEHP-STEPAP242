@@ -27,14 +27,14 @@ namespace DEHPSTEPAP242.Views.Rows
     using System.Windows.Controls;
 
     /// <summary>
-    /// Interaction logic for MappingEcosimProThing.xaml
+    /// Interaction logic for MappingStep3dThingProThing.xaml
     /// </summary>
-    public partial class MappingEcosimProThing : UserControl
+    public partial class MappingStep3dThing : UserControl
     {
         /// <summary>
-        /// Initializes a new <see cref="MappingEcosimProThing"/>
+        /// Initializes a new <see cref="MappingStep3dThingThing"/>
         /// </summary>
-        public MappingEcosimProThing()
+        public MappingStep3dThing()
         {
             this.InitializeComponent();
         }

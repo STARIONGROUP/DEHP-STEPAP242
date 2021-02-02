@@ -66,6 +66,11 @@ namespace DEHPSTEPAP242.DstController
 
         #endregion
 
+        /// <summary>
+        /// Gets this running tool name
+        /// </summary>
+        public string ThisToolName => this.GetType().Assembly.GetName().Name;
+
         #region IDstController interface
 
         /// <summary>
@@ -105,20 +110,6 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
-        /// Backing field for the <see cref="MappingDirection"/>
-        /// </summary>
-        private MappingDirection mappingDirection;
-
-        /// <summary>
-        /// Gets or sets the <see cref="MappingDirection"/>
-        /// </summary>
-        public MappingDirection MappingDirection
-        {
-            get => this.mappingDirection;
-            set => this.RaiseAndSetIfChanged(ref this.mappingDirection, value);
-        }
-
-        /// <summary>
         /// Loads a STEP-AP242 file.
         /// <param name="filename">Full path to a STEP-AP242 file</param>
         public void Load(string filename)
@@ -153,31 +144,84 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
+        /// Backing field for the <see cref="MappingDirection"/>
+        /// </summary>
+        private MappingDirection mappingDirection;
+
+        /// <summary>
+        /// Gets or sets the <see cref="MappingDirection"/>
+        /// </summary>
+        public MappingDirection MappingDirection
+        {
+            get => this.mappingDirection;
+            set => this.RaiseAndSetIfChanged(ref this.mappingDirection, value);
+        }
+
+        /// <summary>
+        /// Gets the collection of <see cref="ExternalIdentifierMap"/>s
+        /// </summary>
+        public IEnumerable<ExternalIdentifierMap> AvailablExternalIdentifierMap =>
+            this.hubController.AvailableExternalIdentifierMap(this.ThisToolName);
+
+        /// <summary>
+        /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
+        /// </summary>
+        public IEnumerable<ElementDefinition> ElementDefinitionParametersDstStep3dMaps { get; private set; } = new List<ElementDefinition>();
+
+        /// <summary>
+        /// Gets or sets the <see cref="ExternalIdentifierMap"/>
+        /// </summary>
+        public ExternalIdentifierMap ExternalIdentifierMap { get; set; }
+
+        /// <summary>
+        /// Gets the collection of <see cref="IdCorrespondences"/>
+        /// </summary>
+        public List<IdCorrespondence> IdCorrespondences { get; } = new List<IdCorrespondence>();
+
+        /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
         /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
         public bool Map(Step3dRowViewModel dst3DPart)
         {
-            var (elements, maps) = ((IEnumerable<ElementDefinition>, IEnumerable<ExternalIdentifierMap>))
-                this.mappingEngine.Map(dst3DPart);
+            //this.ElementDefinitionParametersDstVariablesMaps = (IEnumerable<ElementDefinition>)this.mappingEngine.Map(dst3DPart);
 
-            this.ElementDefinitionParametersDstVariablesMaps = elements;
-            this.ExternalIdentifierMaps = maps;
+            this.ElementDefinitionParametersDstStep3dMaps = (IEnumerable<ElementDefinition>)this.mappingEngine.Map(dst3DPart);
             return true;
+
+            // OLD:
+            //var (elements, maps) = ((IEnumerable<ElementDefinition>, IEnumerable<ExternalIdentifierMap>))
+            //    this.mappingEngine.Map(dst3DPart);
+            //
+            //this.ElementDefinitionParametersDstVariablesMaps = elements;
+            //this.ExternalIdentifierMaps = maps;
+            //return true;
+        }
+
+        /// <summary>
+        /// Creates and sets the <see cref="ExternalIdentifierMap"/>
+        /// </summary>
+        /// <param name="newName">The model name to use for creating the new <see cref="ExternalIdentifierMap"/></param>
+        /// <returns>A newly created <see cref="ExternalIdentifierMap"/></returns>
+        public async Task<ExternalIdentifierMap> CreateExternalIdentifierMap(string newName)
+        {
+            var externalIdentifierMap = new ExternalIdentifierMap(Guid.NewGuid(), null, null)
+            {
+                Name = newName,
+                ExternalToolName = this.ThisToolName,
+                ExternalModelName = newName,
+                Owner = this.hubController.CurrentDomainOfExpertise,
+                Container = this.hubController.OpenIteration
+            };
+
+            await this.hubController.CreateOrUpdate<Iteration, ExternalIdentifierMap>(externalIdentifierMap,
+                (i, m) => i.ExternalIdentifierMap.Add(m), true);
+
+            return externalIdentifierMap;
         }
 
         #endregion
-
-        /// <summary>
-        /// Gets the collection of <see cref="ExternalIdentifierMap"/>s
-        /// </summary>
-        public IEnumerable<ExternalIdentifierMap> ExternalIdentifierMaps { get; private set; } = new List<ExternalIdentifierMap>();
-
-        /// <summary>
-        /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
-        /// </summary>
-        public IEnumerable<ElementDefinition> ElementDefinitionParametersDstVariablesMaps { get; private set; } = new List<ElementDefinition>();
 
         #region Constructor
 

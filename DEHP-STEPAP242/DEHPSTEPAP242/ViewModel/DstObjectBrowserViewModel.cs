@@ -6,9 +6,11 @@ namespace DEHPSTEPAP242.ViewModel
     using System.Diagnostics;
     using System.Threading.Tasks;
 
+    using Autofac;
     using ReactiveUI;
 
     using CDP4Common.CommonData;
+    using DEHPCommon;
     using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.NavigationService;
@@ -16,8 +18,10 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.UserInterfaces.ViewModels;
 
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.ViewModel.Rows;
+    using DEHPSTEPAP242.Views.Dialogs;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 
@@ -94,6 +98,7 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /*
+        // IT DOES NOT WORK, THE TREE IS NOT UPDATED IN THE USER INTERFACE
         ///// <summary>
         ///// Gets or sets the Step3D High Level Representation structure.
         ///// </summary>
@@ -173,7 +178,6 @@ namespace DEHPSTEPAP242.ViewModel
             }
 
             ContextMenu.Add(new ContextMenuItemViewModel(
-                    //"Map selection", "",
                     $"Map {SelectedPart.Description}", "",
                     MapCommand,
                     MenuItemKind.Export,
@@ -225,8 +229,8 @@ namespace DEHPSTEPAP242.ViewModel
                     !busy.Value
                 );
 
-            //TODO: debug line, for some reason MapCommand is not activated after a second load
-            canMap.Subscribe(x => Debug.WriteLine($"canMap event {x}"));
+            //TODO: helper debug line, for some reason MapCommand is not activated after a second load
+            canMap.Subscribe(x => Debug.WriteLine($"canMap={x}, vm.IsBusy={this.IsBusy}"));
 
             MapCommand = ReactiveCommand.Create(canMap);
             MapCommand.Subscribe(_ => this.MapCommandExecute());
@@ -235,23 +239,15 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Executes the <see cref="MapCommand"/>
         /// </summary>
+        /// <remarks>
+        /// The mapping is performed only on the <see cref="SelectedPart"/> through
+        /// the <see cref="IMappingConfigurationDialogViewModel"/>
+        /// </remarks>
         private async void MapCommandExecute()
         {
-            // Testing code to upload a file
-            // =============================
-            // Note: A File instance only holds the identification of a File, 
-            // its owner and an optional lockedBy property. 
-            // All other properties are held inside a FileRevision.
-
-            string filePath = dstController.Step3DFile.FileName;
-
-            var file = this.dstHubService.FindFile(filePath);
-
-            await hubController.Upload(filePath, file);
-
-            //var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
-            //viewModel.Variables.AddRange(this.SelectedThings);
-            //this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
+            var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
+            viewModel.SelectedThing = this.SelectedPart;
+            this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
 
         #endregion

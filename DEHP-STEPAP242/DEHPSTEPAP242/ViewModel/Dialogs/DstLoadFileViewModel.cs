@@ -38,6 +38,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -314,6 +315,14 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             userPreferenceService.Save();
         }
 
+        /// <summary>
+        /// Creates a new <see cref="ExternalIdentifierMap"/> and or set the <see cref="IDstController.ExternalIdentifierMap"/>
+        /// </summary>
+        private async Task ProcessExternalIdentifierMap()
+        {
+            //this.dstController.ExternalIdentifierMap = this.SelectedExternalIdentifierMap ?? await
+            //                                           this.dstController.CreateExternalIdentifierMap(this.ExternalIdentifierMapNewName);
+        }
         #endregion
     }
 }
