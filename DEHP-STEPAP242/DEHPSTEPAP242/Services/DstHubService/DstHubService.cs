@@ -16,6 +16,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
     using DEHPCommon.HubController.Interfaces;
 
     using File = CDP4Common.EngineeringModelData.File;
+    using System.Diagnostics;
 
     class DstHubService : IDstHubService
     {
@@ -145,26 +146,28 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// Gets the <see cref="ReferenceDataLibrary"/> where to add DST content
         /// </summary>
         /// <returns>A <see cref="ReferenceDataLibrary"/></returns>
-        private ReferenceDataLibrary GetReferenceDataLibrary()
+        public ReferenceDataLibrary GetReferenceDataLibrary()
         {
             // Different RDL could exist in the server:
             // RDL: RDL specific to CDF_generic_template --> contains 0 FileTypes
             // RDL: Generic ECSS-E-TM-10-25 Reference Data Library --> contains 28 FileTypes
 
-#if RDL_FROM_ITERATION
-            // Search From Iteration
-            var iteration = hubController.OpenIteration;
-            var rdl = iteration.RequiredRdls.FirstOrDefault(rdl => rdl.ShortName == RDL_SHORT_NAME);
-#else
-            // Search From SiteDirectory
-            var site = hubController.GetSiteDirectory();
-            var rdl = site.SiteReferenceDataLibrary.FirstOrDefault(r => r.ShortName == RDL_SHORT_NAME);
-#endif
+            // Search From Model
+            // iteration --> contained in EM --> having a EM Setup with 1 RequiredRDL
+            var model = this.hubController.OpenIteration.GetContainerOfType<EngineeringModel>();
+            var modelSetup = model.EngineeringModelSetup;
+            var rdls = modelSetup.RequiredRdl;
 
-            if (rdl is null)
-            {
-                logger.Error($"Unexpected ReferenceDataLibrary not found when looking for '{RDL_SHORT_NAME}'");
-            }
+            var rdl = rdls.First();
+            
+            //// Search From SiteDirectory
+            //var site = hubController.GetSiteDirectory();
+            //var rdl = site.SiteReferenceDataLibrary.FirstOrDefault(r => r.ShortName == RDL_SHORT_NAME);
+            //
+            //if (rdl is null)
+            //{
+            //    logger.Error($"Unexpected ReferenceDataLibrary not found when looking for '{RDL_SHORT_NAME}'");
+            //}
 
             return rdl;
         }
@@ -256,6 +259,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             var scales = rdl.Scale;
             var parameters = rdl.ParameterType;
 
+            const string STEP_ID_UNIT_NAME = "step id";
             const string STEP_ID_NAME = "step id";
             const string STEP_LABEL_NAME = "step label";
             const string STEP_FILE_REF_NAME = "step file reference";
@@ -268,6 +272,23 @@ namespace DEHPSTEPAP242.Services.DstHubService
             ParameterType stepFileRefParameter = parameters.OfType<TextParameterType>().FirstOrDefault(x => x.Name == STEP_FILE_REF_NAME && !x.IsDeprecated);
             CompoundParameterType step3DGeometryParameter = parameters.OfType<CompoundParameterType>().FirstOrDefault(x => x.Name == STEP_GEOMETRY_NAME && !x.IsDeprecated);
 
+            var rldClone = rdl.Clone(false);
+
+            if (oneUnit is null)
+            {
+                oneUnit = new SimpleUnit(Guid.NewGuid(), null, null)
+                {
+                    Name = STEP_ID_UNIT_NAME,
+                    ShortName = "1",
+                    Container = rldClone
+                };
+
+                logger.Info($"Adding Unit: {oneUnit.Name} [{oneUnit.ShortName}]");
+
+                await hubController.CreateOrUpdate<ReferenceDataLibrary, MeasurementUnit>(
+                    oneUnit, (r, s) => r.Unit.Add(s));
+            }
+
             if (stepIdScale is null)
             {
                 stepIdScale = new OrdinalScale(Guid.NewGuid(), null, null)
@@ -278,7 +299,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     NumberSet = NumberSetKind.NATURAL_NUMBER_SET,
                     MinimumPermissibleValue = "0",
                     IsMinimumInclusive = true, // 0 indicates not known value
-                    Container = rdl
+                    Container = rldClone
                 };
 
                 logger.Info($"Adding Scale: {stepIdScale.Name} [{stepIdScale.ShortName}] Unit={stepIdScale.Unit.Name}");
@@ -296,7 +317,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     Symbol = "#",
                     DefaultScale = stepIdScale,
                     PossibleScale = new List<MeasurementScale> { stepIdScale },
-                    Container = rdl
+                    Container = rldClone
                 };
 
                 logger.Info($"Adding Parameter: {stepIdParameter.Name} [{stepIdParameter.ShortName}]");
@@ -312,7 +333,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     Name = STEP_LABEL_NAME,
                     ShortName = "step_label",
                     Symbol = "-",
-                    Container = rdl
+                    Container = rldClone
                 };
 
                 logger.Info($"Adding Parameter: {stepLabelParameter.Name} [{stepLabelParameter.ShortName}]");
@@ -328,7 +349,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     Name = STEP_FILE_REF_NAME,
                     ShortName = "step_file_reference",
                     Symbol = "-",
-                    Container = rdl
+                    Container = rldClone
                 };
 
                 logger.Info($"Adding Parameter: {stepFileRefParameter.Name} [{stepFileRefParameter.ShortName}]");
@@ -345,65 +366,177 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     Name = STEP_GEOMETRY_NAME,
                     ShortName = "step_geo",
                     Symbol = "-",
-                    Container = rdl
+                    Container = rldClone
                 };
 
                 var component1 = new ParameterTypeComponent(Guid.NewGuid(), null, null)
                 {
                     ParameterType = stepLabelParameter,
                     ShortName = "name",
-                    Container = step3DGeometryParameter
+                    //Container = step3DGeometryParameter
+                    Container = rdl
                 };
 
                 var component2 = new ParameterTypeComponent(Guid.NewGuid(), null, null)
                 {
                     ParameterType = stepIdParameter,
                     ShortName = "id",
-                    Container = step3DGeometryParameter
+                    //Container = step3DGeometryParameter
+                    Container = rdl
                 };
 
                 var component3 = new ParameterTypeComponent(Guid.NewGuid(), null, null)
                 {
                     ParameterType = stepLabelParameter,
                     ShortName = "rep_type",
-                    Container = step3DGeometryParameter
+                    //Container = step3DGeometryParameter
+                    Container = rdl
                 };
 
                 var component4 = new ParameterTypeComponent(Guid.NewGuid(), null, null)
                 {
                     ParameterType = stepLabelParameter,
                     ShortName = "assembly_label",
-                    Container = step3DGeometryParameter
+                    //Container = step3DGeometryParameter
+                    Container = rdl
                 };
 
                 var component5 = new ParameterTypeComponent(Guid.NewGuid(), null, null)
                 {
                     ParameterType = stepIdParameter,
                     ShortName = "assembly_id",
-                    Container = step3DGeometryParameter
+                    //Container = step3DGeometryParameter
+                    Container = rdl
                 };
 
                 var component6 = new ParameterTypeComponent(Guid.NewGuid(), null, null)
                 {
                     ParameterType = stepFileRefParameter,
                     ShortName = "source",
-                    Container = step3DGeometryParameter
+                    //Container = step3DGeometryParameter
+                    Container = rdl
                 };
+
+                // NOTE: Add components here to avoid exception:
+                // The CDP4 Services replied with code InternalServerError: Internal Server Error: "exception:
+                // The "Component" property of a "CompoundParameterType" is mandatory and must have at least one entry."
+                // Exception thrown: 'System.InvalidOperationException' in DEHPSTEPAP242.exe
+                // Exception thrown: 'System.InvalidOperationException' in mscorlib.dll
+                
+                step3DGeometryParameter.Component.Add(component1);
+                step3DGeometryParameter.Component.Add(component2);
+                step3DGeometryParameter.Component.Add(component3);
+                step3DGeometryParameter.Component.Add(component4);
+                step3DGeometryParameter.Component.Add(component5);
+                step3DGeometryParameter.Component.Add(component6);
 
                 logger.Info($"Adding CompoundParameter: {step3DGeometryParameter.Name} [{step3DGeometryParameter.ShortName}]");
 
-                await hubController.CreateOrUpdate<ReferenceDataLibrary, CompoundParameterType>(
-                    step3DGeometryParameter,
-                    (r, p) => {
-                        r.ParameterType.Add(p);
+                try
+                {
+                    // FROM HubController
+                    // ==================
+                    // public Task CreateOrUpdate<TContainer, TThing>(thing, actionOnClone, deep)
+                    // {
+                    //   await this.Write(thing, actionOnClone, (transaction, t) => transaction.CreateOrUpdate(t), deep);
+                    // }
+                    //
+                    // private Task Write<TContainer, TThing>(thing, actionOnClone, actionOnTransaction, deep)
+                    // {
+                    //   var clone = thing.Clone(deep);
+                    //   var container = thing.Container.Clone(deep) as TContainer;
+                    //   actionOnClone(container, thing);
+                    //   
+                    //   var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(container), container);
+                    //   actionOnTransaction(transaction, clone);
+                    //   
+                    //   await this.Write(transaction);
+                    // }
 
-                        p.Component.Add(component1);
-                        p.Component.Add(component2);
-                        p.Component.Add(component3);
-                        p.Component.Add(component4);
-                        p.Component.Add(component5);
-                        p.Component.Add(component6);
-                    }, true);
+                    // FROM N.S. --> using internal code
+                    // ==================================
+                    //
+                    // container.ParameterType.Add(step3DGeometryParameter);   // --> looks like ACTIONONCLONE()
+                    // 
+                    // var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(container), container);
+                    // 
+                    // 
+                    // transaction.CreateOrUpdate(container);                   //
+                    // transaction.CreateOrUpdate(step3DGeometryParameter);     //
+                    // transaction.CreateOrUpdate(item1);                       //
+                    // transaction.CreateOrUpdate(item2);                       //
+                    // transaction.CreateOrUpdate(item3);                       // --> looks like ACTIONONTRANSACTION()
+                    // transaction.CreateOrUpdate(item4);                       //
+                    // transaction.CreateOrUpdate(item5);                       //
+                    // transaction.CreateOrUpdate(item6);                       //
+                    // 
+                    // await this.Write(transaction);
+
+
+                    await hubController.CreateOrUpdate<ReferenceDataLibrary, CompoundParameterType>(
+                        step3DGeometryParameter,
+                        (r, p) =>
+                        {
+                            r.ParameterType.Add(p);
+
+                            // NOTE: These cannot be added because they already added
+                            // An exception of type 'System.InvalidOperationException' occurred 
+                            // in CDP4Common.dll but was not handled in user code
+                            // OrderedItemList already contains the item: 5fd0f44f-fd3f-4e01-a6fd-f7a72b16fa0e
+                            //
+                            //p.Component.Add(component1);
+                            //p.Component.Add(component2);
+                            //p.Component.Add(component3);
+                            //p.Component.Add(component4);
+                            //p.Component.Add(component5);
+                            //p.Component.Add(component6);
+                        }, true);
+
+
+#if NOT_WORKING
+                    CompoundParameterType geom = step3DGeometryParameter.Clone(false);
+
+                    var thingsToAdd = new List<ParameterTypeComponent>()
+                    {
+                        component1,
+                        component2,
+                        component3,
+                        component4,
+                        component5,
+                        component6
+                    };
+
+                    await hubController.CreateOrUpdate<ReferenceDataLibrary, ParameterTypeComponent>(
+                        thingsToAdd, (c, p) => { Debug.WriteLine($"actionClone for ParameterTypeComponent: {p.ShortName}, Container: {c.Name} "); /* something here? */ }, true);
+
+                    //await hubController.CreateOrUpdate<CompoundParameterType, ParameterTypeComponent>(
+                    //    thingsToAdd, (c, p) => { c.Component.Add(p); }, true);
+#endif
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                    throw e;
+                }
+
+                /*
+                var container = rdl.Clone(false);
+                this.hubController.co
+
+
+                container.ParameterType.Add(step3DGeometryParameter);
+
+                var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(container), container);
+
+                transaction.CreateOrUpdate(container);
+                transaction.CreateOrUpdate(step3DGeometryParameter);
+                transaction.CreateOrUpdate(item1);
+                transaction.CreateOrUpdate(item2);
+                transaction.CreateOrUpdate(item3);
+                transaction.CreateOrUpdate(item4);
+                transaction.CreateOrUpdate(item5);
+                transaction.CreateOrUpdate(item6);
+                */
             }
         }
     }

@@ -40,6 +40,12 @@ namespace DEHPSTEPAP242.Services.DstHubService
         bool IsSTEPFileType(FileRevision fileRevision);
 
         /// <summary>
+        /// Gets the <see cref="ReferenceDataLibrary"/> where to add DST content
+        /// </summary>
+        /// <returns>A <see cref="ReferenceDataLibrary"/></returns>
+        ReferenceDataLibrary GetReferenceDataLibrary();
+
+        /// <summary>
         /// Finds the DST <see cref="CDP4Common.EngineeringModelData.File"/> in the Hub
         /// </summary>
         /// <param name="filePath"></param>
