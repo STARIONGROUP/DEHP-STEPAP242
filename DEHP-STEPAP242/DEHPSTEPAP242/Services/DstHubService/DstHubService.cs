@@ -143,6 +143,23 @@ namespace DEHPSTEPAP242.Services.DstHubService
         }
 
         /// <summary>
+        /// Checks if a parameter is compatible with STEP 3D mapping
+        /// </summary>
+        /// <param name="param">The <see cref="ParameterType"/> to check</param>
+        /// <returns>True if it is a candidate for the mapping</returns>
+        public bool IsSTEPParameterType(ParameterType param)
+        {
+            if (param is CompoundParameterType &&
+                param.Name.StartsWith("step", StringComparison.CurrentCultureIgnoreCase)
+                )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets the <see cref="ReferenceDataLibrary"/> where to add DST content
         /// </summary>
         /// <returns>A <see cref="ReferenceDataLibrary"/></returns>

@@ -40,6 +40,13 @@ namespace DEHPSTEPAP242.Services.DstHubService
         bool IsSTEPFileType(FileRevision fileRevision);
 
         /// <summary>
+        /// Checks if a parameter is compatible with STEP 3D mapping
+        /// </summary>
+        /// <param name="param">The <see cref="ParameterType"/> to check</param>
+        /// <returns>True if it is a candidate for the mapping</returns>
+        bool IsSTEPParameterType(ParameterType param);
+
+        /// <summary>
         /// Gets the <see cref="ReferenceDataLibrary"/> where to add DST content
         /// </summary>
         /// <returns>A <see cref="ReferenceDataLibrary"/></returns>

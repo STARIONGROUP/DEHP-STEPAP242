@@ -179,7 +179,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         }
 
         /// <summary>
-        /// Executes the <see cref="ContinueCommand"/>
+        /// Executes the <see cref="ContinueCommand"/> to create the proper mapping
         /// </summary>
         private void ExecuteContinueCommand()
         {
@@ -218,26 +218,22 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.AvailableParameterTypes.Clear();
             this.AvailableElementDefinitions.AddRange(this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()));
 
+            // EXAMPLE CODE quering from chained Rdls
+            //var paramList = this.hubController.GetSiteDirectory().AvailableReferenceDataLibraries()
+            //            .SelectMany(x => x.QueryParameterTypesFromChainOfRdls())
+            //            .Where(x => this.dstHubService.IsSTEPParameterType(x));
+            //
+            //foreach (var item in paramList)
+            //{
+            //    Debug.WriteLine($"step param: {item.Name}/{item.ShortName}");
+            //}
 
             // Parameter Types are stored in a specific RDL (see this service to change the target)
             var rdl = this.dstHubService.GetReferenceDataLibrary();
 
             this.AvailableParameterTypes.AddRange(rdl.ParameterType.Where(
-                // TODO: point to the Compound parameter of a step 3d
-                  x => x.Name.StartsWith("step", StringComparison.CurrentCultureIgnoreCase))
-                //x => x is CompoundParameterType parameterType
-                //     && x.Name.StartsWith("step", StringComparison.CurrentCultureIgnoreCase))
+                x => this.dstHubService.IsSTEPParameterType(x))
                 .OrderBy(x => x.Name));
-
-            /*
-            this.AvailableParameterTypes.AddRange(this.hubController.GetSiteDirectory().SiteReferenceDataLibrary
-                .SelectMany(x => x.ParameterType).Where(
-                    x => x is CompoundParameterType parameterType 
-                         && parameterType.Component.Count == 2 
-                         && parameterType.Component.Count(
-                             x => x.ParameterType is DateTimeParameterType) == 1)
-                .OrderBy(x => x.Name));
-            */
 
             this.UpdateAvailableParameters();
             this.UpdateAvailableElementUsages();
@@ -278,7 +274,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             if (this.selectedThing?.SelectedElementDefinition != null)
             {
-                this.AvailableParameters.AddRange(this.SelectedThing.SelectedElementDefinition.Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>()));
+                this.AvailableParameters.AddRange(
+                    this.SelectedThing.SelectedElementDefinition.Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
+                    .Where(x => this.AvailableParameterTypes.Contains(x.ParameterType))
+                // ALTERNATIVE, checking from service instead already constructed list AvailableParameterTypes
+                //.Where(x => this.dstHubService.IsSTEPParameterType(x.ParameterType))
+                );
             }
         }
 
@@ -296,37 +297,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 // Note: both the owner of the DOE and ED are the owners of the EU
                 this.AvailableElementUsages.AddRange(ed.ReferencingElementUsages().Where(x => x.ExcludeOption.Contains(this.selectedThing.SelectedOption) == false));
             }
-
-            /*
-            if (this.selectedThing?.SelectedElementDefinition != null)
-            {
-                var ed = this.selectedThing.SelectedElementDefinition;
-
-                Debug.WriteLine($"Element {ed.Name} usages check:");
-                foreach (var item in ed.ContainedElement)
-                {
-                    Debug.WriteLine($"  ContainedElement {item.Name}");
-                }
-
-                Debug.WriteLine("----");
-
-                foreach (var item in ed.ReferencedElement)
-                {
-                    Debug.WriteLine($"  ReferencedElement {item.Name}");
-                }
-
-                Debug.WriteLine("+++++");
-
-                foreach (var item in ed.ReferencingElementUsages())
-                {
-                    Debug.WriteLine($"  Referencing {item.Name}");
-                }
-
-                this.AvailableElementUsages.AddRange(
-                    this.selectedThing.SelectedElementDefinition.ContainedElement.Where(
-                        this.AreTheseOwnedByTheDomain<ElementUsage>()).Distinct());
-            }
-            */
         }
 
         /// <summary>
