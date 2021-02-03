@@ -185,18 +185,13 @@ namespace DEHPSTEPAP242.DstController
         /// <returns>A awaitable assert whether the mapping was successful</returns>
         public bool Map(Step3dRowViewModel dst3DPart)
         {
-            //this.ElementDefinitionParametersDstVariablesMaps = (IEnumerable<ElementDefinition>)this.mappingEngine.Map(dst3DPart);
+            var parts = new List<Step3dRowViewModel> { dst3DPart };
 
-            this.ElementDefinitionParametersDstStep3dMaps = (IEnumerable<ElementDefinition>)this.mappingEngine.Map(dst3DPart);
+            //this.ElementDefinitionParametersDstStep3dMaps = (IEnumerable<ElementDefinition>)this.mappingEngine.Map(parts);
+
+            ((List<ElementDefinition>)this.ElementDefinitionParametersDstStep3dMaps).AddRange((IEnumerable<ElementDefinition>)this.mappingEngine.Map(parts));
+
             return true;
-
-            // OLD:
-            //var (elements, maps) = ((IEnumerable<ElementDefinition>, IEnumerable<ExternalIdentifierMap>))
-            //    this.mappingEngine.Map(dst3DPart);
-            //
-            //this.ElementDefinitionParametersDstVariablesMaps = elements;
-            //this.ExternalIdentifierMaps = maps;
-            //return true;
         }
 
         /// <summary>

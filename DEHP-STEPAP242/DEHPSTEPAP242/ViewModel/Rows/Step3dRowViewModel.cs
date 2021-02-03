@@ -76,6 +76,12 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </remarks>
         public string RelationLabel { get => relation?.id; }
 
+        /// <summary>
+        /// Gets the Get STEP entity file Id of the relation (NAUO)
+        /// </summary>
+        /// </remarks>
+        public string RelationId { get => relation?.id; }
+
         #endregion
 
         #region Mapping parameters

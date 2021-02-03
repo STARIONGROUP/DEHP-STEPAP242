@@ -42,11 +42,6 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         private readonly IHubController hubController = AppContainer.Container.Resolve<IHubController>();
 
-        // /// <summary>
-        // /// The  collection of <see cref="ExternalIdentifierMap"/>
-        // /// </summary>
-        // private readonly List<ExternalIdentifierMap> externalIdentifierMap = new List<ExternalIdentifierMap>();
-
         /// <summary>
         /// Gets the <see cref="idCorrespondences"/>
         /// </summary>
@@ -71,7 +66,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// Transforms a <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> into an <see cref="ElementDefinition"/>
         /// </summary>
         /// <param name="input">The <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> to transform</param>
-        /// <returns>An <see cref="ElementDefinition"/></returns>
+        /// <returns>An <see cref="List{ElementDefinition}"/> as the top level <see cref="Thing"/> with changes</returns>
         public override IEnumerable<ElementDefinition> Transform (List<Step3dRowViewModel> input)
         {
             try
@@ -82,6 +77,14 @@ namespace DEHPSTEPAP242.MappingRules
 
                 foreach (var part in input)
                 {
+                    // Transformation is as following:
+                    // - The STEP part information is stored in a ComposedParameterType
+                    // - Having parameter for:
+                    //   + Product Definition (name, id, type)
+                    //   + Assembly Usage, or Relation (label, id)
+                    //   + GUII of the file in the DomainFileStore (known only at Transfer time)
+                    //
+
                     this.dstElementName = part.Name;
                     this.dstParameterName = $"{part.Name} 3D Geometry";
 
@@ -107,7 +110,11 @@ namespace DEHPSTEPAP242.MappingRules
                     }
                 }
 
-                return (input.Select(x => x.SelectedElementDefinition));
+                // When changes can be also performed in other things
+                // (i.e. EU, Parameters, etc.) only the top thing in the 
+                // hierarchy is returned, the update will call
+                // CreateOrUpdate for all its related things.
+                return input.Select(x => x.SelectedElementDefinition);
             }
             catch (Exception exception)
             {
@@ -154,13 +161,13 @@ namespace DEHPSTEPAP242.MappingRules
                 {
                     if (this.hubController.Session.OpenReferenceDataLibraries
                         .SelectMany(x => x.QueryParameterTypesFromChainOfRdls())
-                        .FirstOrDefault(x => x.Name == "TimeTaggedValue") is CompoundParameterType parameterType)
+                        .FirstOrDefault(x => x.ShortName == "step_geo") is CompoundParameterType parameterType)
                     {
                         part.SelectedParameterType = parameterType;
                     }
                     else
                     {
-                        part.SelectedParameterType = this.CreateCompoundParameterTypeForEcosimTimetaggedValues();
+                        part.SelectedParameterType = this.CreateCompoundParameterTypeForSte3DGeometry();
                     }
                 }
 
@@ -187,26 +194,40 @@ namespace DEHPSTEPAP242.MappingRules
         /// Creates the <see cref="CompoundParameterType"/> for time tagged values
         /// </summary>
         /// <returns>A <see cref="CompoundParameterType"/></returns>
-        private CompoundParameterType CreateCompoundParameterTypeForEcosimTimetaggedValues()
+        private CompoundParameterType CreateCompoundParameterTypeForSte3DGeometry()
         {
+            // NOTE: this parameter type actually should already exists (DST check at connection)
             return this.Bake<CompoundParameterType>(x =>
             {
-                x.ShortName = "TimeTaggedValue";
-                x.Name = "TimeTaggedValue";
-                x.Symbol = "ttv";
+                //string STEP_ID_UNIT_NAME = "step id";
+                //string STEP_ID_NAME = "step id";
+                //string STEP_LABEL_NAME = "step label";
+                //string STEP_FILE_REF_NAME = "step file reference";
+                string STEP_GEOMETRY_NAME = "step geometry";
+
+                x.ShortName = STEP_GEOMETRY_NAME;
+                x.ShortName = "step_geo";
+                x.Symbol = "-";
 
                 x.Component.Add(this.Bake<ParameterTypeComponent>(
                     p =>
                     {
-                        p.ShortName = "TtvDateTime";
-                        p.ParameterType = this.Bake<DateTimeParameterType>();
+                        p.ShortName = "name";
+                        p.ParameterType = this.Bake<TextParameterType>();
                     }));
 
                 x.Component.Add(this.Bake<ParameterTypeComponent>(
                     p =>
                     {
-                        p.ShortName = "TtvValue";
-                        p.ParameterType = this.Bake<SimpleQuantityKind>();
+                        p.ShortName = "id";
+                        p.ParameterType = this.Bake<SimpleQuantityKind>(
+                            d =>
+                            {
+                                d.Symbol = "#";
+                                //d.DefaultScale = ?
+                                //d.PossibleScale = new List<MeasurementScale> { ? }
+                            }
+                            );
                     }));
             });
         }
@@ -235,12 +256,14 @@ namespace DEHPSTEPAP242.MappingRules
 
             if (parameter.StateDependence != null && variable.SelectedActualFiniteState is { } actualFiniteState)
             {
+                // QUESTION: are those valuesets correctly created... it requires new API maybe?
                 valueSet = parameter.ValueSets.Last(x => x.ActualState == actualFiniteState);
             }
             else
             {
                 valueSet = parameter.ValueSets.LastOrDefault();
                 
+                //TODO: check new code from N.S. using the new API
                 if (valueSet is null)
                 {
                     switch (parameter)
@@ -261,18 +284,48 @@ namespace DEHPSTEPAP242.MappingRules
         }
 
         /// <summary>
-        /// Updates the specified value set
+        /// Updates the specified value set (Computed data)
         /// </summary>
-        /// <param name="variable">The <see cref="Step3dRowViewModel"/></param>
+        /// <param name="part">The <see cref="Step3dRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Thing"/> <see cref="Parameter"/> or <see cref="ParameterOverride"/></param>
         /// <param name="valueSet">The <see cref="ParameterValueSetBase"/></param>
-        private void UpdateValueSet(Step3dRowViewModel variable, Thing parameter, ParameterValueSetBase valueSet)
+        private void UpdateValueSet(Step3dRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
         {
-            //valueSet.Computed = new ValueArray<string>(
-            //    variable.SelectedValues.Select(
-            //        x => FormattableString.Invariant($"{x.Value}")));
-            //
-            this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
+            var valuearray = valueSet.Computed;
+
+            ParameterBase paramBase = (ParameterBase)parameter;
+            var paramType = paramBase.ParameterType;
+
+            if (paramType is CompoundParameterType p)
+            {
+                // Component is an OrderedItemList, and the order could be 
+                // changed externally, then do the set value based on 
+                // component's name
+                int index = 0;
+                foreach (ParameterTypeComponent component in p.Component)
+                {
+                    switch (component.ShortName)
+                    {
+                        case "name": valuearray[index++] = $"{part.Name}"; break;
+
+                        case "id": valuearray[index++] = $"{part.StepId}"; break;
+                        
+                        case "rep_type": valuearray[index++] = $"{part.RepresentationType}"; break;
+                        
+                        case "assembly_label": valuearray[index++] = $"{part.RelationLabel}"; break;
+                        
+                        case "assembly_id": valuearray[index++] = $"{part.RelationId}"; break;
+
+                        // NOTE: File.Iid will be known at Transfer time
+                        case "source": valuearray[index++] = ""; break;
+                            
+                        default:
+                        break;
+                    }
+                }
+            }
+
+            //this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
         }
 
         /// <summary>
