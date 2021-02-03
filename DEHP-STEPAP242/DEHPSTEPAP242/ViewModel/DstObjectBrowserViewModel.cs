@@ -177,6 +177,20 @@ namespace DEHPSTEPAP242.ViewModel
                 return;
             }
 
+#if USE_CANMAP_OBSERVABLE
+            // Nothing to do, validation already done in the "canMap" observable of the command
+#else
+            bool canMap = this.SelectedPart != null && this.hubController.OpenIteration != null &&
+                    this.dstController.MappingDirection is MappingDirection.FromDstToHub &&
+                    !this.IsBusy;
+
+            if (canMap == false)
+            {
+                // Do not add menu entry when the action is not supported
+                return;
+            }
+#endif
+
             ContextMenu.Add(new ContextMenuItemViewModel(
                     $"Map {SelectedPart.Description}", "",
                     MapCommand,
@@ -218,6 +232,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void InitializeCommands()
         {
+#if USE_CANMAP_OBSERVABLE
             var canMap = this.WhenAny(
                 vm => vm.SelectedPart,
                 vm => vm.hubController.OpenIteration,
@@ -234,6 +249,10 @@ namespace DEHPSTEPAP242.ViewModel
 
             MapCommand = ReactiveCommand.Create(canMap);
             MapCommand.Subscribe(_ => this.MapCommandExecute());
+#else
+            MapCommand = ReactiveCommand.Create();
+            MapCommand.Subscribe(_ => this.MapCommandExecute());
+#endif
         }
 
         /// <summary>
@@ -250,6 +269,6 @@ namespace DEHPSTEPAP242.ViewModel
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
 
-        #endregion
+#endregion
     }
 }
