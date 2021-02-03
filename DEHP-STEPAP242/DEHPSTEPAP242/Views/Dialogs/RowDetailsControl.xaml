@@ -12,7 +12,7 @@
         <ResourceDictionary>
             <converters:ListToElementUsageConverter x:Key="ListToElementUsageConverter" /></ResourceDictionary>
     </UserControl.Resources>
-    <GroupBox Header="Selected Part" Margin="10" Padding="10">
+    <GroupBox Header="Selected Part" Padding="10">
         <Grid Height="150">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
