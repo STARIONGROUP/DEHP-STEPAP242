@@ -63,13 +63,13 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         ReactiveList<ActualFiniteState> AvailableActualFiniteStates { get; }
 
         /// <summary>
-        /// Gets the collection of <see cref="VariableRowViewModel"/>
-        /// </summary>
-        ReactiveList<Step3dRowViewModel> Variables { get; }
-
-        /// <summary>
         /// Gets the <see cref="ICommand"/> to continue
         /// </summary>
         ReactiveCommand<object> ContinueCommand { get; set; }
+
+        /// <summary>
+        /// Updates the mapping based on the available 10-25 elements
+        /// </summary>
+        void UpdatePropertiesBasedOnMappingConfiguration();
     }
 }

@@ -139,7 +139,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         public ElementDefinition SelectedElementDefinition
         {
             get => this.selectedElementDefinition;
-            set => this.RaiseAndSetIfChanged(ref this.selectedElementDefinition, value.Clone(true));
+            set => this.RaiseAndSetIfChanged(ref this.selectedElementDefinition, value?.Clone(true));
         }
 
         /// <summary>
@@ -160,6 +160,21 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// Gets or sets the collection of selected <see cref="ElementUsage"/>s
         /// </summary>
         public ReactiveList<ElementUsage> SelectedElementUsages { get; set; } = new ReactiveList<ElementUsage>();
+
+        /// <summary>
+        /// Gets or sets the mapping configurations
+        /// </summary>
+        public ReactiveList<IdCorrespondence> MappingConfigurations { get; set; } = new ReactiveList<IdCorrespondence>();
+
+        /// <summary>
+        /// Gets this represented ElementName
+        /// </summary>
+        public string ElementName => this.Name;
+
+        /// <summary>
+        /// Gets this reprensented ParameterName
+        /// </summary>
+        public string ParameterName => $"{this.Name} 3d geometry";
 
         #endregion
 

@@ -26,6 +26,7 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 
     using STEP3DAdapter;
+    using System.Linq;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -273,16 +274,38 @@ namespace DEHPSTEPAP242.ViewModel
         /// The mapping is performed only on the <see cref="SelectedPart"/> through
         /// the <see cref="IMappingConfigurationDialogViewModel"/>
         /// </remarks>
-        private async void MapCommandExecute()
+        private void MapCommandExecute()
         {
             var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
+
+            this.AssignMapping();
+            
             viewModel.SelectedThing = this.SelectedPart;
+
+            viewModel.UpdatePropertiesBasedOnMappingConfiguration(); 
+
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
 
+        /// <summary>
+        /// Temporal command
+        /// </summary>
+        /// <todo>Remove this command</todo>
         private async void TransferCommandExecute()
         {
             await this.dstController.Transfer();
+        }
+
+        /// <summary>
+        /// Assings a mapping configuration to the selected part
+        /// </summary>
+        private void AssignMapping()
+        {
+            //TODO: implement, null pointer right now
+            //this.SelectedPart?.MappingConfigurations.AddRange(
+            //    this.dstController.ExternalIdentifierMap.Correspondence.Where(
+            //        x => x.ExternalId == this.SelectedPart.ElementName ||
+            //                x.ExternalId == this.SelectedPart.ParameterName));
         }
 
         #endregion

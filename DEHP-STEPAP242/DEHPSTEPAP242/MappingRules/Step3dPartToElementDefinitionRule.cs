@@ -122,8 +122,10 @@ namespace DEHPSTEPAP242.MappingRules
                     //   + GUII of the file in the DomainFileStore (known only at Transfer time)
                     //
 
-                    this.dstElementName = part.Name;
-                    this.dstParameterName = $"{part.Name} 3D Geometry";
+
+                    // Default values
+                    this.dstElementName = part.ElementName;
+                    this.dstParameterName = part.ParameterName;
 
                     if (part.SelectedElementUsages.Any())
                     {

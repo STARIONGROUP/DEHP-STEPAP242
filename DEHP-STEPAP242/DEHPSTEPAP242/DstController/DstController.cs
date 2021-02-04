@@ -247,8 +247,7 @@ namespace DEHPSTEPAP242.DstController
         /// <returns>A <see cref="Task"/></returns>
         public async Task UpdateExternalIdentifierMap()
         {
-            await Task.FromResult(0);
-            /*
+#if DO_UPDATE_EXTERNAL_IDMAP
             await this.hubController.Delete<ExternalIdentifierMap, IdCorrespondence>(this.ExternalIdentifierMap.Correspondence.ToList(),
                 (map, correspondence) => map.Correspondence.Remove(correspondence));
 
@@ -265,7 +264,10 @@ namespace DEHPSTEPAP242.DstController
             this.ExternalIdentifierMap.Correspondence.AddRange(this.IdCorrespondences);
             this.IdCorrespondences.Clear();
             this.statusBar.Append("Mapping configuration saved");
-            */
+#else
+            // Currently nothing to save (feature not fully implemented)
+            await Task.FromResult(0);
+#endif
         }
 
         /// <summary>
@@ -310,9 +312,7 @@ namespace DEHPSTEPAP242.DstController
             this.statusBar = statusBar;
         }
 
-        #endregion
-
-
+#endregion
 
         /// <summary>
         /// Transfers the mapped parts to the Hub data source

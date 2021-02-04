@@ -23,6 +23,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Services.DstHubService;
     using System.Diagnostics;
+    using CDP4Common.CommonData;
 
 
     /// <summary>
@@ -49,6 +50,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
         /// </summary>
         public ICloseWindowBehavior CloseWindowBehavior { get; set; }
+
+        #region IMappingConfigurationDialogViewModel interface
 
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
@@ -109,14 +112,48 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         public ReactiveList<ActualFiniteState> AvailableActualFiniteStates { get; } = new ReactiveList<ActualFiniteState>();
 
         /// <summary>
-        /// Gets the collection of <see cref="VariableRowViewModel"/>
-        /// </summary>
-        public ReactiveList<Step3dRowViewModel> Variables { get; } = new ReactiveList<Step3dRowViewModel>();
-
-        /// <summary>
         /// Gets the <see cref="ICommand"/> to continue
         /// </summary>
         public ReactiveCommand<object> ContinueCommand { get; set; }
+
+        /// <summary>
+        /// Updates the mapping based on the available 10-25 elements
+        /// </summary>
+        public void UpdatePropertiesBasedOnMappingConfiguration()
+        {
+            this.IsBusy = true;
+
+            var part = this.SelectedThing;
+
+            foreach (var idCorrespondence in part.MappingConfigurations)
+            {
+                if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
+                {
+                    Action action = thing switch
+                    {
+                        ElementDefinition elementDefinition => (() => part.SelectedElementDefinition = elementDefinition),
+                        ElementUsage elementUsage => (() => part.SelectedElementUsages.Add(elementUsage)),
+                        Parameter parameter => (() => part.SelectedParameter = parameter),
+                        Option option => (() => part.SelectedOption = option),
+                        ActualFiniteState state => (() => part.SelectedActualFiniteState = state),
+                        _ => null
+                    };
+
+                    action?.Invoke();
+
+                    if (action is null && this.hubController.GetThingById(idCorrespondence.InternalThing, out CompoundParameterType parameterType))
+                    {
+                        part.SelectedParameterType = parameterType;
+                    }
+                }
+            }
+
+            this.IsBusy = false;
+        }
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// Initializes a new <see cref="MappingConfigurationDialogViewModel"/>
@@ -129,9 +166,14 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.hubController = hubController;
             this.dstController = dstController;
             this.dstHubService = dstHubService;
+
             this.UpdateProperties();
             this.InitializesCommandsAndObservableSubscriptions();
         }
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// Initializes this view model <see cref="ICommand"/> and <see cref="Observable"/>
@@ -255,7 +297,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         private void UpdateAvailableOptions()
         {
             this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
-            this.Variables.ForEach(x => x.SelectedOption = this.AvailableOptions.Last());
+            
+            // Called in constructor, this reference is not yet selected
+            //this.SelectedThing.SelectedOption = this.AvailableOptions.Last();
         }
 
         /// <summary>
@@ -299,5 +343,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <returns>A <see cref="Func{T,T}"/> input parameter is <see cref="IOwnedThing"/> and outputs an assert whether the verification return true </returns>
         private Func<T, bool> AreTheseOwnedByTheDomain<T>() where T : IOwnedThing 
             => x => x.Owner.Iid == this.hubController.CurrentDomainOfExpertise.Iid;
+
+        #endregion
     }
 }
