@@ -59,10 +59,10 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Path Stretch="Fill" Fill="DarkGray" Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z" HorizontalAlignment="Left" MaxHeight="30" RenderTransformOrigin=".5,.5"/>
-                                    <Button Grid.Column="1" Height="40" HorizontalAlignment="Center" Content="Change Transfert Direction"/>
+                                    <Button Grid.Column="1" Height="40" HorizontalAlignment="Center" Content="Change Transfert Direction" Command="{Binding ChangeMappingDirection}"/>
                                     <Path Grid.Column="2" Stretch="Fill" Fill="DarkGray" Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z" HorizontalAlignment="Left" MaxHeight="30" RenderTransformOrigin=".5,.5"/>
                                 </Grid>
-                                <views:DstObjectBrowser  Grid.Row="1"></views:DstObjectBrowser>
+                                <objectBrowser:ObjectBrowser DataContext="{Binding NetChangePreviewViewModel}" Grid.Row="1"></objectBrowser:ObjectBrowser>
                             </Grid>
                         </dxdo:LayoutPanel>
                         

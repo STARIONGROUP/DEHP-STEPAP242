@@ -187,10 +187,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             try
             {
-                if (this.dstController.Map(this.SelectedThing))
-                {
-                    this.CloseWindowBehavior?.Close();
-                }
+                this.dstController.Map(this.SelectedThing);
+                this.CloseWindowBehavior?.Close();
             }
             catch (Exception e)
             {

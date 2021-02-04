@@ -77,7 +77,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
-        IEnumerable<ElementDefinition> DstMapResult { get; }
+        IEnumerable<ElementDefinition> MapResult { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
@@ -101,7 +101,7 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        bool Map(Step3dRowViewModel dst3DPart);
+        Task Map(Step3dRowViewModel dst3DPart);
 
         /// <summary>
         /// Transfers the mapped parts to the Hub data source

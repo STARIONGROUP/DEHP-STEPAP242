@@ -27,6 +27,7 @@ namespace DEHPSTEPAP242.DstController
     using System;
     using System.Diagnostics;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     
     using ReactiveUI;
@@ -47,8 +48,8 @@ namespace DEHPSTEPAP242.DstController
     using CDP4Dal;
     using DEHPCommon.Events;
     using CDP4Common.CommonData;
-    using System.Linq;
     using CDP4Common.Types;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data from and to EcosimPro
@@ -71,7 +72,12 @@ namespace DEHPSTEPAP242.DstController
         /// The <see cref="IDstHubService"/>
         /// </summary>
         private readonly IDstHubService dstHubService;
-        
+
+        /// <summary>
+        /// The <see cref="IStatusBarControlViewModel"/>
+        /// </summary>
+        private readonly IStatusBarControlViewModel statusBar;
+
         /// <summary>
         /// The current class <see cref="NLog.Logger"/>
         /// </summary>
@@ -179,7 +185,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
-        public IEnumerable<ElementDefinition> DstMapResult { get; private set; } = new List<ElementDefinition>();
+        public IEnumerable<ElementDefinition> MapResult { get; private set; } = new List<ElementDefinition>();
 
         /// <summary>
         /// Gets the colection of mapped <see cref="Step3dTargetSourceParameter"/> which needs to be updated in the transfer operation
@@ -201,7 +207,7 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        public bool Map(Step3dRowViewModel dst3DPart)
+        public async Task Map(Step3dRowViewModel dst3DPart)
         {
             var parts = new List<Step3dRowViewModel> { dst3DPart };
 
@@ -211,10 +217,55 @@ namespace DEHPSTEPAP242.DstController
             var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
                this.mappingEngine.Map(parts);
 
-            ((List<ElementDefinition>)this.DstMapResult).AddRange(elements);
+            ((List<ElementDefinition>)this.MapResult).AddRange(elements);
             this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
-            return true;
+            await this.UpdateExternalIdentifierMap();
+
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
+        }
+
+        /// <summary>
+        /// Transfers the mapped parts to the Hub data source
+        /// </summary>
+        /// <returns>A <see cref="Task"/></returns>
+        public async Task Transfer()
+        {
+            if (this.MappingDirection == MappingDirection.FromDstToHub)
+            {
+                await this.TransferMappedThingsToHub();
+            }
+            else
+            {
+                //TODO: nothing in that direction
+            }
+        }
+
+        /// <summary>
+        /// Updates the configured mapping
+        /// </summary>
+        /// <returns>A <see cref="Task"/></returns>
+        public async Task UpdateExternalIdentifierMap()
+        {
+            await Task.FromResult(0);
+            /*
+            await this.hubController.Delete<ExternalIdentifierMap, IdCorrespondence>(this.ExternalIdentifierMap.Correspondence.ToList(),
+                (map, correspondence) => map.Correspondence.Remove(correspondence));
+
+            this.ExternalIdentifierMap.Correspondence.Clear();
+
+            foreach (var correspondence in this.IdCorrespondences)
+            {
+                correspondence.Container = this.ExternalIdentifierMap;
+            }
+
+            await this.hubController.CreateOrUpdate<ExternalIdentifierMap, IdCorrespondence>(this.IdCorrespondences,
+                (map, correspondence) => map.Correspondence.Add(correspondence));
+
+            this.ExternalIdentifierMap.Correspondence.AddRange(this.IdCorrespondences);
+            this.IdCorrespondences.Clear();
+            this.statusBar.Append("Mapping configuration saved");
+            */
         }
 
         /// <summary>
@@ -248,30 +299,20 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="mappingEngine">The <<see cref="IMappingEngine"/></param>
-        public DstController(IHubController hubController, IMappingEngine mappingEngine, IDstHubService dstHubService)
+        /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
+        /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
+        public DstController(IHubController hubController, IMappingEngine mappingEngine, 
+            IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
         {
             this.hubController = hubController;
             this.mappingEngine = mappingEngine;
             this.dstHubService = dstHubService;
+            this.statusBar = statusBar;
         }
 
         #endregion
 
-        /// <summary>
-        /// Transfers the mapped parts to the Hub data source
-        /// </summary>
-        /// <returns>A <see cref="Task"/></returns>
-        public async Task Transfer()
-        {
-            if (this.MappingDirection == MappingDirection.FromDstToHub)
-            {
-                await this.TransferMappedThingsToHub();
-            }
-            else
-            {
-                //TODO: nothing in that direction
-            }
-        }
+
 
         /// <summary>
         /// Transfers the mapped parts to the Hub data source
@@ -300,7 +341,7 @@ namespace DEHPSTEPAP242.DstController
                 var iterationClone = this.hubController.OpenIteration.Clone(false);
                 var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone);
 
-                foreach (var elementDefinition in this.DstMapResult)
+                foreach (var elementDefinition in this.MapResult)
                 {
                     var elementDefinitionCloned = this.TransactionCreateOrUpdate(transaction, elementDefinition, iterationClone.Element);
 
@@ -362,8 +403,8 @@ namespace DEHPSTEPAP242.DstController
         private async Task UpdateParametersValueSets(Thing clonedContainer)
         {
             var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(clonedContainer), clonedContainer);
-            this.UpdateParametersValueSets(transaction, this.DstMapResult.SelectMany(x => x.Parameter));
-            this.UpdateParametersValueSets(transaction, this.DstMapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
+            this.UpdateParametersValueSets(transaction, this.MapResult.SelectMany(x => x.Parameter));
+            this.UpdateParametersValueSets(transaction, this.MapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
             await this.hubController.Write(transaction);
         }
 

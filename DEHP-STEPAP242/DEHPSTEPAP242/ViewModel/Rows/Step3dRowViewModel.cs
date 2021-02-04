@@ -139,7 +139,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         public ElementDefinition SelectedElementDefinition
         {
             get => this.selectedElementDefinition;
-            set => this.RaiseAndSetIfChanged(ref this.selectedElementDefinition, value);
+            set => this.RaiseAndSetIfChanged(ref this.selectedElementDefinition, value.Clone(true));
         }
 
         /// <summary>

@@ -328,43 +328,58 @@ namespace DEHPSTEPAP242.MappingRules
         /// <param name="valueSet">The <see cref="ParameterValueSetBase"/></param>
         private void UpdateValueSet(Step3dRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
         {
-            var valuearray = valueSet.Computed;
-
             ParameterBase paramBase = (ParameterBase)parameter;
             var paramType = paramBase.ParameterType;
 
             if (paramType is CompoundParameterType p)
             {
+                var valuearray = valueSet.Computed;
+
+                if (valuearray.Count == 0)
+                {
+                    valuearray = new ValueArray<string>();
+
+                    // NOTE: this does not cange the valuearray size
+                    //for (int i=0; i<paramType.NumberOfValues; i++)
+                    //{
+                    //    valuearray.Append("");
+                    //}
+
+                    valueSet.Computed = valuearray;
+                }
+
                 // Component is an OrderedItemList, and the order could be 
-                // changed externally, then do the set value based on 
-                // component's name
+                // changed externally by modifyind the ParameterType definition,
+                // then do the set the value based on component's name
                 int index = 0;
                 foreach (ParameterTypeComponent component in p.Component)
-                {
-                    switch (component.ShortName)
                     {
-                        case "name": valuearray[index++] = $"{part.Name}"; break;
-
-                        case "id": valuearray[index++] = $"{part.StepId}"; break;
-                        
-                        case "rep_type": valuearray[index++] = $"{part.RepresentationType}"; break;
-                        
-                        case "assembly_label": valuearray[index++] = $"{part.RelationLabel}"; break;
-                        
-                        case "assembly_id": valuearray[index++] = $"{part.RelationId}"; break;
-
-                        case "source":
+                        switch (component.ShortName)
                         {
-                            // NOTE: FileRevision.Iid will be known at Transfer time
-                            this.targetSourceParameters.Add(new Step3dTargetSourceParameter(valuearray, index));
-                            valuearray[index++] = "";
+                            case "name": valuearray[index++] = $"{part.Name}"; break;
+
+                            case "id": valuearray[index++] = $"{part.StepId}"; break;
+
+                            case "rep_type": valuearray[index++] = $"{part.RepresentationType}"; break;
+
+                            case "assembly_label": valuearray[index++] = $"{part.RelationLabel}"; break;
+
+                            case "assembly_id": valuearray[index++] = $"{part.RelationId}"; break;
+
+                            case "source":
+                            {
+                                // NOTE: FileRevision.Iid will be known at Transfer time
+                                //       store the current index to know which possition corresponds
+                                //       to the source (avoid searching it again)
+                                this.targetSourceParameters.Add(new Step3dTargetSourceParameter(valuearray, index));
+                                valuearray[index++] = "";
+                            }
+                            break;
+
+                            default:
+                            break;
                         }
-                        break;
-                            
-                        default:
-                        break;
                     }
-                }
             }
 
             //this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);

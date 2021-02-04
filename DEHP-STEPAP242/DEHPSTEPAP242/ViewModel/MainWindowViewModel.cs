@@ -24,8 +24,14 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
+    using System;
+    using System.Windows.Input;
+
+    using DEHPCommon.Enumerators;
+    using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
+    using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
 
     using ReactiveUI;
@@ -35,6 +41,11 @@ namespace DEHPSTEPAP242.ViewModel
     /// </summary>
     public class MainWindowViewModel : ReactiveObject, IMainWindowViewModel
     {
+        /// <summary>
+        /// The <see cref="IDstController"/>
+        /// </summary>
+        private readonly IDstController dstController;
+
         /// <summary>
         /// Gets the view model that represents the 10-25 data source
         /// </summary>
@@ -46,9 +57,19 @@ namespace DEHPSTEPAP242.ViewModel
         public IDstDataSourceViewModel DstSourceViewModel { get; private set; }
 
         /// <summary>
+        /// Gets the view model that represents the net change preview panel
+        /// </summary>
+        public IDstNetChangePreviewViewModel NetChangePreviewViewModel { get; }
+
+        /// <summary>
         /// Gets the view model that represents the status bar
         /// </summary>
         public IStatusBarControlViewModel StatusBarControlViewModel { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ICommand"/> that will change the mapping direction
+        /// </summary>
+        public ReactiveCommand<object> ChangeMappingDirection { get; private set; }
 
         /// <summary>
         /// Initializes a new <see cref="MainWindowViewModel"/>
@@ -56,11 +77,38 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="hubHubDataSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
         /// <param name="dstSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
         /// <param name="statusBarControlViewModel">The <see cref="IStatusBarControlViewModel"/></param>
-        public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel, IDstDataSourceViewModel dstSourceViewModelViewModel, IStatusBarControlViewModel statusBarControlViewModel)
+        public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel, 
+            IDstDataSourceViewModel dstSourceViewModelViewModel, 
+            IStatusBarControlViewModel statusBarControlViewModel,
+            IDstController dstController,
+            IDstNetChangePreviewViewModel netChangePreviewViewModel)
         {
+            this.dstController = dstController;
             this.HubDataSourceViewModel = hubHubDataSourceViewModelViewModel;
             this.DstSourceViewModel = dstSourceViewModelViewModel;
+            this.NetChangePreviewViewModel = netChangePreviewViewModel;
+            //this.TransferControlViewModel = transferControlViewModel;
             this.StatusBarControlViewModel = statusBarControlViewModel;
+
+            this.InitializeCommands();
+        }
+
+        /// <summary>
+        /// Initializes this view model <see cref="ICommand"/>
+        /// </summary>
+        private void InitializeCommands()
+        {
+            this.ChangeMappingDirection = ReactiveCommand.Create();
+            this.ChangeMappingDirection.Subscribe(_ => this.ChangeMappingDirectionExecute());
+        }
+
+        /// <summary>
+        /// Executes the <see cref="ChangeMappingDirection"/>
+        /// </summary>
+        private void ChangeMappingDirectionExecute()
+        {
+            //this.SwitchPanelBehavior?.Switch();
+            //this.dstController.MappingDirection = this.SwitchPanelBehavior?.MappingDirection ?? MappingDirection.FromDstToHub;
         }
     }
 }

@@ -24,6 +24,10 @@
 
 namespace DEHPSTEPAP242.ViewModel.Interfaces
 {
+    using ReactiveUI;
+
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+
     /// <summary>
     /// Interface definitions of methods and properties of <see cref="Views.MainWindow"/>
     /// </summary>
@@ -38,5 +42,20 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// Gets the view model that represents the EcosimPro data source
         /// </summary>
         IDstDataSourceViewModel DstSourceViewModel { get; }
+
+        /// <summary>
+        /// Gets the view model that represents the net change preview panel
+        /// </summary>
+        IDstNetChangePreviewViewModel NetChangePreviewViewModel { get; }
+
+        /// <summary>
+        /// Gets the view model that represents the status bar
+        /// </summary>
+        IStatusBarControlViewModel StatusBarControlViewModel { get; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ICommand"/> that will change the mapping direction
+        /// </summary>
+        ReactiveCommand<object> ChangeMappingDirection { get; }
     }
 }

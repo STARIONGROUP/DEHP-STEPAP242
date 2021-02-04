@@ -40,6 +40,7 @@ namespace DEHPSTEPAP242
     using DEHPSTEPAP242.ViewModel.Dialogs;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.ViewModel.NetChangePreview;
     using DEHPSTEPAP242.Views;
 
     using DevExpress.Xpf.Core;
@@ -111,6 +112,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();
             containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
             containerBuilder.RegisterType<MappingConfigurationDialogViewModel>().As<IMappingConfigurationDialogViewModel>();
+            containerBuilder.RegisterType<DstNetChangePreviewViewModel>().As<IDstNetChangePreviewViewModel>();
         }
     }
 }
