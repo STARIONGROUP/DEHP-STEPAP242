@@ -38,7 +38,13 @@ namespace DEHPSTEPAP242.ViewModel
 
     /// <summary>
     /// <see cref="MainWindowViewModel"/> is the view model for <see cref="Views.MainWindow"/>
+    /// 
     /// </summary>
+    /// <remarks>
+    /// From <see cref="DEHPCommon.UserInterfaces.Behaviors.SwitchLayoutPanelOrderBehavior"/>:
+    /// The behavior well function relies on the panels to be of type <see cref="LayoutGroup"/> and on their name.
+    /// Those needs to match the <see cref="LayoutGroupName"/>, <see cref="DstPanelName"/> and <see cref="HubPanelName"/>
+    /// </remarks>
     public class MainWindowViewModel : ReactiveObject, IMainWindowViewModel
     {
         /// <summary>
@@ -65,6 +71,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// Gets the <see cref="ITransferControlViewModel"/>
         /// </summary>
         public ITransferControlViewModel TransferControlViewModel { get; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ISwitchLayoutPanelOrderBehavior"/>
+        /// </summary>
+        public ISwitchLayoutPanelOrderBehavior SwitchPanelBehavior { get; set; }
 
         /// <summary>
         /// Gets the view model that represents the status bar
@@ -113,8 +124,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void ChangeMappingDirectionExecute()
         {
-            //this.SwitchPanelBehavior?.Switch();
-            //this.dstController.MappingDirection = this.SwitchPanelBehavior?.MappingDirection ?? MappingDirection.FromDstToHub;
+            this.SwitchPanelBehavior?.Switch();
+            this.dstController.MappingDirection = this.SwitchPanelBehavior?.MappingDirection ?? MappingDirection.FromDstToHub;
         }
     }
 }

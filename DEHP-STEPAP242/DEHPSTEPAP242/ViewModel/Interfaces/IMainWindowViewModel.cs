@@ -31,7 +31,7 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     /// <summary>
     /// Interface definitions of methods and properties of <see cref="Views.MainWindow"/>
     /// </summary>
-    public interface IMainWindowViewModel
+    public interface IMainWindowViewModel : ISwitchLayoutPanelOrderViewModel
     {
         /// <summary>
         /// Gets the view model that represents the 10-25 data source

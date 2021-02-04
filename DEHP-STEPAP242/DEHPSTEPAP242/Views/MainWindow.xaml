@@ -5,7 +5,9 @@
         xmlns:dataTemplate="clr-namespace:DEHPSTEPAP242.Views.Rows"
         xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
         xmlns:common="clr-namespace:DEHPCommon.UserInterfaces.Views;assembly=DEHPCommon"
+        xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
         xmlns:objectBrowser="clr-namespace:DEHPCommon.UserInterfaces.Views.ObjectBrowser;assembly=DEHPCommon"
         xmlns:views="clr-namespace:DEHPSTEPAP242.Views" 
         Title="DEHP STEP-AP242 Adapter" WindowState="Maximized" 
@@ -17,6 +19,9 @@
             </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
+    <dxmvvm:Interaction.Behaviors>
+        <behaviors:SwitchLayoutPanelOrderBehavior/>
+    </dxmvvm:Interaction.Behaviors>
     <DockPanel>
         <Grid>
             <Grid.RowDefinitions>
@@ -27,7 +32,7 @@
             <dxdo:DockLayoutManager Grid.Row="0" AutoHideMode="Inline" FloatingMode="Desktop">
                 <dxdo:LayoutGroup AllowSplitters="True" Orientation="Vertical">
                     <dxdo:LayoutGroup x:Name="LayoutGroup" ItemHeight="7*" Orientation="Horizontal">
-                        <dxdo:LayoutPanel MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="STEP-AP242">
+                        <dxdo:LayoutPanel Name="DstPanel" MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="STEP-AP242">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"></RowDefinition>
@@ -67,7 +72,7 @@
                         </dxdo:LayoutPanel>
                         
                         <!-- Hub Data Source panel -->
-                        <dxdo:LayoutPanel MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="Hub Data Source">
+                        <dxdo:LayoutPanel Name="HubPanel" MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="Hub Data Source">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"></RowDefinition>
