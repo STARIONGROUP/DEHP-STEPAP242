@@ -41,6 +41,14 @@ namespace DEHPSTEPAP242.DstController
     using DEHPSTEPAP242.ViewModel;
     using STEP3DAdapter;
     using DEHPSTEPAP242.ViewModel.Rows;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.MappingRules;
+    using CDP4Dal.Operations;
+    using CDP4Dal;
+    using DEHPCommon.Events;
+    using CDP4Common.CommonData;
+    using System.Linq;
+    using CDP4Common.Types;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data from and to EcosimPro
@@ -50,15 +58,20 @@ namespace DEHPSTEPAP242.DstController
         #region Private Members
 
         /// <summary>
+        /// The <see cref="IHubController"/>
+        /// </summary>
+        private readonly IHubController hubController;
+
+        /// <summary>
         /// The <see cref="IMappingEngine"/>
         /// </summary>
         private readonly IMappingEngine mappingEngine;
 
         /// <summary>
-        /// The <see cref="IHubController"/>
+        /// The <see cref="IDstHubService"/>
         /// </summary>
-        private readonly IHubController hubController;
-
+        private readonly IDstHubService dstHubService;
+        
         /// <summary>
         /// The current class <see cref="NLog.Logger"/>
         /// </summary>
@@ -166,7 +179,12 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
-        public IEnumerable<ElementDefinition> ElementDefinitionParametersDstStep3dMaps { get; private set; } = new List<ElementDefinition>();
+        public IEnumerable<ElementDefinition> DstMapResult { get; private set; } = new List<ElementDefinition>();
+
+        /// <summary>
+        /// Gets the colection of mapped <see cref="Step3dTargetSourceParameter"/> which needs to be updated in the transfer operation
+        /// </summary>
+        public List<Step3dTargetSourceParameter> TargetSourceParametersDstStep3dMaps { get; private set; } = new List<Step3dTargetSourceParameter>();
 
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
@@ -188,8 +206,13 @@ namespace DEHPSTEPAP242.DstController
             var parts = new List<Step3dRowViewModel> { dst3DPart };
 
             //this.ElementDefinitionParametersDstStep3dMaps = (IEnumerable<ElementDefinition>)this.mappingEngine.Map(parts);
+            //((List<ElementDefinition>)this.ElementDefinitionParametersDstStep3dMaps).AddRange((IEnumerable<ElementDefinition>)this.mappingEngine.Map(parts));
 
-            ((List<ElementDefinition>)this.ElementDefinitionParametersDstStep3dMaps).AddRange((IEnumerable<ElementDefinition>)this.mappingEngine.Map(parts));
+            var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
+               this.mappingEngine.Map(parts);
+
+            ((List<ElementDefinition>)this.DstMapResult).AddRange(elements);
+            this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
             return true;
         }
@@ -225,24 +248,173 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="mappingEngine">The <<see cref="IMappingEngine"/></param>
-        public DstController(IHubController hubController, IMappingEngine mappingEngine)
+        public DstController(IHubController hubController, IMappingEngine mappingEngine, IDstHubService dstHubService)
         {
             this.hubController = hubController;
             this.mappingEngine = mappingEngine;
+            this.dstHubService = dstHubService;
         }
 
         #endregion
 
-        // /// <summary>
-        // /// Transfers the mapped variables to the Hub data source
-        // /// </summary>
-        // /// <returns>A <see cref="Task"/></returns>
-        // public async Task Transfer()
-        // {
-        //     await this.hubController.CreateOrUpdate(this.ElementDefinitionParametersDstVariablesMaps, true);
-        //     await this.hubController.CreateOrUpdate(this.ExternalIdentifierMaps, false);
-        // }
+        /// <summary>
+        /// Transfers the mapped parts to the Hub data source
+        /// </summary>
+        /// <returns>A <see cref="Task"/></returns>
+        public async Task Transfer()
+        {
+            if (this.MappingDirection == MappingDirection.FromDstToHub)
+            {
+                await this.TransferMappedThingsToHub();
+            }
+            else
+            {
+                //TODO: nothing in that direction
+            }
+        }
 
+        /// <summary>
+        /// Transfers the mapped parts to the Hub data source
+        /// </summary>
+        /// <returns>A <see cref="Task"/></returns>
+        public async Task TransferMappedThingsToHub()
+        {
+            // Step 1: upload file
+            string filePath = Step3DFile.FileName;
+            var file = this.dstHubService.FindFile(filePath);
+
+            await this.hubController.Upload(filePath, file);
+
+            // Step 2: update Step3dParameter.source with FileRevision from uploaded file
+            file = this.dstHubService.FindFile(filePath);
+            var fileRevision = file.CurrentFileRevision;
+
+            foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
+            {
+                sourceFieldToUpdate.UpdateSource(fileRevision);
+            }
+
+            // Step 3: create/update things
+            try
+            {
+                var iterationClone = this.hubController.OpenIteration.Clone(false);
+                var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone);
+
+                foreach (var elementDefinition in this.DstMapResult)
+                {
+                    var elementDefinitionCloned = this.TransactionCreateOrUpdate(transaction, elementDefinition, iterationClone.Element);
+
+                    foreach (var parameter in elementDefinition.Parameter)
+                    {
+                        _ = this.TransactionCreateOrUpdate(transaction, parameter, elementDefinitionCloned.Parameter);
+                    }
+
+                    foreach (var parameterOverride in elementDefinition.ContainedElement.SelectMany(x => x.ParameterOverride))
+                    {
+                        var elementUsageClone = (ElementUsage)parameterOverride.Container.Clone(false);
+                        transaction.CreateOrUpdate(elementUsageClone);
+
+                        _ = this.TransactionCreateOrUpdate(transaction, parameterOverride, elementUsageClone.ParameterOverride);
+                    }
+                }
+
+                await this.hubController.Write(transaction);
+
+                await this.UpdateParametersValueSets(iterationClone);
+
+                await this.hubController.Refresh();
+                CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Registers the provided <paramref cref="Thing"/> to be created or updated by the <paramref name="transaction"/>
+        /// </summary>
+        /// <typeparam name="TThing">The type of the <paramref name="containerClone"/></typeparam>
+        /// <param name="transaction">The <see cref="IThingTransaction"/></param>
+        /// <param name="thing">The <see cref="Thing"/></param>
+        /// <param name="containerClone">The <see cref="ContainerList{T}"/> of the cloned container</param>
+        /// <returns>A cloned <typeparamref name="TThing"/></returns>
+        private TThing TransactionCreateOrUpdate<TThing>(IThingTransaction transaction, TThing thing, ContainerList<TThing> containerClone) where TThing : Thing
+        {
+            var clone = thing.Clone(false);
+
+            if (clone.Iid == Guid.Empty)
+            {
+                clone.Iid = Guid.NewGuid();
+                thing.Iid = clone.Iid;
+                transaction.Create(clone);
+                containerClone.Add((TThing)clone);
+            }
+            else
+            {
+                transaction.CreateOrUpdate(clone);
+            }
+
+            return (TThing)clone;
+        }
+
+        private async Task UpdateParametersValueSets(Thing clonedContainer)
+        {
+            var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(clonedContainer), clonedContainer);
+            this.UpdateParametersValueSets(transaction, this.DstMapResult.SelectMany(x => x.Parameter));
+            this.UpdateParametersValueSets(transaction, this.DstMapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
+            await this.hubController.Write(transaction);
+        }
+
+        private void UpdateParametersValueSets(IThingTransaction transaction, IEnumerable<Parameter> parameters)
+        {
+            foreach (var parameter in parameters)
+            {
+                this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out Parameter newParameter);
+
+                var container = newParameter.Clone(false);
+
+                for (var index = 0; index < parameter.ValueSet.Count; index++)
+                {
+                    var clone = newParameter.ValueSet[index].Clone(false);
+                    UpdateValueSet(clone, parameter.ValueSet[index]);
+                    transaction.CreateOrUpdate(clone);
+                }
+
+                transaction.CreateOrUpdate(container);
+            }
+        }
+
+        private void UpdateParametersValueSets(IThingTransaction transaction, IEnumerable<ParameterOverride> parameters)
+        {
+            foreach (var parameter in parameters)
+            {
+                this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out ParameterOverride newParameter);
+
+                var container = newParameter.Clone(false);
+
+                for (var index = 0; index < parameter.ValueSet.Count; index++)
+                {
+                    var clone = newParameter.ValueSet[index].Clone(false);
+                    UpdateValueSet(clone, parameter.ValueSet[index]);
+                    transaction.CreateOrUpdate(clone);
+                }
+
+                transaction.CreateOrUpdate(container);
+            }
+        }
+
+        private static void UpdateValueSet(ParameterValueSetBase clone, IValueSet valueSet)
+        {
+            clone.Reference = valueSet.Reference;
+            clone.Computed = valueSet.Computed;
+            clone.Manual = valueSet.Manual;
+            clone.ActualState = valueSet.ActualState;
+            clone.ActualOption = valueSet.ActualOption;
+            clone.Formula = valueSet.Formula;
+            clone.ValueSwitch = valueSet.ValueSwitch;
+        }
 
     }
 }

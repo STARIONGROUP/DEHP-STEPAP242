@@ -191,11 +191,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 {
                     this.CloseWindowBehavior?.Close();
                 }
-
-                //if (this.dstController.Map(this.Variables.Where(x => !x.SelectedValues.IsEmpty).ToList()))
-                //{
-                //    this.CloseWindowBehavior?.Close();
-                //}
             }
             catch (Exception e)
             {
