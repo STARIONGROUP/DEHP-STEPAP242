@@ -113,6 +113,14 @@ namespace DEHPSTEPAP242.ViewModel
 
             this.ConnectCommand = ReactiveCommand.Create();
             this.ConnectCommand.Subscribe(_ => this.ConnectCommandExecute());
+
+            // Activate Refresh when an Iteration is open
+            var canRefresh = this.WhenAny(
+                vm => vm.hubController.OpenIteration,
+                (iteration) => iteration.Value != null);
+
+            this.RefreshCommand = ReactiveCommand.Create(canRefresh);
+            this.RefreshCommand.Subscribe(_ => this.hubController.Refresh());
         }
 
         /// <summary>
@@ -143,6 +151,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// <see cref="ReactiveCommand{T}"/> for connecting to a data source
         /// </summary>
         public ReactiveCommand<object> ConnectCommand { get; set; }
+
+        /// <summary>
+        /// <see cref="ReactiveCommand{T}"/> to refresh the data source
+        /// </summary>
+        public ReactiveCommand<object> RefreshCommand { get; set; }
 
         /// <summary>
         /// Executes the <see cref="HubDataSourceViewModel.ConnectCommand"/>

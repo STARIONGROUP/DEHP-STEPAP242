@@ -74,7 +74,10 @@
                                     <RowDefinition></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <!-- Hub Connect section -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button Width="150" Height="40" HorizontalAlignment="Center" Content="{Binding HubDataSourceViewModel.ConnectButtonText}" Command="{Binding HubDataSourceViewModel.ConnectCommand}"/>
+                                <Button Height="40" HorizontalAlignment="Center" Content="Refresh" Command="{Binding HubDataSourceViewModel.RefreshCommand}" Margin="20,0,0,0"/>
+                                </StackPanel>
                                 <!-- Hub Content section -->
                                 <!-- BorderThickness="0,0,0,1" -->
                                 <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderThickness="0" Padding="0">

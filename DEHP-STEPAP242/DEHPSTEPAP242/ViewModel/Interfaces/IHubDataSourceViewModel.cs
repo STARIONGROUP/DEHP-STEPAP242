@@ -57,5 +57,10 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// <see cref="ReactiveCommand{T}"/> for connecting to a data source
         /// </summary>
         ReactiveCommand<object> ConnectCommand { get; set; }
+
+        /// <summary>
+        /// <see cref="ReactiveCommand{T}"/> to refresh the data source
+        /// </summary>
+        ReactiveCommand<object> RefreshCommand { get; set; }
     }
 }
