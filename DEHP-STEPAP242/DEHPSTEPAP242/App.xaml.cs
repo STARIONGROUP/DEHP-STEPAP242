@@ -49,6 +49,7 @@ namespace DEHPSTEPAP242
     using SplashScreen = DEHPCommon.UserInterfaces.Views.SplashScreen;
     using DEHPCommon.MappingEngine;
     using System.Reflection;
+    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -94,6 +95,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstHubService>().As<IDstHubService>().SingleInstance();
             containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
             containerBuilder.RegisterType<MappingEngine>().As<IMappingEngine>().WithParameter(MappingEngine.ParameterName, Assembly.GetExecutingAssembly());
+            containerBuilder.RegisterType<HLRBuilder>().As<IHLRBuilder>();
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ namespace DEHPSTEPAP242.ViewModel
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using Autofac;
@@ -26,7 +27,6 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 
     using STEP3DAdapter;
-    using System.Linq;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -145,7 +145,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             SelectedPart = null;
 
-            var builder = new HLRBuilder();
+            var builder = AppContainer.Container.Resolve<IHLRBuilder>();
 
             Step3DHLR = builder.CreateHLR(dstController.Step3DFile);
 

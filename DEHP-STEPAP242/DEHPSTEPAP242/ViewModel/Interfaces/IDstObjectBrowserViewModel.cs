@@ -5,7 +5,6 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     using System.Collections.Generic;
 
     using DEHPSTEPAP242.ViewModel.Rows;
-    using ReactiveUI;
 
     ///	<summary>
     /// Interface definition for <see cref="DstObjectBrowserViewModel"/> is the
@@ -25,13 +24,13 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// - Key Field --> Step3DPartTreeNode.ID
         /// - Parent Field --> Step3DPartTreeNode.ParentID
         /// </summary>
-        public List<Step3dRowViewModel> Step3DHLR { get; }
+        List<Step3dRowViewModel> Step3DHLR { get; }
 
         /// <summary>
         /// Create the HLR tree from the Parts/Relations.
         /// </summary>
         /// <param name="parts">List of geometric parts</param>
         /// <param name="relations">List of part relations defining instances in the tree composition</param>
-        public void UpdateHLR();
+        void UpdateHLR();
     }
 }
