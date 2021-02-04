@@ -49,6 +49,11 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         IDstNetChangePreviewViewModel NetChangePreviewViewModel { get; }
 
         /// <summary>
+        /// Gets the <see cref="ITransferControlViewModel"/>
+        /// </summary>
+        ITransferControlViewModel TransferControlViewModel { get; }
+
+        /// <summary>
         /// Gets the view model that represents the status bar
         /// </summary>
         IStatusBarControlViewModel StatusBarControlViewModel { get; }

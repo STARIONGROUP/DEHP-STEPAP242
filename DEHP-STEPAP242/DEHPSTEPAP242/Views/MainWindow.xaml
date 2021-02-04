@@ -62,7 +62,7 @@
                                     <Button Grid.Column="1" Height="40" HorizontalAlignment="Center" Content="Change Transfert Direction" Command="{Binding ChangeMappingDirection}"/>
                                     <Path Grid.Column="2" Stretch="Fill" Fill="DarkGray" Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z" HorizontalAlignment="Left" MaxHeight="30" RenderTransformOrigin=".5,.5"/>
                                 </Grid>
-                                <objectBrowser:ObjectBrowser DataContext="{Binding NetChangePreviewViewModel}" Grid.Row="1"></objectBrowser:ObjectBrowser>
+                                <objectBrowser:ObjectBrowser DataContext="{Binding NetChangePreviewViewModel}" Grid.Row="1" />
                             </Grid>
                         </dxdo:LayoutPanel>
                         
@@ -102,8 +102,6 @@
                                         <views:HubFileStoreBrowser DataContext="{Binding HubDataSourceViewModel.HubFileStoreBrowser}" />
                                     </TabItem>
                                 </TabControl>
-                                
-                                
                             </Grid>
                         </dxdo:LayoutPanel>
                         
@@ -125,24 +123,8 @@
                     </dxdo:LayoutGroup>
                 </dxdo:LayoutGroup>
             </dxdo:DockLayoutManager>
-            <Grid Grid.Row="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="4*" />
-                    <RowDefinition Height="6*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="8*" />
-                </Grid.ColumnDefinitions>
-                <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="10,10,10,5" HorizontalAlignment="Stretch">
-                    <ProgressBar Background="AliceBlue" Foreground="DarkGray" Maximum="100" Minimum="0" Value="37" />
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Text="37%" />
-                </Grid>
-                <Button Grid.Row="1" Grid.Column="0" Height="40" Margin="10,5,5,10" Content="Cancel"/>
-                <Button Grid.Row="1" Grid.Column="1" Height="40" Margin="5,5,10,10" Content="Map"/>
-            </Grid>
-
-            <common:StatusBarControl DataContext="{Binding StatusBarControlViewModel}" Grid.Row="2" />
+            <common:TransferControl  Grid.Row="1" DataContext="{Binding TransferControlViewModel}" />
+            <common:StatusBarControl Grid.Row="2" DataContext="{Binding StatusBarControlViewModel}" />
         </Grid>
     </DockPanel>
 </Window>

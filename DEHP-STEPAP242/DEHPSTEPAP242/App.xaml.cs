@@ -25,13 +25,17 @@
 namespace DEHPSTEPAP242
 {
     using System.Windows;
+    using System.Reflection;
 
     using Autofac;
 
     using DEHPCommon;
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
+    using DEHPCommon.MappingEngine;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
+    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.Services.FileStoreService;
@@ -47,9 +51,6 @@ namespace DEHPSTEPAP242
 
     using DXSplashScreenViewModel = DevExpress.Mvvm.DXSplashScreenViewModel;
     using SplashScreen = DEHPCommon.UserInterfaces.Views.SplashScreen;
-    using DEHPCommon.MappingEngine;
-    using System.Reflection;
-    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -115,6 +116,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
             containerBuilder.RegisterType<MappingConfigurationDialogViewModel>().As<IMappingConfigurationDialogViewModel>();
             containerBuilder.RegisterType<DstNetChangePreviewViewModel>().As<IDstNetChangePreviewViewModel>();
+            containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>();
         }
     }
 }
