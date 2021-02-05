@@ -198,17 +198,6 @@ namespace DEHPSTEPAP242.ViewModel
                     MenuItemKind.Export,
                     ClassKind.NotThing)
                 );
-
-
-            var TransferCommand = ReactiveCommand.Create();
-            TransferCommand.Subscribe(_ => this.TransferCommandExecute());
-
-            ContextMenu.Add(new ContextMenuItemViewModel(
-                    $"Transfer Mappings", "",
-                    TransferCommand,
-                    MenuItemKind.Export,
-                    ClassKind.NotThing)
-                );
         }
 
         #endregion
