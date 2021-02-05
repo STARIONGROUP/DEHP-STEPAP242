@@ -18,6 +18,10 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Services.FileStoreService;
     using DEHPSTEPAP242.Services.DstHubService;
+    using System.Reactive;
+    using CDP4Dal;
+    using DEHPCommon.Events;
+    using DEHPCommon.Services.FileDialogService;
 
     /// <summary>
     /// Wrapper class to display <see cref="FileRevision"/>
@@ -65,13 +69,24 @@ namespace DEHPSTEPAP242.ViewModel
         private readonly IHubController hubController;
 
         /// <summary>
+        /// The <see cref="IDstHubService"/> instance
+        /// </summary>
+        private readonly IDstHubService dstHubService;
+
+        /// <summary>
         /// The <see cref="IStatusBarControlViewModel"/> instance
         /// </summary>
-        private readonly IStatusBarControlViewModel statusBarControlView;
+        private readonly IStatusBarControlViewModel statusBar;
 
+        /// <summary>
+        /// The <see cref="IFileStoreService"/> instance
+        /// </summary>
         private readonly IFileStoreService fileStoreService;
-        
-        private readonly IDstHubService dstHubService;
+
+        /// <summary>
+        /// The <see cref="IOpenSaveFileDialogService"/>
+        /// </summary>
+        private readonly IOpenSaveFileDialogService fileDialogService;
 
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
@@ -94,10 +109,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Gets the collection of STEP file names in the current iteration and active domain
         /// </summary>
-        public ReactiveList<HubFile> HubFiles
-        {
-            get; private set;
-        }
+        public ReactiveList<HubFile> HubFiles { get; private set; }
 
         /// <summary>
         /// Backing field for <see cref="CurrentHubFile"/>
@@ -119,11 +131,18 @@ namespace DEHPSTEPAP242.ViewModel
         public ReactiveCommand<object> UploadFileCommand { get; private set; }
 
         /// <summary>
+        /// Downloads one STEP-AP242 file from the <see cref="DomainFileStore"/> of active domain into user choosen location
+        ///
+        /// Uses the <see cref="CurrentHubFile"/> value.
+        /// </summary>
+        public ReactiveCommand<Unit> DownloadFileAsCommand { get; private set; }
+
+        /// <summary>
         /// Downloads one STEP-AP242 file from the <see cref="DomainFileStore"/> of active domain into the local storage
         ///
         /// Uses the <see cref="CurrentHubFile"/> value.
         /// </summary>
-        public ReactiveCommand<object> DownloadFileCommand { get; private set; }
+        public ReactiveCommand<Unit> DownloadFileCommand { get; private set; }
 
         /// <summary>
         /// Loads one STEP-AP242 file from the local storage
@@ -132,40 +151,25 @@ namespace DEHPSTEPAP242.ViewModel
         /// 
         /// Uses the <see cref="CurrentHubFile"/> value.
         /// </summary>
-        public ReactiveCommand<object> LoadFileCommand { get; private set; }
+        public ReactiveCommand<Unit> LoadFileCommand { get; private set; }
 
         #endregion
 
         #region Constructor
 
-        public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView, IFileStoreService fileStoreService, IDstHubService dstHubService)
+        public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView, 
+            IFileStoreService fileStoreService, IDstHubService dstHubService,
+            IOpenSaveFileDialogService fileDialogService)
         {
             this.hubController = hubController;
-            this.statusBarControlView = statusBarControlView;
+            this.statusBar = statusBarControlView;
             this.fileStoreService = fileStoreService;
             this.dstHubService = dstHubService;
+            this.fileDialogService = fileDialogService;
 
             HubFiles = new ReactiveList<HubFile>();
 
-            this.WhenAnyValue(x => x.hubController.OpenIteration).ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ =>
-                {
-                    this.IsBusy = true;
-
-                    if (this.hubController.IsSessionOpen && this.hubController.OpenIteration != null)
-                    {
-                        //this.ToolTip = $"{this.hubController.Session.DataSourceUri}\n{this.hubController.Session.ActivePerson.Name}";
-                        this.UpdateFileList();
-                    }
-                    else
-                    {
-                        HubFiles.Clear();
-                    }
-
-                    this.IsBusy = false;
-                });
-
-            InitializeCommands();
+            InitializeCommandsAndObservables();
         }
 
         #endregion
@@ -175,28 +179,38 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Initializes the commands
         /// </summary>
-        private void InitializeCommands()
+        private void InitializeCommandsAndObservables()
         {
-            /* null comparison is not accepted by WhenAnyValue() */
-            //
-            //var fileSelected = this.WhenAnyValue(
-            //	vm => vm.CurrentHubFile,
-            //	(x) => x != null);
+            // Change on connection
+            this.WhenAnyValue(x => x.hubController.OpenIteration).ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                {
+                    if (this.hubController.IsSessionOpen && this.hubController.OpenIteration != null)
+                    {
+                        this.UpdateFileList();
+                    }
+                    else
+                    {
+                        CurrentHubFile = null;
+                        HubFiles.Clear();
+                    }
+                });
 
-            //var fileSelected = this.WhenAnyValue(
-            //	vm => vm.CurrentHubFile,
-            //	(x) => { return (x != null); });
+            // Refresh/Transfer emits UpdateObjectBrowserTreeEvent (cache changed)
+            CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => this.UpdateFileList());
 
-            var fileSelected = this.WhenAnyValue(
+
+            var fileSelected = this.WhenAny(
                 vm => vm.CurrentHubFile,
-                (x) => IsValidCurrentHubFile(x));
+                (x) => x.Value != null);
 
-            LoadFileCommand = ReactiveCommand.Create(fileSelected);
-            LoadFileCommand.Subscribe(_ => LoadFileCommandExecute());
-            //this.LoadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.LoadFileCommandExecute());
+            this.LoadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.LoadFileCommandExecute());
 
-            DownloadFileCommand = ReactiveCommand.Create(fileSelected);
-            DownloadFileCommand.Subscribe(_ => DownloadFileCommandExecute());
+            this.DownloadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.DownloadFileCommandExecute());
+            
+            this.DownloadFileAsCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.DownloadFileAsCommandExecute());
         }
 
         /// <summary>
@@ -207,6 +221,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void UpdateFileList()
         {
+            this.IsBusy = true;
+
             Debug.WriteLine("UpdateFileList:");
 
             var revisions = dstHubService.GetFileRevisions();
@@ -227,18 +243,8 @@ namespace DEHPSTEPAP242.ViewModel
             {
                 Debug.WriteLine($">>> HF {i.FileName}");
             }
-        }
 
-        /// <summary>
-        /// Helper method to check if object is null
-        /// 
-        /// WhenAnyValue() does not accept "x != null" in the body method.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <returns>True if is not null</returns>
-        private bool IsValidCurrentHubFile(HubFile x)
-        {
-            return !(x == null);
+            this.IsBusy = false;
         }
 
         /// <summary>
@@ -260,27 +266,63 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Executes the <see cref="DownloadFileCommand"/> asynchronously.
         /// 
-        /// File is downloaded from the Hub and stored locally.
-        /// <seealso cref="FileStoreService"/>.
+        /// File is downloaded from the Hub into destination choosen by the user.
         /// </summary>
-        protected async Task DownloadFileCommandExecute()
+        private async Task DownloadFileAsCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                statusBarControlView.Append("No current file selected to perform the download");
+                statusBar.Append("No current file selected to perform the download");
+                return;
+            }
+
+            var fileName = System.IO.Path.GetFileNameWithoutExtension(fileRevision.Path);
+            var extension = System.IO.Path.GetExtension(fileRevision.Path);
+            var filter = $"{extension.Replace(".", "").ToUpper()} files|*{extension}|All files (*.*)|*.*";
+
+            var destinationPath = this.fileDialogService.GetSaveFileDialog(fileName, extension, filter, string.Empty, 1);
+            if (destinationPath is null)
+            {
                 return;
             }
 
             IsBusy = true;
-            statusBarControlView.Append("Downloading file from Hub...");
+            statusBar.Append("Downloading file from Hub...");
+
+            using (var fstream = new System.IO.FileStream(destinationPath, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
+            {
+                await hubController.Download(fileRevision, fstream);
+            }
+
+            statusBar.Append($"Downloaded as: {destinationPath}");
+            IsBusy = false;
+        }
+
+        /// <summary>
+        /// Executes the <see cref="DownloadFileCommand"/> asynchronously.
+        /// 
+        /// File is downloaded from the Hub and stored locally.
+        /// <seealso cref="FileStoreService"/>.
+        /// </summary>
+        private async Task DownloadFileCommandExecute()
+        {
+            var fileRevision = CurrentFileRevision();
+            if (fileRevision is null)
+            {
+                statusBar.Append("No current file selected to perform the download");
+                return;
+            }
+
+            IsBusy = true;
+            statusBar.Append("Downloading file from Hub...");
 
             using (var fstream = fileStoreService.AddFileStream(fileRevision))
             {
                 await hubController.Download(fileRevision, fstream);
             }
 
-            statusBarControlView.Append("Download successful");
+            statusBar.Append("Download successful");
 
             IsBusy = false;
         }
@@ -291,12 +333,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// File is loaded from the local storage <see cref="FileStoreService"/>.
         /// If file does not exists, it is first downloaded.
         /// </summary>
-        protected async Task LoadFileCommandExecute()
+        private async Task LoadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                statusBarControlView.Append("No current file selected to perform the load");
+                statusBar.Append("No current file selected to perform the load");
                 return;
             }
             
@@ -309,11 +351,11 @@ namespace DEHPSTEPAP242.ViewModel
 
             var destinationPath = fileStoreService.GetPath(fileRevision);
 
-            statusBarControlView.Append($"Loading from Hub: {destinationPath}");
+            statusBar.Append($"Loading from Hub: {destinationPath}");
 
             // TODO: load STEP file into a View
 
-            statusBarControlView.Append("Load successful");
+            statusBar.Append("Load successful");
 
             IsBusy = false;
         }

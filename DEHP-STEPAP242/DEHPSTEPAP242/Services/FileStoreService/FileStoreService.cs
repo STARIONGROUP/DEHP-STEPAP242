@@ -87,16 +87,28 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         }
 
         /// <summary>
-        /// Gets the corresponding file in the <see cref="StorageDirectoryPath"/>
+        /// Gets the corresponding file name in the <see cref="StorageDirectoryPath"/>
         /// </summary>
         /// <param name="fileRevision"></param>
-        /// <returns>Full file path with pattern [StorageDirectoryPath]\\[name]_rev[RevisionNumber][extension]</returns>
-        public string GetPath(FileRevision fileRevision)
+        /// <returns>The file name with pattern [name]_rev[RevisionNumber][extension]</returns>
+        public string GetName(FileRevision fileRevision)
         {
             var fileName = Path.GetFileNameWithoutExtension(fileRevision.Path);
             var extension = Path.GetExtension(fileRevision.Path);
 
             var storageName = $"{fileName}_rev{fileRevision.RevisionNumber}{extension}";
+            
+            return storageName;
+        }
+
+        /// <summary>
+        /// Gets the corresponding file path in the <see cref="StorageDirectoryPath"/>
+        /// </summary>
+        /// <param name="fileRevision"></param>
+        /// <returns>Full file path with pattern [StorageDirectoryPath]\\[name]_rev[RevisionNumber][extension]</returns>
+        public string GetPath(FileRevision fileRevision)
+        {
+            var storageName = GetName(fileRevision);
             var path = Path.Combine(StorageDirectoryPath, storageName);
 
             return path;

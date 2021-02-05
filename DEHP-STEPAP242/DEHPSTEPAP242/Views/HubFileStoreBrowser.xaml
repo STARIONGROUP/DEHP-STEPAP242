@@ -27,7 +27,7 @@
         </dxg:GridControl>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,8" HorizontalAlignment="Center">
-            <Button Content="Download" Margin="0,0,2,0" Command="{Binding DownloadFileCommand}"/>
+            <Button Content="Download As..." Margin="0,0,2,0" Command="{Binding DownloadFileAsCommand}"/>
             <Button Content="Load" Margin="2,0,0,0" Command="{Binding LoadFileCommand}"/>
         </StackPanel>
         

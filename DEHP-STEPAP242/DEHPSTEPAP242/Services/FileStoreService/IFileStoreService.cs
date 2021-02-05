@@ -39,10 +39,17 @@
         bool Exists(FileRevision fileRevision);
 
         /// <summary>
-        /// Get the path for a file revision
+        /// Gets the corresponding file name in the <see cref="StorageDirectoryPath"/>
         /// </summary>
         /// <param name="fileRevision"></param>
-        /// <returns>Returns null if does not exists</returns>
+        /// <returns>Returns file name and extension</returns>
+        string GetName(FileRevision fileRevision);
+
+        /// <summary>
+        /// Gets the corresponding file path in the <see cref="StorageDirectoryPath"/>
+        /// </summary>
+        /// <param name="fileRevision"></param>
+        /// <returns>Returns full path to file name</returns>
         string GetPath(FileRevision fileRevision);
     }
 }

@@ -3,6 +3,7 @@
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
     using ReactiveUI;
+    using System.Reactive;
 
     /// <summary>
     /// Definition of methods and properties of <see cref="HubFileStoreBrowserViewModel"/>
@@ -25,13 +26,18 @@
         ReactiveCommand<object> UploadFileCommand { get; }
 
         /// <summary>
+        /// Downloads one STEP-AP242 file from the <see cref="DomainFileStore"/> of active domain into user choosen location
+        /// </summary>
+        ReactiveCommand<Unit> DownloadFileAsCommand { get; }
+
+        /// <summary>
         /// Downloads one STEP-AP242 file from the <see cref="DomainFileStore"/> of active domain into the local storage
         /// </summary>
-        ReactiveCommand<object> DownloadFileCommand { get; }
+        ReactiveCommand<Unit> DownloadFileCommand { get; }
 
         /// <summary>
         /// Loads one STEP-AP242 file from the local storage
         /// </summary>
-        ReactiveCommand<object> LoadFileCommand { get; }
+        ReactiveCommand<Unit> LoadFileCommand { get; }
     }
 }
