@@ -38,5 +38,7 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// Gets the <see cref="IDstObjectBrowserViewModel"/>
         /// </summary>
         public IDstObjectBrowserViewModel DstObjectBrowser { get; }
+
+        bool IsFileInHub { get; }
     }
 }

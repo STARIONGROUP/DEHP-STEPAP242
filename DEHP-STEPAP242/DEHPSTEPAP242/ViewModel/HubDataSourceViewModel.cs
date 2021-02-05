@@ -45,6 +45,8 @@ namespace DEHPSTEPAP242.ViewModel
     using ReactiveUI;
     using System.Collections.Generic;
     using DEHPSTEPAP242.Services.DstHubService;
+    using CDP4Dal;
+    using DEHPCommon.Events;
 
     /// <summary>
     /// View model that represents a data source panel which holds a tree like browser, a informational header and
@@ -120,7 +122,7 @@ namespace DEHPSTEPAP242.ViewModel
                 (iteration) => iteration.Value != null);
 
             this.RefreshCommand = ReactiveCommand.Create(canRefresh);
-            this.RefreshCommand.Subscribe(_ => this.hubController.Refresh());
+            this.RefreshCommand.Subscribe(_ => this.RefreshCommandExecute());
         }
 
         /// <summary>
@@ -160,7 +162,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Executes the <see cref="HubDataSourceViewModel.ConnectCommand"/>
         /// </summary>
-        void ConnectCommandExecute()
+        private void ConnectCommandExecute()
         {
             if (this.hubController.IsSessionOpen)
             {
@@ -183,9 +185,18 @@ namespace DEHPSTEPAP242.ViewModel
         /// Updates the <see cref="ConnectButtonText"/>
         /// </summary>
         /// <param name="isSessionOpen">Assert whether the the button text should be <see cref="ConnectText"/> or <see cref="DisconnectText"/></param>
-        void UpdateConnectButtonText(bool isSessionOpen)
+        private void UpdateConnectButtonText(bool isSessionOpen)
         {
             this.ConnectButtonText = isSessionOpen ? DisconnectText : ConnectText;
+        }
+
+        /// <summary>
+        /// Refreshes the <see cref="IHubController"/> cache
+        /// </summary>
+        private void RefreshCommandExecute()
+        {
+            this.hubController.Refresh();
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
         }
 
         /// <summary>

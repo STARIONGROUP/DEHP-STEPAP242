@@ -33,7 +33,7 @@ namespace DEHPSTEPAP242.ViewModel
         private bool areThereAnyTransferInProgress;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the TransfertCommand" is executing
+        /// Gets or sets a value indicating whether the <see cref="TransferControlViewModel.TransferCommand"/> is executing
         /// </summary>
         public bool AreThereAnyTransferInProgress
         {

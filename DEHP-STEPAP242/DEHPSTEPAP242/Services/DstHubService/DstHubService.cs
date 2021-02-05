@@ -56,12 +56,17 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// <returns>The <see cref="CDP4Common.EngineeringModelData.File"/> or null if does not exist</returns>
         public File FindFile(string filePath)
         {
+            if (filePath is null || hubController.OpenIteration is null)
+            {
+                return null;
+            }
+
             var name = Path.GetFileNameWithoutExtension(filePath);
 
             var currentDomainOfExpertise = hubController.CurrentDomainOfExpertise;
             var dfStore = hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
 
-            var file = dfStore.File.FirstOrDefault(x => this.IsSTEPFileType(x.CurrentFileRevision) && x.CurrentFileRevision.Name == name);
+            var file = dfStore?.File.FirstOrDefault(x => this.IsSTEPFileType(x.CurrentFileRevision) && x.CurrentFileRevision.Name == name);
 
             //var file = from x in dfStore.File
             //         where this.IsSTEPFileType(x.CurrentFileRevision) && x.CurrentFileRevision.Name == name
