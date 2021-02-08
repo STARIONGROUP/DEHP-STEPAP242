@@ -16,7 +16,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// - FileTypes
         /// - ParameterTypes
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A <see cref="Task"/></returns>
         Task CheckHubDependencies();
 
         /// <summary>
