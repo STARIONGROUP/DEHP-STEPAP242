@@ -29,7 +29,7 @@ namespace DEHPSTEPAP242.DstController
     using CDP4Common.EngineeringModelData;
     using DEHPCommon.Enumerators;
     using DEHPSTEPAP242.ViewModel.Rows;
-
+    using ReactiveUI;
     using STEP3DAdapter;
 
     /// <summary>
@@ -77,7 +77,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
-        IEnumerable<ElementDefinition> MapResult { get; }
+        ReactiveList<ElementDefinition> MapResult { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>

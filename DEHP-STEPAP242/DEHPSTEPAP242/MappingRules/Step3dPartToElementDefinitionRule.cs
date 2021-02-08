@@ -278,7 +278,6 @@ namespace DEHPSTEPAP242.MappingRules
         /// <returns>A <typeparamref name="TThing"/> instance</returns>
         private TThing Bake<TThing>(Action<TThing> initialize = null) where TThing : Thing, new()
         {
-            // TODO: take care, Session will not be public
             var tThingInstance = Activator.CreateInstance(typeof(TThing), Guid.Empty /*Guid.NewGuid()*/, this.hubController.Session.Assembler.Cache, new Uri(this.hubController.Session.DataSourceUri)) as TThing;
             initialize?.Invoke(tThingInstance);
             return tThingInstance;
@@ -323,7 +322,7 @@ namespace DEHPSTEPAP242.MappingRules
         }
 
         /// <summary>
-        /// Updates the Computed <see cref="ValueArray{T}"/> of specified <see cref="ParameterValueSetBase"/>
+        /// Updates the Computed <see cref="ParameterValueSetBase"/> <see cref="ValueArray{T}"/>
         /// </summary>
         /// <param name="part">The <see cref="Step3dRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Thing"/> <see cref="Parameter"/> or <see cref="ParameterOverride"/></param>
@@ -339,52 +338,71 @@ namespace DEHPSTEPAP242.MappingRules
 
                 if (valuearray.Count == 0)
                 {
-                    valuearray = new ValueArray<string>();
+                    // New parameter does not contain ValueArray with the expected dimmension,
+                    // they are filled by the server side, then it is necessary to create the
+                    // expected content here.
 
-                    // NOTE: this does not cange the valuearray size
-                    //for (int i=0; i<paramType.NumberOfValues; i++)
-                    //{
-                    //    valuearray.Append("");
-                    //}
+                    var values = new List<string>(p.NumberOfValues);
+                    foreach (var i in System.Linq.Enumerable.Range(0, p.NumberOfValues))
+                    {
+                        values.Add("");
+                    }
 
+                    valuearray = new ValueArray<string>(values);
                     valueSet.Computed = valuearray;
                 }
 
-                // Component is an OrderedItemList, and the order could be 
-                // changed externally by modifyind the ParameterType definition,
-                // then do the set the value based on component's name
-                int index = 0;
-                foreach (ParameterTypeComponent component in p.Component)
-                    {
-                        switch (component.ShortName)
-                        {
-                            case "name": valuearray[index++] = $"{part.Name}"; break;
-
-                            case "id": valuearray[index++] = $"{part.StepId}"; break;
-
-                            case "rep_type": valuearray[index++] = $"{part.RepresentationType}"; break;
-
-                            case "assembly_label": valuearray[index++] = $"{part.RelationLabel}"; break;
-
-                            case "assembly_id": valuearray[index++] = $"{part.RelationId}"; break;
-
-                            case "source":
-                            {
-                                // NOTE: FileRevision.Iid will be known at Transfer time
-                                //       store the current index to know which possition corresponds
-                                //       to the source (avoid searching it again)
-                                this.targetSourceParameters.Add(new Step3dTargetSourceParameter(valuearray, index));
-                                valuearray[index++] = "";
-                            }
-                            break;
-
-                            default:
-                            break;
-                        }
-                    }
+                UpdateValueArrayForCompoundParameterType(part, p, valuearray);
             }
 
-            //this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
+            this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
+        }
+
+        /// <summary>
+        /// Update <see cref="CompoundParameterType"/> <see cref="ValueArray{string}"/>
+        /// </summary>
+        /// <param name="part">The <see cref="Step3dRowViewModel"/></param>
+        /// <param name="parameter">The <see cref="CompoundParameterType"/></param>
+        /// <param name="valuearray">The <see cref="ValueArray{string}"/></param>
+        /// <remarks>
+        /// Creates a <seealso cref="Step3dTargetSourceParameter"/> entry when a
+        /// <see cref="ParameterTypeComponent"/> named "source" is present in the <paramref name="parameter"/>.
+        /// </remarks>
+        private void UpdateValueArrayForCompoundParameterType(Step3dRowViewModel part, CompoundParameterType parameter, ValueArray<string> valuearray)
+        {
+            // Component is an OrderedItemList, and the order could be 
+            // changed externally by modifyind the ParameterType definition,
+            // then do the set the value based on component's name
+
+            int index = 0;
+            foreach (ParameterTypeComponent component in parameter.Component)
+            {
+                switch (component.ShortName)
+                {
+                    case "name": valuearray[index++] = $"{part.Name}"; break;
+
+                    case "id": valuearray[index++] = $"{part.StepId}"; break;
+
+                    case "rep_type": valuearray[index++] = $"{part.RepresentationType}"; break;
+
+                    case "assembly_label": valuearray[index++] = $"{part.RelationLabel}"; break;
+
+                    case "assembly_id": valuearray[index++] = $"{part.RelationId}"; break;
+
+                    case "source":
+                    {
+                        // NOTE: FileRevision.Iid will be known at Transfer time
+                        //       store the current index to know which possition corresponds
+                        //       to the source (avoid searching it again)
+                        this.targetSourceParameters.Add(new Step3dTargetSourceParameter(valuearray, index));
+                        valuearray[index++] = "";
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
         }
 
         /// <summary>

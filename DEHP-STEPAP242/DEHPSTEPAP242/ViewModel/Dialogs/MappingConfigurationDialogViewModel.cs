@@ -78,7 +78,16 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         public Step3dRowViewModel SelectedThing
         {
             get => this.selectedThing;
-            set => this.RaiseAndSetIfChanged(ref this.selectedThing, value);
+            set
+            {
+                // Parts are stored in parameters of a specifci type (created by Dst)
+                //value.SelectedParameterType = this.AvailableParameterTypes.FirstOrDefault();
+
+                this.RaiseAndSetIfChanged(ref this.selectedThing, value);
+
+                // Update mappings
+                //this.UpdatePropertiesBasedOnMappingConfiguration();
+            }
         }
 
         /// <summary>
@@ -121,34 +130,34 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         public void UpdatePropertiesBasedOnMappingConfiguration()
         {
-            this.IsBusy = true;
-
-            var part = this.SelectedThing;
-
-            foreach (var idCorrespondence in part.MappingConfigurations)
-            {
-                if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
-                {
-                    Action action = thing switch
-                    {
-                        ElementDefinition elementDefinition => (() => part.SelectedElementDefinition = elementDefinition),
-                        ElementUsage elementUsage => (() => part.SelectedElementUsages.Add(elementUsage)),
-                        Parameter parameter => (() => part.SelectedParameter = parameter),
-                        Option option => (() => part.SelectedOption = option),
-                        ActualFiniteState state => (() => part.SelectedActualFiniteState = state),
-                        _ => null
-                    };
-
-                    action?.Invoke();
-
-                    if (action is null && this.hubController.GetThingById(idCorrespondence.InternalThing, out CompoundParameterType parameterType))
-                    {
-                        part.SelectedParameterType = parameterType;
-                    }
-                }
-            }
-
-            this.IsBusy = false;
+            //this.IsBusy = true;
+            //
+            //var part = this.SelectedThing;
+            //
+            //foreach (var idCorrespondence in part.MappingConfigurations)
+            //{
+            //    if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
+            //    {
+            //        Action action = thing switch
+            //        {
+            //            ElementDefinition elementDefinition => (() => part.SelectedElementDefinition = elementDefinition),
+            //            ElementUsage elementUsage => (() => part.SelectedElementUsages.Add(elementUsage)),
+            //            Parameter parameter => (() => part.SelectedParameter = parameter),
+            //            Option option => (() => part.SelectedOption = option),
+            //            ActualFiniteState state => (() => part.SelectedActualFiniteState = state),
+            //            _ => null
+            //        };
+            //
+            //        action?.Invoke();
+            //
+            //        if (action is null && this.hubController.GetThingById(idCorrespondence.InternalThing, out CompoundParameterType parameterType))
+            //        {
+            //            part.SelectedParameterType = parameterType;
+            //        }
+            //    }
+            //}
+            //
+            //this.IsBusy = false;
         }
 
         #endregion
@@ -198,7 +207,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             this.WhenAnyValue(x => x.SelectedThing.SelectedElementDefinition)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => this.UpdateHubFields(() =>
+                .Subscribe(_ => this.UpdateAvailableFields(() =>
                 {
                     this.UpdateAvailableParameters();
                     this.UpdateAvailableElementUsages();
@@ -206,14 +215,14 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             this.WhenAnyValue(x => x.SelectedThing.SelectedParameter)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => this.UpdateHubFields(this.UpdateAvailableActualFiniteStates));
+                .Subscribe(_ => this.UpdateAvailableFields(this.UpdateAvailableActualFiniteStates));
         }
 
         /// <summary>
         /// Executes the specified action to update the view Hub fields surrounded by a <see cref="IsBusy"/> state change
         /// </summary>
         /// <param name="updateAction">The <see cref="Action"/> to execute</param>
-        private void UpdateHubFields(Action updateAction)
+        private void UpdateAvailableFields(Action updateAction)
         {
             this.IsBusy = true;
             updateAction.Invoke();
@@ -248,10 +257,26 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         private void UpdateProperties()
         {
             this.IsBusy = true;
+
             this.UpdateAvailableOptions();
-            this.AvailableElementDefinitions.Clear();
+            this.UpdateAvailableElementDefinitions();
+            this.UpdateAvailableParameters();
+            this.UpdateAvailableElementUsages();
+            this.UpdateAvailableActualFiniteStates();
+
+            this.IsBusy = false;
+        }
+
+        /// <summary>
+        /// Updates the list of compatible parameters
+        /// </summary>
+        /// <remarks>
+        /// This DST targets the information against one special parameter type
+        /// created by the DST <seealso cref="DstHubService.CheckParameterTypes"/>
+        /// </remarks>
+        private void UpdateAvailableParameterTypes()
+        {
             this.AvailableParameterTypes.Clear();
-            this.AvailableElementDefinitions.AddRange(this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()));
 
             // EXAMPLE CODE quering from chained Rdls
             //var paramList = this.hubController.GetSiteDirectory().AvailableReferenceDataLibraries()
@@ -269,12 +294,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.AvailableParameterTypes.AddRange(rdl.ParameterType.Where(
                 x => this.dstHubService.IsSTEPParameterType(x))
                 .OrderBy(x => x.Name));
-
-            this.UpdateAvailableParameters();
-            this.UpdateAvailableElementUsages();
-            this.UpdateAvailableActualFiniteStates();
-
-            this.IsBusy = false;
         }
 
         /// <summary>
@@ -321,18 +340,79 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         }
 
         /// <summary>
+        /// Updates the list of compatible element definitions
+        /// </summary>
+        private void UpdateAvailableElementDefinitions()
+        {
+            this.AvailableElementDefinitions.Clear();
+            this.AvailableElementDefinitions.AddRange(this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()));
+        }
+
+        /// <summary>
         /// Updates the <see cref="AvailableElementUsages"/>
         /// </summary>
         private void UpdateAvailableElementUsages()
         {
             this.AvailableElementUsages.Clear();
 
-            if (this.selectedThing?.SelectedElementDefinition != null)
+            if (this.SelectedThing?.SelectedElementDefinition != null)
             {
-                var ed = this.selectedThing.SelectedElementDefinition;
+                var ed = this.SelectedThing.SelectedElementDefinition;
+                Debug.WriteLine($"ED {ed.Name} {ed.Iid}");
 
+                // NOTE: ElementUsages where not cloned when setting the value in the SelecteThing.SelectedElementDefinition
+                var hubED = this.hubController.OpenIteration.Element.FirstOrDefault(x => x.Iid == ed.Iid);
+                
                 // Note: both the owner of the DOE and ED are the owners of the EU
-                this.AvailableElementUsages.AddRange(ed.ReferencingElementUsages().Where(x => x.ExcludeOption.Contains(this.selectedThing.SelectedOption) == false));
+                this.AvailableElementUsages.AddRange(
+                    hubED.ReferencingElementUsages()
+                        .Where(x => x.ExcludeOption.Contains(this.selectedThing.SelectedOption) == false)
+                        .Select(x => x.Clone(true))
+                    );
+
+                /*
+                Debug.WriteLine($"Element {ed.Name} usages check:");
+                foreach (var item in ed.ContainedElement)
+                {
+                    Debug.WriteLine($"  ContainedElement {item.Name}");
+                }
+
+                Debug.WriteLine("----");
+
+                foreach (var item in ed.ReferencedElement)
+                {
+                    Debug.WriteLine($"  ReferencedElement {item.Name}");
+                }
+
+                Debug.WriteLine("+++++");
+
+                foreach (var item in ed.ReferencingElementUsages())
+                {
+                    Debug.WriteLine($"  Referencing {item.Name}");
+                }
+
+                Debug.WriteLine("========================================================");
+
+                Debug.WriteLine($"Element {hubED.Name} usages check:");
+                foreach (var item in hubED.ContainedElement)
+                {
+                    Debug.WriteLine($"  ContainedElement {item.Name}");
+                }
+
+                Debug.WriteLine("----");
+
+                foreach (var item in hubED.ReferencedElement)
+                {
+                    Debug.WriteLine($"  ReferencedElement {item.Name}");
+                }
+
+                Debug.WriteLine("+++++");
+
+                foreach (var item in hubED.ReferencingElementUsages())
+                {
+                    Debug.WriteLine($"  Referencing {item.Name}");
+                }
+                */
             }
         }
 

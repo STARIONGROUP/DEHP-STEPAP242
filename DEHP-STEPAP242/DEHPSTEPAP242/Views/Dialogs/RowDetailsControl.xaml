@@ -62,17 +62,17 @@
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Content="Option:"></Label>
-                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="0" DisplayMember="ShortName" ValueMember="Name"
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="0" DisplayMember="Name" ValueMember="Name"
                                                                   AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedOption}"
-                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableOptions}" NullText="Select Option"/>
+                                                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableOptions}" NullText="Select Option" AllowNullInput="True"/>
                 <Label Grid.Row="1" Grid.Column="0" Content="Element Definition:"></Label>
-                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="1" DisplayMember="ShortName" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="1" DisplayMember="Name" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
                                                                   AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedElementDefinition}" NullText="Create New Element Definition" AllowNullInput="True"
                                                                   ValidateOnTextInput="False" ItemsSource="{Binding AvailableElementDefinitions}"/>
                 <Label Grid.Row="2" Grid.Column="0" Content="Update Element Usages:"></Label>
                 <!-- BEFORE DisplayMember="ElementDefinition.ShortName" -->
                 <!-- NOW the name of the EU instance -->
-                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="2" DisplayMember="Name"  ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="2" DisplayMember="Name" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
                                                                   AutoComplete="True" EditValue="{Binding SelectedThing.SelectedElementUsages, Converter={StaticResource ListToElementUsageConverter}}" NullText="Create New Element Usage" AllowNullInput="True"
                                                                   ValidateOnTextInput="False" ItemsSource="{Binding AvailableElementUsages}">
                     <dxe:ComboBoxEdit.StyleSettings>
@@ -80,6 +80,13 @@
                     </dxe:ComboBoxEdit.StyleSettings>
                 </dxe:ComboBoxEdit>
 
+                <Label Grid.Row="3" Grid.Column="0" Content="Actual Finite State:"></Label>
+                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="3" DisplayMember="Name" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
+                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedActualFiniteState}" NullText="Select Finite State" AllowNullInput="True"
+                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableActualFiniteStates}"
+                                  ApplyItemTemplateToSelectedItem="True">
+                </dxe:ComboBoxEdit>
+                
                 <!-- NOTE: ParameterType is NOT REQUIRED, we construct a Step3D parameter -->
                 <!--
                 <Label Grid.Row="3" Grid.Column="0" Content="Parameter type:"></Label>
@@ -88,19 +95,15 @@
                                                                   ValidateOnTextInput="False" ItemsSource="{Binding AvailableParameterTypes}"/>
                  -->
                 <!-- TODO: selection of the parameter (or new) where to apply the information -->
-                <Label Grid.Row="4" Grid.Column="0" Content="Parameter:"></Label>
+                <Label Grid.Row="4" Grid.Column="0" Content="Parameter:" />
                 <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="4" DisplayMember="UserFriendlyName" ValueMember="UserFriendlyShortName" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
                                                                   AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedParameter}" NullText="Create New Parameter" AllowNullInput="True"
                                                                   ValidateOnTextInput="False" ItemsSource="{Binding AvailableParameters}"
-                                                                  ApplyItemTemplateToSelectedItem="True">
+                                                                  ApplyItemTemplateToSelectedItem="True"
+                                                                  IsReadOnly="True">
                 </dxe:ComboBoxEdit>
                 
-                <Label Grid.Row="5" Grid.Column="0" Content="Actual Finite State:"></Label>
-                <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="5" DisplayMember="Name" ValueMember="Name" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
-                                  AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedActualFiniteState}" NullText="Select Finite State" AllowNullInput="True"
-                                  ValidateOnTextInput="False" ItemsSource="{Binding AvailableActualFiniteStates}"
-                                  ApplyItemTemplateToSelectedItem="True">
-                </dxe:ComboBoxEdit>
+                
             </Grid>
         </Grid>
     </GroupBox>
