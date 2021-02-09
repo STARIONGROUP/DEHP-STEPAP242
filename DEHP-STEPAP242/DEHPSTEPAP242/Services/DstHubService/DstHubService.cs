@@ -23,7 +23,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
     /// Helper service supporting the work performed by the <see cref="DstController"/> and
     /// also required by different components.
     /// </summary>
-    class DstHubService : IDstHubService
+    public class DstHubService : IDstHubService
     {
         // File Constants
         private static readonly string APPLICATION_STEP_NAME = "application/step";
@@ -89,21 +89,35 @@ namespace DEHPSTEPAP242.Services.DstHubService
 
             var file = dfStore?.File.FirstOrDefault(x => this.IsSTEPFileType(x.CurrentFileRevision) && x.CurrentFileRevision.Name == name);
 
-            //var file = from x in dfStore.File
-            //         where this.IsSTEPFileType(x.CurrentFileRevision) && x.CurrentFileRevision.Name == name
-            //         select x;
-
-            //foreach (var file in dfStore.File)
-            //{
-            //    var cfrev = file.CurrentFileRevision;
-            //
-            //    if (this.IsSTEPFileType(cfrev) && cfrev.Name == name)
-            //    {
-            //        return file;
-            //    }
-            //}
-
             return file;
+        }
+
+        /// <summary>
+        /// Finds the <see cref="CDP4Common.EngineeringModelData.FileRevision"/> from string <see cref="System.Guid"/>
+        /// </summary>
+        /// <param name="guid">The string value of an <see cref="System.Guid"/></param>
+        /// <returns>The <see cref="CDP4Common.EngineeringModelData.FileRevision"/> or null if does not exist</returns>
+        public FileRevision FindFileRevision(string guid)
+        {
+            // NOTE: HubController.GetThingById() does not contemplates file revisions, only FileType
+            //this.hubController.GetThingById(new Guid(guid), out FileRevision fileRevision);
+
+            var currentDomainOfExpertise = this.hubController.CurrentDomainOfExpertise;
+            var dfStore = this.hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
+
+            var files = dfStore?.File;
+            var targetIid = new System.Guid(guid);
+
+            foreach (var file in files)
+            {
+                var fileRevision = file.FileRevision.FirstOrDefault(x => x.Iid == targetIid);
+                if (fileRevision is { })
+                {
+                    return fileRevision;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -177,6 +191,28 @@ namespace DEHPSTEPAP242.Services.DstHubService
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ParameterTypeComponent"/> corresponding to the source file reference
+        /// </summary>
+        /// <param name="param">The <see cref="ParameterType"/> to check</param>
+        /// <returns>A <see cref="ParameterTypeComponent"/> or null if does not contain the component</returns>
+        public ParameterTypeComponent FindSourceParameterType(ParameterType param)
+        {
+            if (param is CompoundParameterType compountParameter)
+            {
+                foreach (ParameterTypeComponent comp in compountParameter.Component)
+                {
+                    Debug.WriteLine($"FindSourceParameterType component {comp.ShortName} {comp.ParameterType.ShortName}");
+                }
+
+                var p = compountParameter.Component.FirstOrDefault(x => x.ShortName == "source");
+                var r = compountParameter.Component.FirstOrDefault(x => x.ParameterType.Name == STEP_FILE_REF_NAME);
+                return p;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -341,6 +377,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     new KeyValuePair<string, ParameterType>("rep_type", stepLabelParameter),
                     new KeyValuePair<string, ParameterType>("assembly_label", stepLabelParameter),
                     new KeyValuePair<string, ParameterType>("assembly_id", stepIdParameter),
+                    //new KeyValuePair<string, ParameterType>("source", stepFileRefParameter)
                     new KeyValuePair<string, ParameterType>("source", stepLabelParameter)
                 };
 

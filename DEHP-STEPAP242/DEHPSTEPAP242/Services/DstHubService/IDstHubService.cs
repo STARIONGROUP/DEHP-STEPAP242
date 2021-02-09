@@ -47,6 +47,13 @@ namespace DEHPSTEPAP242.Services.DstHubService
         bool IsSTEPParameterType(ParameterType param);
 
         /// <summary>
+        /// Gets the <see cref="ParameterTypeComponent"/> corresponding to the source file reference
+        /// </summary>
+        /// <param name="param">The <see cref="ParameterType"/> to check</param>
+        /// <returns>A <see cref="ParameterTypeComponent"/> or null if does not contain the component</returns>
+        public ParameterTypeComponent FindSourceParameterType(ParameterType param);
+
+        /// <summary>
         /// Gets the <see cref="ReferenceDataLibrary"/> where to add DST content
         /// </summary>
         /// <returns>A <see cref="ReferenceDataLibrary"/></returns>
@@ -58,5 +65,12 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// <param name="filePath"></param>
         /// <returns>The <see cref="CDP4Common.EngineeringModelData.File"/> or null if does not exist</returns>
         File FindFile(string filePath);
+
+        /// <summary>
+        /// Finds the <see cref="CDP4Common.EngineeringModelData.FileRevision"/> from string <see cref="System.Guid"/>
+        /// </summary>
+        /// <param name="guid">The string value of an <see cref="System.Guid"/></param>
+        /// <returns>The <see cref="CDP4Common.EngineeringModelData.FileRevision"/> or null if does not exist</returns>
+        FileRevision FindFileRevision(string guid);
     }
 }

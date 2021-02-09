@@ -36,7 +36,7 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// <summary>
         /// The <see cref="IObjectBrowserViewModel"/>
         /// </summary>
-        IObjectBrowserViewModel ObjectBrowser { get; }
+        IHubObjectBrowserViewModel ObjectBrowser { get; }
 
         /// <summary>
         /// The <see cref="IHubBrowserHeaderViewModel"/>

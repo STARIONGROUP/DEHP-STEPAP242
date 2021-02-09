@@ -72,7 +72,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// The <see cref="IObjectBrowserViewModel"/>
         /// </summary>
-        public IObjectBrowserViewModel ObjectBrowser { get; set; }
+        public IHubObjectBrowserViewModel ObjectBrowser { get; set; }
 
         /// <summary>
         /// The <see cref="IHubBrowserHeaderViewModel"/>
@@ -90,11 +90,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
         /// <param name="dstHubService">The <see cref="IDstHubService "/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
-        /// <param name="objectBrowser">The <see cref="IObjectBrowserViewModel"/></param>
+        /// <param name="objectBrowser">The <see cref="IHubObjectBrowserViewModel"/></param>
         /// <param name="treeSelectorService">The <see cref="IObjectBrowserTreeSelectorService"/></param>
         /// <param name="hubBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         public HubDataSourceViewModel(INavigationService navigationService, IDstHubService dstHubService,
-            IHubController hubController, IObjectBrowserViewModel objectBrowser,
+            IHubController hubController, IHubObjectBrowserViewModel objectBrowser,
             IObjectBrowserTreeSelectorService treeSelectorService, 
             IHubBrowserHeaderViewModel hubBrowserHeader, 
             IHubFileStoreBrowserViewModel hubFileBrowser) : base(navigationService)

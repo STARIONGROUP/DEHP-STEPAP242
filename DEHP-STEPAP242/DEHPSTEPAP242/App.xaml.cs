@@ -108,6 +108,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<MainWindowViewModel>().As<IMainWindowViewModel>().SingleInstance();
             // Hub
             containerBuilder.RegisterType<HubDataSourceViewModel>().As<IHubDataSourceViewModel>();
+            containerBuilder.RegisterType<HubObjectBrowserViewModel>().As<IHubObjectBrowserViewModel>();
             containerBuilder.RegisterType<HubFileStoreBrowserViewModel>().As<IHubFileStoreBrowserViewModel>();
             containerBuilder.RegisterType<HubNetChangePreviewViewModel>().As<IHubNetChangePreviewViewModel>();
             // Dst

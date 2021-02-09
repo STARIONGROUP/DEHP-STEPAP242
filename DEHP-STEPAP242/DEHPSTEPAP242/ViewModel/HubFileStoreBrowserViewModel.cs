@@ -22,6 +22,9 @@ namespace DEHPSTEPAP242.ViewModel
     using CDP4Dal;
     using DEHPCommon.Events;
     using DEHPCommon.Services.FileDialogService;
+    using DEHPSTEPAP242.Events;
+    using DEHPCommon.Enumerators;
+    using System.Windows;
 
     /// <summary>
     /// Wrapper class to display <see cref="FileRevision"/>
@@ -130,6 +133,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         public ReactiveCommand<object> UploadFileCommand { get; private set; }
 
+        //public ReactiveCommand<string,Unit> DownloadGuidFileRevisionAsCommand { get; private set; }
+
         /// <summary>
         /// Downloads one STEP-AP242 file from the <see cref="DomainFileStore"/> of active domain into user choosen location
         ///
@@ -198,6 +203,11 @@ namespace DEHPSTEPAP242.ViewModel
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x => this.UpdateFileList());
 
+            // Ask for download
+            CDPMessageBus.Current.Listen<DownloadFileRevisionEvent>()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(async x => await this.DownloadFileRevisionIdAs(x.TargetId));
+
             // Commands on selected FileRevision
             var fileSelected = this.WhenAny(
                 vm => vm.CurrentHubFile,
@@ -230,7 +240,7 @@ namespace DEHPSTEPAP242.ViewModel
             Debug.WriteLine("UpdateFileList:");
 
             var revisions = dstHubService.GetFileRevisions();
-            
+
             List<HubFile> hubfiles = new List<HubFile>();
 
             foreach (var rev in revisions)
@@ -243,7 +253,7 @@ namespace DEHPSTEPAP242.ViewModel
             HubFiles.Clear();
             HubFiles.AddRange(hubfiles);
 
-            foreach(var i in HubFiles)
+            foreach (var i in HubFiles)
             {
                 Debug.WriteLine($">>> HF {i.FileName}");
             }
@@ -268,6 +278,89 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /// <summary>
+        /// Shows the <see cref="IOpenSaveFileDialogService.GetSaveFileDialog()"/> for a <see cref="FileRevision"/>
+        /// </summary>
+        /// <param name="fileRevision">The <see cref="FileRevision"/> to be downloaded</param>
+        /// <returns>The destination path, or null if cancelled by the user</returns>
+        private string GetSaveFileDestination(FileRevision fileRevision)
+        {
+            var fileName = System.IO.Path.GetFileNameWithoutExtension(fileRevision.Path);
+            var extension = System.IO.Path.GetExtension(fileRevision.Path);
+            var filter = $"{extension.Replace(".", "").ToUpper()} files|*{extension}|All files (*.*)|*.*";
+
+            var destinationPath = this.fileDialogService.GetSaveFileDialog(fileName, extension, filter, string.Empty, 1);
+            return destinationPath;
+        }
+
+        /// <summary>
+        /// Downloads the <see cref="FileRevision"/> into a file
+        /// </summary>
+        /// <param name="fileRevision">The <see cref="FileRevision"/> to be downloaded</param>
+        /// <param name="destinationPath">Full name path to file</param>
+        /// <returns>A <see cref="Task"/></returns>
+        private async Task DownloadFileRevision(FileRevision fileRevision, string destinationPath)
+        {
+            if (fileRevision is null)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append("Downloading file from Hub..."));
+
+            using (var fstream = new System.IO.FileStream(destinationPath, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
+            {
+                await hubController.Download(fileRevision, fstream);
+            }
+
+            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Downloaded as: {destinationPath}"));
+            IsBusy = false;
+        }
+
+        /// <summary>
+        /// Downloads the <see cref="FileRevision"/> into destination choosen by the user
+        /// </summary>
+        /// <param name="fileRevision">The <see cref="FileRevision"/> to be downloaded</param>
+        /// <returns>A <see cref="Task"/></returns>
+        private async Task DownloadFileRevisionAs(FileRevision fileRevision)
+        {
+            if (fileRevision is null)
+            {
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"The FileRevision is null", StatusBarMessageSeverity.Error));
+                return;
+            }
+
+            var destinationPath = this.GetSaveFileDestination(fileRevision);
+            if (destinationPath is null)
+            {
+                return;
+            }
+
+            await this.DownloadFileRevision(fileRevision, destinationPath);
+        }
+
+        /// <summary>
+        /// Downloads the <see cref="FileRevision"/> from its <see cref="System.Guid"/> into destination choosen by the user
+        /// </summary>
+        /// <param name="guid"><see cref="System.Guid"/> value</param>
+        /// <returns>A <see cref="Task"/></returns>
+        /// <remarks>
+        /// The <paramref name="guid"/> is validated as <see cref="System.Guid"/> pointing to a <see cref="FileRevision"/>
+        /// in the current <see cref="DomainOfExpertise"/>
+        /// </remarks>
+        private async Task DownloadFileRevisionIdAs(string guid)
+        {
+            var fileRevision = this.dstHubService.FindFileRevision(guid);
+            if (fileRevision is null)
+            {
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"The Guid {guid} did not correspond to a valid FileRevision", StatusBarMessageSeverity.Warning));
+                return;
+            }
+
+            await this.DownloadFileRevisionAs(fileRevision);
+        }
+
+        /// <summary>
         /// Executes the <see cref="DownloadFileCommand"/> asynchronously.
         /// 
         /// File is downloaded from the Hub into destination choosen by the user.
@@ -277,30 +370,11 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                statusBar.Append("No current file selected to perform the download");
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append("No current file selected to perform the download"));
                 return;
             }
 
-            var fileName = System.IO.Path.GetFileNameWithoutExtension(fileRevision.Path);
-            var extension = System.IO.Path.GetExtension(fileRevision.Path);
-            var filter = $"{extension.Replace(".", "").ToUpper()} files|*{extension}|All files (*.*)|*.*";
-
-            var destinationPath = this.fileDialogService.GetSaveFileDialog(fileName, extension, filter, string.Empty, 1);
-            if (destinationPath is null)
-            {
-                return;
-            }
-
-            IsBusy = true;
-            statusBar.Append("Downloading file from Hub...");
-
-            using (var fstream = new System.IO.FileStream(destinationPath, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
-            {
-                await hubController.Download(fileRevision, fstream);
-            }
-
-            statusBar.Append($"Downloaded as: {destinationPath}");
-            IsBusy = false;
+            await this.DownloadFileRevisionAs(fileRevision);
         }
 
         /// <summary>
@@ -314,20 +388,19 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                statusBar.Append("No current file selected to perform the download");
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append("No current file selected to perform the download"));
                 return;
             }
 
             IsBusy = true;
-            statusBar.Append("Downloading file from Hub...");
+            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Downloading file from Hub..."));
 
             using (var fstream = fileStoreService.AddFileStream(fileRevision))
             {
                 await hubController.Download(fileRevision, fstream);
             }
 
-            statusBar.Append("Download successful");
-
+            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Download successful"));
             IsBusy = false;
         }
 
@@ -342,7 +415,7 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                statusBar.Append("No current file selected to perform the load");
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append("No current file selected to perform the load"));
                 return;
             }
             
@@ -352,15 +425,13 @@ namespace DEHPSTEPAP242.ViewModel
             }
 
             IsBusy = true;
-
             var destinationPath = fileStoreService.GetPath(fileRevision);
 
-            statusBar.Append($"Loading from Hub: {destinationPath}");
+            Application.Current.Dispatcher.Invoke(() => statusBar.Append($"Loading from Hub: {destinationPath}"));
 
             // TODO: load STEP file into a View
 
-            statusBar.Append("Load successful");
-
+            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Load successful"));
             IsBusy = false;
         }
 
