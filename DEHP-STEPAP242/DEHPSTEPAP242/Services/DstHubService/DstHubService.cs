@@ -25,8 +25,16 @@ namespace DEHPSTEPAP242.Services.DstHubService
     /// </summary>
     class DstHubService : IDstHubService
     {
+        // File Constants
         private static readonly string APPLICATION_STEP_NAME = "application/step";
         private static readonly string[] APPLICATION_STEP_EXTENSIONS = { "step", "stp" };
+
+        // Parameter Constants
+        private static readonly string STEP_ID_UNIT_NAME = "step id";
+        private static readonly string STEP_ID_NAME = "step id";
+        private static readonly string STEP_LABEL_NAME = "step label";
+        private static readonly string STEP_FILE_REF_NAME = "step file reference";
+        private static readonly string STEP_GEOMETRY_NAME = "step geometry";
 
         /// <summary>
         /// The current class <see cref="NLog.Logger"/>
@@ -69,7 +77,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// <returns>The <see cref="CDP4Common.EngineeringModelData.File"/> or null if does not exist</returns>
         public File FindFile(string filePath)
         {
-            if (filePath is null || hubController.OpenIteration is null)
+            if (filePath is null || this.hubController.OpenIteration is null)
             {
                 return null;
             }
@@ -115,6 +123,11 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// <returns>The <see cref="List{FileRevision}"/> for only current file revision</returns>
         public List<FileRevision> GetFileRevisions()
         {
+            if (this.hubController.OpenIteration is null)
+            {
+                return null;
+            }
+
             var revisions = new List<FileRevision>();
 
             var currentDomainOfExpertise = hubController.CurrentDomainOfExpertise;
@@ -122,7 +135,6 @@ namespace DEHPSTEPAP242.Services.DstHubService
 
             var dfStore = hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
             logger.Debug($"DomainFileStore: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
-
 
             logger.Debug($"Files Count: {dfStore.File.Count}");
             foreach (var f in dfStore.File)
@@ -283,12 +295,6 @@ namespace DEHPSTEPAP242.Services.DstHubService
             var units = rdl.Unit;
             var scales = rdl.Scale;
             var parameters = rdl.ParameterType;
-
-            const string STEP_ID_UNIT_NAME = "step id";
-            const string STEP_ID_NAME = "step id";
-            const string STEP_LABEL_NAME = "step label";
-            const string STEP_FILE_REF_NAME = "step file reference";
-            const string STEP_GEOMETRY_NAME = "step geometry";
 
             MeasurementUnit oneUnit = units.OfType<SimpleUnit>().FirstOrDefault(u => u.ShortName == "1" && u is SimpleUnit);
             MeasurementScale stepIdScale = scales.OfType<OrdinalScale>().FirstOrDefault(x => x.Name == STEP_ID_NAME && !x.IsDeprecated);
