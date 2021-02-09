@@ -44,9 +44,9 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         IDstDataSourceViewModel DstSourceViewModel { get; }
 
         /// <summary>
-        /// Gets the view model that represents the net change preview panel
+        /// Gets the view model that represents the net change preview panel to the 10-25 data source
         /// </summary>
-        IDstNetChangePreviewViewModel NetChangePreviewViewModel { get; }
+        IHubNetChangePreviewViewModel HubNetChangePreviewViewModel { get; }
 
         /// <summary>
         /// Gets the <see cref="ITransferControlViewModel"/>

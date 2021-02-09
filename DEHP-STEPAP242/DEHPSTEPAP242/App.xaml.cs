@@ -109,13 +109,13 @@ namespace DEHPSTEPAP242
             // Hub
             containerBuilder.RegisterType<HubDataSourceViewModel>().As<IHubDataSourceViewModel>();
             containerBuilder.RegisterType<HubFileStoreBrowserViewModel>().As<IHubFileStoreBrowserViewModel>();
+            containerBuilder.RegisterType<HubNetChangePreviewViewModel>().As<IHubNetChangePreviewViewModel>();
             // Dst
             containerBuilder.RegisterType<DstBrowserHeaderViewModel>().As<IDstBrowserHeaderViewModel>();
             containerBuilder.RegisterType<DstObjectBrowserViewModel>().As<IDstObjectBrowserViewModel>();
             containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();
             containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
             containerBuilder.RegisterType<MappingConfigurationDialogViewModel>().As<IMappingConfigurationDialogViewModel>();
-            containerBuilder.RegisterType<DstNetChangePreviewViewModel>().As<IDstNetChangePreviewViewModel>();
             containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>();
         }
     }

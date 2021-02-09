@@ -65,7 +65,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Gets the view model that represents the net change preview panel
         /// </summary>
-        public IDstNetChangePreviewViewModel NetChangePreviewViewModel { get; }
+        public IHubNetChangePreviewViewModel HubNetChangePreviewViewModel { get; }
 
         /// <summary>
         /// Gets the <see cref="ITransferControlViewModel"/>
@@ -97,13 +97,13 @@ namespace DEHPSTEPAP242.ViewModel
             IDstDataSourceViewModel dstSourceViewModelViewModel, 
             IStatusBarControlViewModel statusBarControlViewModel,
             IDstController dstController,
-            IDstNetChangePreviewViewModel netChangePreviewViewModel,
+            IHubNetChangePreviewViewModel hubNetChangePreviewViewModel,
             ITransferControlViewModel transferControlViewModel)
         {
             this.dstController = dstController;
             this.HubDataSourceViewModel = hubHubDataSourceViewModelViewModel;
             this.DstSourceViewModel = dstSourceViewModelViewModel;
-            this.NetChangePreviewViewModel = netChangePreviewViewModel;
+            this.HubNetChangePreviewViewModel = hubNetChangePreviewViewModel;
             this.TransferControlViewModel = transferControlViewModel;
             this.StatusBarControlViewModel = statusBarControlViewModel;
 

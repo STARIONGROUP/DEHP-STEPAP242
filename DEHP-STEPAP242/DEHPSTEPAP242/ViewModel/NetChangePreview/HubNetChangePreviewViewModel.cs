@@ -21,7 +21,13 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
 
     using ReactiveUI;
 
-    class DstNetChangePreviewViewModel : NetChangePreviewViewModel, IDstNetChangePreviewViewModel
+
+    /// <summary>
+    /// The <see cref="HubNetChangePreviewViewModel"/> is the view model 
+    /// for the Net Change Preview of the 10-25 data source from 
+    /// mappings of STEP-AP242 parts.
+    /// </summary>
+    class HubNetChangePreviewViewModel : NetChangePreviewViewModel, IHubNetChangePreviewViewModel
     {
         /// <summary>
         /// The <see cref="IDstController"/>
@@ -34,7 +40,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="hubController">The <see cref="T:DEHPCommon.HubController.Interfaces.IHubController" /></param>
         /// <param name="objectBrowserTreeSelectorService">The <see cref="T:DEHPCommon.Services.ObjectBrowserTreeSelectorService.IObjectBrowserTreeSelectorService" /></param>
-        public DstNetChangePreviewViewModel(IDstController dstController, IHubController hubController, IObjectBrowserTreeSelectorService objectBrowserTreeSelectorService) 
+        public HubNetChangePreviewViewModel(IDstController dstController, IHubController hubController, IObjectBrowserTreeSelectorService objectBrowserTreeSelectorService) 
             : base(hubController, objectBrowserTreeSelectorService)
         {
             this.dstController = dstController;
@@ -82,14 +88,17 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                         CDPMessageBus.Current.SendMessage(new HighlightEvent(elementToUpdate.Thing), elementToUpdate.Thing);
                         elementToUpdate.UpdateThing(thing);
                         elementToUpdate.UpdateChildren();
+                        elementToUpdate.ExpandAllRows();
                     }
                     else
                     {
                         // ElementDefinition does not exist, add it into the tree browser
-                        iterationRow.ContainedRows.Add(new ElementDefinitionRowViewModel(thing, this.HubController.CurrentDomainOfExpertise, this.HubController.Session, iterationRow));
+                        var elementToAdd = new ElementDefinitionRowViewModel(thing, this.HubController.CurrentDomainOfExpertise, this.HubController.Session, iterationRow);
+                        iterationRow.ContainedRows.Add(elementToAdd);
+                        elementToAdd.ExpandAllRows();
                         CDPMessageBus.Current.SendMessage(new HighlightEvent(thing), thing);
                     }
-
+                    
                     foreach (var elementUsage in thing.ContainedElement)
                     {
                         var elementUsageToUpdate = iterationRow.ContainedRows.OfType<ElementDefinitionRowViewModel>()
@@ -107,6 +116,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                         }
 
                         CDPMessageBus.Current.SendMessage(new ElementUsageHighlightEvent(elementUsageToUpdate.Thing.ElementDefinition), elementUsageToUpdate.Thing);
+                        elementUsageToUpdate.ExpandAllRows();
                         elementUsageToUpdate.UpdateThing(elementUsage);
                         elementUsageToUpdate.UpdateChildren();
                     }
