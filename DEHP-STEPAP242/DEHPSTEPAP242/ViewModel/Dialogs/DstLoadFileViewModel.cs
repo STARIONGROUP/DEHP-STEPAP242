@@ -92,7 +92,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         protected async void LoadFileCommandExecuteAsync()
         {
             IsLoadingFile = true;
-            statusBarControlView.Append("Loading file...");
+            statusBarControlView.Append($"Loading file: {FilePath}");
 
             try
             {
@@ -108,6 +108,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                     SaveRecentFiles();
 
                     CloseWindowBehavior?.Close();
+                }
+                else
+                {
+                    statusBarControlView.Append($"Failure loading file: {FilePath}", StatusBarMessageSeverity.Error);
                 }
             }
             catch (InvalidOperationException e)
