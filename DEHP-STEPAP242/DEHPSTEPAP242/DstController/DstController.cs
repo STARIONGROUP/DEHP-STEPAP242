@@ -151,6 +151,8 @@ namespace DEHPSTEPAP242.DstController
             // Update the new instance only when a load success
             Step3DFile = step;
 
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+
             IsLoading = false;
         }
 

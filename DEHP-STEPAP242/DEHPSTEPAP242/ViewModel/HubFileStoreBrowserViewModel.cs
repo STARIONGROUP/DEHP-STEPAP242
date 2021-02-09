@@ -157,6 +157,14 @@ namespace DEHPSTEPAP242.ViewModel
 
         #region Constructor
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="hubController"></param>
+        /// <param name="statusBarControlView"></param>
+        /// <param name="fileStoreService"></param>
+        /// <param name="dstHubService"></param>
+        /// <param name="fileDialogService"></param>
         public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView, 
             IFileStoreService fileStoreService, IDstHubService dstHubService,
             IOpenSaveFileDialogService fileDialogService)
@@ -183,25 +191,14 @@ namespace DEHPSTEPAP242.ViewModel
         {
             // Change on connection
             this.WhenAnyValue(x => x.hubController.OpenIteration).ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ =>
-                {
-                    if (this.hubController.IsSessionOpen && this.hubController.OpenIteration != null)
-                    {
-                        this.UpdateFileList();
-                    }
-                    else
-                    {
-                        CurrentHubFile = null;
-                        HubFiles.Clear();
-                    }
-                });
+                .Subscribe(_ => this.UpdateFileList());
 
             // Refresh/Transfer emits UpdateObjectBrowserTreeEvent (cache changed)
             CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x => this.UpdateFileList());
 
-
+            // Commands on selected FileRevision
             var fileSelected = this.WhenAny(
                 vm => vm.CurrentHubFile,
                 (x) => x.Value != null);
@@ -221,6 +218,13 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void UpdateFileList()
         {
+            if (!this.hubController.IsSessionOpen || this.hubController.OpenIteration is null)
+            {
+                CurrentHubFile = null;
+                HubFiles.Clear();
+                return;
+            }
+
             this.IsBusy = true;
 
             Debug.WriteLine("UpdateFileList:");
