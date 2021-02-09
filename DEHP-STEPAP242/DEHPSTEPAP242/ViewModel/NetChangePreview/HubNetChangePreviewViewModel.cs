@@ -85,20 +85,23 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                             thing.Parameter.AddRange(elementToUpdate.Thing.Parameter.Where(x => thing.Parameter.All(p => p.Iid != x.Iid)));
                         }
 
+                        foreach (var parameterOrOverrideBaseRowViewModel in elementToUpdate.ContainedRows.OfType<ParameterOrOverrideBaseRowViewModel>())
+                        {
+                            parameterOrOverrideBaseRowViewModel.SetProperties();
+                        }
+
                         CDPMessageBus.Current.SendMessage(new HighlightEvent(elementToUpdate.Thing), elementToUpdate.Thing);
+
+                        elementToUpdate.ExpandAllRows();
                         elementToUpdate.UpdateThing(thing);
                         elementToUpdate.UpdateChildren();
-                        elementToUpdate.ExpandAllRows();
                     }
                     else
                     {
-                        // ElementDefinition does not exist, add it into the tree browser
-                        var elementToAdd = new ElementDefinitionRowViewModel(thing, this.HubController.CurrentDomainOfExpertise, this.HubController.Session, iterationRow);
-                        iterationRow.ContainedRows.Add(elementToAdd);
-                        elementToAdd.ExpandAllRows();
+                        iterationRow.ContainedRows.Add(new ElementDefinitionRowViewModel(thing, this.HubController.CurrentDomainOfExpertise, this.HubController.Session, iterationRow));
                         CDPMessageBus.Current.SendMessage(new HighlightEvent(thing), thing);
                     }
-                    
+
                     foreach (var elementUsage in thing.ContainedElement)
                     {
                         var elementUsageToUpdate = iterationRow.ContainedRows.OfType<ElementDefinitionRowViewModel>()
@@ -115,7 +118,13 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                             elementUsage.ParameterOverride.AddRange(elementUsageToUpdate.Thing.ParameterOverride.Where(x => thing.Parameter.All(p => p.Iid != x.Iid)));
                         }
 
+                        foreach (var parameterOrOverrideBaseRowViewModel in elementUsageToUpdate.ContainedRows.OfType<ParameterOrOverrideBaseRowViewModel>())
+                        {
+                            parameterOrOverrideBaseRowViewModel.SetProperties();
+                        }
+
                         CDPMessageBus.Current.SendMessage(new ElementUsageHighlightEvent(elementUsageToUpdate.Thing.ElementDefinition), elementUsageToUpdate.Thing);
+
                         elementUsageToUpdate.ExpandAllRows();
                         elementUsageToUpdate.UpdateThing(elementUsage);
                         elementUsageToUpdate.UpdateChildren();
