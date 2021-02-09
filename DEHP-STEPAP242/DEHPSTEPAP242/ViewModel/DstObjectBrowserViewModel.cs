@@ -271,7 +271,7 @@ namespace DEHPSTEPAP242.ViewModel
             
             viewModel.SelectedThing = this.SelectedPart;
 
-            viewModel.UpdatePropertiesBasedOnMappingConfiguration(); 
+            viewModel.UpdatePropertiesBasedOnMappingConfiguration();
 
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }

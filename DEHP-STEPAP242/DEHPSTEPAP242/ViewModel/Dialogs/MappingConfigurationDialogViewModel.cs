@@ -84,9 +84,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 //value.SelectedParameterType = this.AvailableParameterTypes.FirstOrDefault();
 
                 this.RaiseAndSetIfChanged(ref this.selectedThing, value);
-
-                // Update mappings
-                //this.UpdatePropertiesBasedOnMappingConfiguration();
             }
         }
 
