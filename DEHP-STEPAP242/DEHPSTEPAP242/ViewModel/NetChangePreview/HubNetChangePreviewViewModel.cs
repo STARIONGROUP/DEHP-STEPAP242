@@ -62,7 +62,9 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             }
             else
             {
+                this.IsBusy = true;
                 this.ComputeValues();
+                this.IsBusy = false;
             }
         }
 
