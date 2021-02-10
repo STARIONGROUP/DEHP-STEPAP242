@@ -339,12 +339,14 @@ namespace DEHPSTEPAP242.DstController
             string filePath = Step3DFile.FileName;
             var file = this.dstHubService.FindFile(filePath);
 
+            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Uploading STEP file to Hub: {filePath}"));
             await this.hubController.Upload(filePath, file);
 
             // Step 2: update Step3dParameter.source with FileRevision from uploaded file
             file = this.dstHubService.FindFile(filePath);
             var fileRevision = file.CurrentFileRevision;
 
+            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
             foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
             {
                 sourceFieldToUpdate.UpdateSource(fileRevision);
@@ -355,6 +357,8 @@ namespace DEHPSTEPAP242.DstController
             {
                 var iterationClone = this.hubController.OpenIteration.Clone(false);
                 var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone);
+
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering {this.MapResult.Count} ElementDefinitions..."));
 
                 foreach (var elementDefinition in this.MapResult)
                 {
@@ -382,16 +386,21 @@ namespace DEHPSTEPAP242.DstController
                 // The ValueArray are constructed with the correct size
                 // in the last HubController.Write(transaction) call.
 
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
+
                 await this.UpdateParametersValueSets();
 
                 await this.UpdateExternalIdentifierMap();
 
                 await this.hubController.Refresh();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                this.logger.Error(e);
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub failed: {e.Message}"));
                 throw;
             }
         }
