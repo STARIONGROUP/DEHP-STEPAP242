@@ -26,7 +26,7 @@ for:
   configuration: Release
   before_build:
     - ps: >-
-          Write-Host Tag Encountered. Producing Artifact
+          Write-Host AP242 Tag Encountered. Producing Artifact
     - cmd: nuget sources add -name devexpress -source %DEVEXPRESS_API%
     - cmd: nuget sources add -name github -username RHEAGROUP -password %GITHUB_TOKEN% -source https://nuget.pkg.github.com/RHEAGROUP/index.json
     - cmd: nuget restore -verbosity quiet
