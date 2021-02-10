@@ -26,6 +26,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
+    using System.Reactive;
 
     using Microsoft.Win32;
     using ReactiveUI;
@@ -38,7 +40,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
-    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -84,12 +85,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Loads the current <see cref="FilePath"/> and closes the window.
         /// </summary>
-        public ReactiveCommand<object> LoadFileCommand { get; private set; }
+        public ReactiveCommand<Unit> LoadFileCommand { get; private set; }
 
         /// <summary>
         /// Executes the <see cref="LoadFileCommand"/> asynchronously
         /// </summary>
-        protected async void LoadFileCommandExecuteAsync()
+        protected async Task LoadFileCommandExecuteAsync()
         {
             IsLoadingFile = true;
             statusBarControlView.Append($"Loading file: {FilePath}");
@@ -243,8 +244,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 vm => vm.IsLoadingFile,
                 (fn, loading) => File.Exists(fn) && !loading);
 
-            LoadFileCommand = ReactiveCommand.Create(canLoadFile);
-            LoadFileCommand.Subscribe(_ => LoadFileCommandExecuteAsync());
+            LoadFileCommand = ReactiveCommand.CreateAsyncTask(canLoadFile, async _ => await this.LoadFileCommandExecuteAsync(), RxApp.MainThreadScheduler);
         }
 
         /// <summary>

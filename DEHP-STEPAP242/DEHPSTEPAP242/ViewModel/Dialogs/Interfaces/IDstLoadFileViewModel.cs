@@ -27,6 +27,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
     using DEHPCommon.UserInterfaces.Behaviors;
 
     using ReactiveUI;
+    using System.Reactive;
 
     /// <summary>
     /// Interface definiton for <see cref="DstLoadFileViewModel"/>
@@ -43,7 +44,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         /// 
         /// Uses the <see cref="FilePath"/> value.
         /// </summary>
-        ReactiveCommand<object> LoadFileCommand { get; }
+        ReactiveCommand<Unit> LoadFileCommand { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
