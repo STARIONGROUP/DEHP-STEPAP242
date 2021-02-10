@@ -94,7 +94,9 @@
                                                                   AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedParameterType}" NullText="Create New Parameter Type" AllowNullInput="True"
                                                                   ValidateOnTextInput="False" ItemsSource="{Binding AvailableParameterTypes}"/>
                  -->
+                
                 <!-- TODO: selection of the parameter (or new) where to apply the information -->
+                <!--
                 <Label Grid.Row="4" Grid.Column="0" Content="Parameter:" />
                 <dxe:ComboBoxEdit Margin="2" Grid.Column="1" Grid.Row="4" DisplayMember="UserFriendlyName" ValueMember="UserFriendlyShortName" ShowNullTextForEmptyValue="True" NullValueButtonPlacement="EditBox" ClearSelectionOnBackspace="True"
                                                                   AutoComplete="True" SelectedItem="{Binding SelectedThing.SelectedParameter}" NullText="Select Parameter" AllowNullInput="True"
@@ -102,7 +104,7 @@
                                                                   ApplyItemTemplateToSelectedItem="True"
                                                                   IsReadOnly="True">
                 </dxe:ComboBoxEdit>
-                
+                -->
                 
             </Grid>
         </Grid>
