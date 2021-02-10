@@ -240,13 +240,21 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void ExecuteContinueCommand()
         {
-            this.IsBusy = true;
+            
 
             try
             {
                 // Update the selected parameter
                 this.SelectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition.Parameter.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
                 this.SelectedThing.SelectedParameterType = this.SelectedThing.SelectedParameter?.ParameterType;
+
+                if (this.SelectedThing.SelectedElementUsages is { })
+                {
+                    MessageBox.Show("Element Usages were disabled until implementation is finished", "Work in progress");
+                    this.SelectedThing.SelectedElementUsages?.Clear();
+                }
+
+                this.IsBusy = true;
 
                 this.dstController.Map(this.SelectedThing);
                 this.CloseWindowBehavior?.Close();
