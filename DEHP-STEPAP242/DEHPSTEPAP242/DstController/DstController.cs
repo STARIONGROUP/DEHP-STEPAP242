@@ -50,6 +50,7 @@ namespace DEHPSTEPAP242.DstController
     using CDP4Common.CommonData;
     using CDP4Common.Types;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using System.Windows;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data 
@@ -212,19 +213,27 @@ namespace DEHPSTEPAP242.DstController
         /// <returns>A awaitable assert whether the mapping was successful</returns>
         public async Task Map(Step3dRowViewModel dst3DPart)
         {
-            this.statusBar.Append($"Mapping in progress of {dst3DPart.Description}...");
+            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Mapping in progress of {dst3DPart.Description}..."));
 
             var parts = new List<Step3dRowViewModel> { dst3DPart };
 
-            var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
-               this.mappingEngine.Map(parts);
+            try
+            {
+                var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
+                   this.mappingEngine.Map(parts);
 
-            this.MapResult.AddRange(elements);
-            this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
+                this.MapResult.AddRange(elements);
+                this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
-            await this.UpdateExternalIdentifierMap();
+                await this.UpdateExternalIdentifierMap();
 
-            this.statusBar.Append($"Mapping of {dst3DPart.Description} done");
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Mapping of {dst3DPart.Description} done"));
+            }
+            catch (Exception exception)
+            {
+                this.logger.Error(exception);
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Mapping of {dst3DPart.Description} failed"));
+            }
 
             CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
         }
