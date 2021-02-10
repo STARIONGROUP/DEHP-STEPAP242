@@ -181,12 +181,16 @@ namespace DEHPSTEPAP242.MappingRules
                     }
                     else
                     {
+                        //TODO: there is an error here
+                        // Exception Message: "Forbidden Set value for the derived property ParameterOverride.ParameterType"
+                        // StackTrace: "at CDP4Common.EngineeringModelData.ParameterOverride.set_ParameterType(ParameterType value)"
+
                         parameterOverride = this.Bake<ParameterOverride>(x =>
                         {
                             x.Parameter = parameter;
-                            x.ParameterType = parameter.ParameterType;
-                            x.StateDependence = parameter.StateDependence;
-                            x.IsOptionDependent = parameter.IsOptionDependent;
+                            //x.ParameterType = parameter.ParameterType;
+                            //x.StateDependence = parameter.StateDependence;
+                            //x.IsOptionDependent = parameter.IsOptionDependent;
                             x.Owner = this.owner;
                         });
                     }
@@ -196,7 +200,6 @@ namespace DEHPSTEPAP242.MappingRules
                 else
                 {
                     // THIS LINE 
-                    int neverReachThisLine = 3;
                     parameterOverride = elementUsage.ParameterOverride.FirstOrDefault(x => x.ParameterType.Name == this.dstParameterName);
                     
                     if (parameterOverride is null &&
