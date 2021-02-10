@@ -127,6 +127,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         public void UpdatePropertiesBasedOnMappingConfiguration()
         {
+            //this.dstHubService.CheckHubDependencies
+            //this.SelectedThing.SelectedParameter = this.dstHubService.
             //this.IsBusy = true;
             //
             //var part = this.SelectedThing;
@@ -195,7 +197,14 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             //    x.WhenAny(v => v.SelectedValues, v => v.Value.Any())
             //        .ObserveOn(RxApp.MainThreadScheduler)));
 
-            this.ContinueCommand = ReactiveCommand.Create(/*canContinue*/);
+            var canContinue = this.WhenAny(
+                vm => vm.SelectedThing,
+                vm => vm.SelectedThing.SelectedElementDefinition,
+                (part, ed) =>
+                    part.Value != null && ed.Value != null
+                );
+
+            this.ContinueCommand = ReactiveCommand.Create(canContinue);
             this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
 
             this.WhenAnyValue(x => x.SelectedThing.SelectedOption)
@@ -235,6 +244,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             try
             {
+                // Update the selected parameter
+                this.SelectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition.Parameter.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
+                this.SelectedThing.SelectedParameterType = this.SelectedThing.SelectedParameter?.ParameterType;
+
                 this.dstController.Map(this.SelectedThing);
                 this.CloseWindowBehavior?.Close();
             }
