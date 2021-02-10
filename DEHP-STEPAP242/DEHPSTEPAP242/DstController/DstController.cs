@@ -392,10 +392,10 @@ namespace DEHPSTEPAP242.DstController
 
                 await this.UpdateExternalIdentifierMap();
 
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
+
                 await this.hubController.Refresh();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
-
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
             }
             catch (Exception e)
             {
