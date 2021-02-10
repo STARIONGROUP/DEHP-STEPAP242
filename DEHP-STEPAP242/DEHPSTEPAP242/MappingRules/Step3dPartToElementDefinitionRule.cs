@@ -171,8 +171,57 @@ namespace DEHPSTEPAP242.MappingRules
         {
             foreach (var elementUsage in part.SelectedElementUsages)
             {
-                // TODO: if the expected parameter is not Overridedable?
+                ParameterOverride parameterOverride;
 
+                if (part.SelectedParameter is { } parameter)
+                {
+                    if (elementUsage.ParameterOverride.FirstOrDefault(x => x.Parameter == parameter) is { } existingOverride)
+                    {
+                        parameterOverride = existingOverride;
+                    }
+                    else
+                    {
+                        parameterOverride = this.Bake<ParameterOverride>(x =>
+                        {
+                            x.Parameter = parameter;
+                            x.ParameterType = parameter.ParameterType;
+                            x.StateDependence = parameter.StateDependence;
+                            x.IsOptionDependent = parameter.IsOptionDependent;
+                            x.Owner = this.owner;
+                        });
+                    }
+
+                    elementUsage.ParameterOverride.Add(parameterOverride);
+                }
+                else
+                {
+                    // THIS LINE 
+                    int neverReachThisLine = 3;
+                    parameterOverride = elementUsage.ParameterOverride.FirstOrDefault(x => x.ParameterType.Name == this.dstParameterName);
+                    
+                    if (parameterOverride is null &&
+                        elementUsage.ElementDefinition.Parameter.FirstOrDefault(x => x.ParameterType.Name == this.dstParameterName) is { } parameterToOverride)
+                    {
+                        parameterOverride = this.Bake<ParameterOverride>(x =>
+                        {
+                            x.Parameter = parameterToOverride;
+                            x.ParameterType = parameterToOverride.ParameterType;
+                            x.StateDependence = parameterToOverride.StateDependence;
+                            x.IsOptionDependent = parameterToOverride.IsOptionDependent;
+                            x.Owner = this.owner;
+                            x.Container = elementUsage;
+                        });
+                    }
+                }
+
+                if (parameterOverride != null)
+                {
+                    this.UpdateValueSet(part, parameterOverride);
+                    this.AddToExternalIdentifierMap(parameterOverride.Iid, this.dstParameterName);
+                }
+
+#if OLD_CODE
+                // TODO: if the expected parameter is not Override-able?
                 foreach (var parameter in elementUsage.ParameterOverride
                     .Where(x => x.ParameterType is CompoundParameterType parameterType
                         && parameterType.Name.StartsWith("step")))
@@ -185,6 +234,7 @@ namespace DEHPSTEPAP242.MappingRules
                 }
 
                 this.AddToExternalIdentifierMap(elementUsage.Iid, this.dstElementName);
+#endif
             }
         }
 
