@@ -539,13 +539,8 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="valueSet">The <see cref="IValueSet"/> of reference</param>
         private static void UpdateValueSet(ParameterValueSetBase clone, IValueSet valueSet)
         {
-            clone.Reference = valueSet.Reference;
+            // Only Computed IValueSet is being updated
             clone.Computed = valueSet.Computed;
-            clone.Manual = valueSet.Manual;
-            clone.ActualState = valueSet.ActualState;
-            clone.ActualOption = valueSet.ActualOption;
-            clone.Formula = valueSet.Formula;
-            clone.ValueSwitch = valueSet.ValueSwitch;
         }
 
 #if OLDMETHODS

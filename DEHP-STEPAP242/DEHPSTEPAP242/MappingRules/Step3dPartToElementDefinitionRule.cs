@@ -267,12 +267,10 @@ namespace DEHPSTEPAP242.MappingRules
                 {
                     x.ParameterType = part.SelectedParameterType;
                     x.Owner = this.owner;
-                    x.Container = this.hubController.OpenIteration;
                 });
                 
                 var valueSet = this.Bake<ParameterValueSet>(x =>
                 {
-                    x.Container = part.SelectedParameter;
                 });
 
                 part.SelectedParameter.ValueSet.Add(valueSet);
@@ -398,11 +396,15 @@ namespace DEHPSTEPAP242.MappingRules
                     var values = new List<string>(p.NumberOfValues);
                     foreach (var i in System.Linq.Enumerable.Range(0, p.NumberOfValues))
                     {
-                        values.Add("");
+                        values.Add("-");
                     }
 
-                    valuearray = new ValueArray<string>(values);
-                    valueSet.Computed = valuearray;
+                    valueSet.Computed = new ValueArray<string>(values);
+                    valueSet.Manual = new ValueArray<string>(values);
+                    valueSet.Reference = new ValueArray<string>(values);
+                    valueSet.Formula = new ValueArray<string>(values);
+
+                    valuearray = valueSet.Computed;
                 }
 
                 UpdateValueArrayForCompoundParameterType(part, p, valuearray);
