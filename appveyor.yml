@@ -15,6 +15,9 @@ environment:
 
 skip_branch_with_pr: true
 
+platform:
+  - x64
+
 for:
 -
   matrix:
