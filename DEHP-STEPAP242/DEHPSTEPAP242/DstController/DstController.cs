@@ -29,28 +29,28 @@ namespace DEHPSTEPAP242.DstController
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Windows;
     
     using ReactiveUI;
-
     using NLog;
 
+    using CDP4Dal;
+    using CDP4Dal.Operations;
     using CDP4Common.EngineeringModelData;
+    using CDP4Common.CommonData;
+    using CDP4Common.Types;
+
     using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.MappingEngine;
+    using DEHPCommon.Events;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
-    using DEHPSTEPAP242.ViewModel;
-    using STEP3DAdapter;
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.MappingRules;
-    using CDP4Dal.Operations;
-    using CDP4Dal;
-    using DEHPCommon.Events;
-    using CDP4Common.CommonData;
-    using CDP4Common.Types;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using System.Windows;
+
+    using STEP3DAdapter;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data 
