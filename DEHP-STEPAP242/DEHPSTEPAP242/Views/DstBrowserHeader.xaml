@@ -70,7 +70,7 @@
         <TextBlock Grid.Row="3" Grid.Column="5" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding OriginatingSystem}" />
 
         <TextBlock Grid.Row="4" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Preprocessor: " />
-        <TextBlock Grid.Row="4" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Preprocessor}" />
+        <TextBlock Grid.Row="4" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding PreprocessorVersion}" />
 
         <TextBlock Grid.Row="4" Grid.Column="2" Height="Auto" Margin="6,3,3,3" FontSize="10" FontWeight="Bold" Text="Authorization:" />
         <TextBlock Grid.Row="4" Grid.Column="3" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding Authorization}" />
