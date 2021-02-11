@@ -28,7 +28,7 @@ namespace STEP3DAdapter.Tests
 			// Example current: D:\dev\DEHP\DEHP-STEPAP242\DEHP-STEPAP242\STEP3DAdapter.Tests\bin\Debug\
 			// Example target:  D:\dev\DEHP\DEHP-STEPAP242\STEP3DWrapper\STEPcode\extra\step3d_wrapper_test\examples
 
-			string cwd = System.AppContext.BaseDirectory;
+			string cwd = System.IO.Path.GetDirectoryName(new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath);
 			string examplesDir = cwd + "../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
 			examplesDir = Path.GetFullPath(examplesDir);
 
