@@ -197,14 +197,17 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             //    x.WhenAny(v => v.SelectedValues, v => v.Value.Any())
             //        .ObserveOn(RxApp.MainThreadScheduler)));
 
-            var canContinue = this.WhenAny(
-                vm => vm.SelectedThing,
-                vm => vm.SelectedThing.SelectedElementDefinition,
-                (part, ed) =>
-                    part.Value != null && ed.Value != null
-                );
-
-            this.ContinueCommand = ReactiveCommand.Create(canContinue);
+            // By default the continue is available (new ED will be created)
+            //var canContinue = this.WhenAny(
+            //    vm => vm.SelectedThing,
+            //    vm => vm.SelectedThing.SelectedElementDefinition,
+            //    (part, ed) =>
+            //        part.Value != null && ed.Value != null
+            //    );
+            //
+            //this.ContinueCommand = ReactiveCommand.Create(canContinue);
+            //this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
+            this.ContinueCommand = ReactiveCommand.Create();
             this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
 
             this.WhenAnyValue(x => x.SelectedThing.SelectedOption)
@@ -240,22 +243,18 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void ExecuteContinueCommand()
         {
-            
-
             try
             {
                 // Update the selected parameter
-                this.SelectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition.Parameter.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
-                this.SelectedThing.SelectedParameterType = this.SelectedThing.SelectedParameter?.ParameterType;
-
-                if (this.SelectedThing.SelectedElementUsages is { })
+                if (this.SelectedThing.SelectedElementDefinition is { })
                 {
-                    MessageBox.Show("Element Usages were disabled until implementation is finished", "Work in progress");
-                    this.SelectedThing.SelectedElementUsages?.Clear();
+                    this.SelectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition.Parameter.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
+                    //this.SelectedThing.SelectedParameterType = this.SelectedThing.SelectedParameter?.ParameterType;
                 }
 
                 this.IsBusy = true;
 
+                //this.statusBar.Append($"Mapping in progress of {SelectedThing.Description}...");
                 this.dstController.Map(this.SelectedThing);
                 this.CloseWindowBehavior?.Close();
             }
@@ -363,7 +362,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         private void UpdateAvailableElementDefinitions()
         {
             this.AvailableElementDefinitions.Clear();
-            this.AvailableElementDefinitions.AddRange(this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()));
+            this.AvailableElementDefinitions.AddRange(
+                this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>())
+                .Select(e => e.Clone(true))
+                );
         }
 
         /// <summary>
@@ -376,61 +378,16 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing?.SelectedElementDefinition != null)
             {
                 var ed = this.SelectedThing.SelectedElementDefinition;
-                Debug.WriteLine($"ED {ed.Name} {ed.Iid}");
 
-                // NOTE: ElementUsages where not cloned when setting the value in the SelecteThing.SelectedElementDefinition
-                var hubED = this.hubController.OpenIteration.Element.FirstOrDefault(x => x.Iid == ed.Iid);
+                // // NOTE: ElementUsages where not cloned when setting the value in the SelecteThing.SelectedElementDefinition
+                // var hubED = this.hubController.OpenIteration.Element.FirstOrDefault(x => x.Iid == ed.Iid);
                 
                 // Note: both the owner of the DOE and ED are the owners of the EU
                 this.AvailableElementUsages.AddRange(
-                    hubED.ReferencingElementUsages()
+                    ed.ReferencingElementUsages()
                         .Where(x => x.ExcludeOption.Contains(this.selectedThing.SelectedOption) == false)
                         .Select(x => x.Clone(true))
                     );
-
-                /*
-                Debug.WriteLine($"Element {ed.Name} usages check:");
-                foreach (var item in ed.ContainedElement)
-                {
-                    Debug.WriteLine($"  ContainedElement {item.Name}");
-                }
-
-                Debug.WriteLine("----");
-
-                foreach (var item in ed.ReferencedElement)
-                {
-                    Debug.WriteLine($"  ReferencedElement {item.Name}");
-                }
-
-                Debug.WriteLine("+++++");
-
-                foreach (var item in ed.ReferencingElementUsages())
-                {
-                    Debug.WriteLine($"  Referencing {item.Name}");
-                }
-
-                Debug.WriteLine("========================================================");
-
-                Debug.WriteLine($"Element {hubED.Name} usages check:");
-                foreach (var item in hubED.ContainedElement)
-                {
-                    Debug.WriteLine($"  ContainedElement {item.Name}");
-                }
-
-                Debug.WriteLine("----");
-
-                foreach (var item in hubED.ReferencedElement)
-                {
-                    Debug.WriteLine($"  ReferencedElement {item.Name}");
-                }
-
-                Debug.WriteLine("+++++");
-
-                foreach (var item in hubED.ReferencingElementUsages())
-                {
-                    Debug.WriteLine($"  Referencing {item.Name}");
-                }
-                */
             }
         }
 

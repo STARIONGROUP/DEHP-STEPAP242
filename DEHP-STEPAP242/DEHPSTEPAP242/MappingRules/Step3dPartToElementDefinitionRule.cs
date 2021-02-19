@@ -19,6 +19,7 @@ namespace DEHPSTEPAP242.MappingRules
     using DEHPCommon.MappingRules.Core;
 
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Rows;
 
     using NLog;
@@ -70,6 +71,11 @@ namespace DEHPSTEPAP242.MappingRules
         /// The <see cref="IHubController"/>
         /// </summary>
         private readonly IHubController hubController = AppContainer.Container.Resolve<IHubController>();
+
+        /// <summary>
+        /// The <see cref="IDstHubService"/>
+        /// </summary>
+        private readonly IDstHubService dstHubService = AppContainer.Container.Resolve<IDstHubService>();
 
         /// <summary>
         /// Gets the <see cref="idCorrespondences"/>
@@ -251,16 +257,7 @@ namespace DEHPSTEPAP242.MappingRules
             {
                 if (part.SelectedParameterType is null)
                 {
-                    if (this.hubController.Session.OpenReferenceDataLibraries
-                        .SelectMany(x => x.QueryParameterTypesFromChainOfRdls())
-                        .FirstOrDefault(x => x.ShortName == "step_geo") is CompoundParameterType parameterType)
-                    {
-                        part.SelectedParameterType = parameterType;
-                    }
-                    else
-                    {
-                        part.SelectedParameterType = this.CreateCompoundParameterTypeForSte3DGeometry();
-                    }
+                    part.SelectedParameterType = this.GetStep3dGeometryParameterType();
                 }
 
                 part.SelectedParameter = this.Bake<Parameter>(x =>
@@ -281,12 +278,31 @@ namespace DEHPSTEPAP242.MappingRules
         }
 
         /// <summary>
+        /// Gets the existing parameter type or creates a new one
+        /// </summary>
+        /// <returns>A <see cref="ParameterType"/></returns>
+        private ParameterType GetStep3dGeometryParameterType()
+        {
+            var rdl = this.dstHubService.GetReferenceDataLibrary();
+
+            var parameterType = rdl.ParameterType.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x));
+
+            if (parameterType is null)
+            {
+                // NOTE: this should not happen, the DST creates required types at connection time
+                parameterType = this.CreateCompoundParameterTypeForSte3DGeometry();
+            }
+
+            return parameterType;
+        }
+
+        /// <summary>
         /// Creates the <see cref="CompoundParameterType"/> for time tagged values
         /// </summary>
         /// <returns>A <see cref="CompoundParameterType"/></returns>
+        /// <remarks>This method will not be called because all was created at connection time</remarks>
         private CompoundParameterType CreateCompoundParameterTypeForSte3DGeometry()
         {
-            // NOTE: this parameter type actually should already exists (DST check at connection)
             return this.Bake<CompoundParameterType>(x =>
             {
                 //string STEP_ID_UNIT_NAME = "step id";
@@ -341,6 +357,11 @@ namespace DEHPSTEPAP242.MappingRules
         /// <param name="parameter">The <see cref="Parameter"/></param>
         private void UpdateValueSet(Step3dRowViewModel variable, ParameterBase parameter)
         {
+            var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(variable.SelectedOption, variable.SelectedActualFiniteState);
+
+            this.UpdateComputedValueSet(variable, parameter, valueSet);
+
+            /*
             IValueSet valueSet;
 
             if (parameter.StateDependence != null && variable.SelectedActualFiniteState is { } actualFiniteState)
@@ -370,6 +391,7 @@ namespace DEHPSTEPAP242.MappingRules
             }
 
             this.UpdateValueSet(variable, parameter, (ParameterValueSetBase)valueSet);
+            */
         }
 
         /// <summary>
@@ -378,7 +400,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// <param name="part">The <see cref="Step3dRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Thing"/> <see cref="Parameter"/> or <see cref="ParameterOverride"/></param>
         /// <param name="valueSet">The <see cref="ParameterValueSetBase"/></param>
-        private void UpdateValueSet(Step3dRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
+        private void UpdateComputedValueSet(Step3dRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
         {
             ParameterBase paramBase = (ParameterBase)parameter;
             var paramType = paramBase.ParameterType;
@@ -408,9 +430,11 @@ namespace DEHPSTEPAP242.MappingRules
                 }
 
                 UpdateValueArrayForCompoundParameterType(part, p, valuearray);
-            }
 
-            this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
+                valueSet.ValueSwitch = ParameterSwitchKind.COMPUTED;
+
+                this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
+            }
         }
 
         /// <summary>
