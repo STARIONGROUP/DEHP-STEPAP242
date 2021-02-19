@@ -375,12 +375,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.AvailableElementUsages.Clear();
 
-            if (this.SelectedThing?.SelectedElementDefinition != null)
+            if (this.SelectedThing?.SelectedElementDefinition is {})
             {
                 var ed = this.SelectedThing.SelectedElementDefinition;
-
-                // // NOTE: ElementUsages where not cloned when setting the value in the SelecteThing.SelectedElementDefinition
-                // var hubED = this.hubController.OpenIteration.Element.FirstOrDefault(x => x.Iid == ed.Iid);
                 
                 // Note: both the owner of the DOE and ED are the owners of the EU
                 this.AvailableElementUsages.AddRange(
