@@ -24,12 +24,16 @@
 
 namespace DEHPSTEPAP242.DstController
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    
+    using ReactiveUI;
+
     using CDP4Common.EngineeringModelData;
     using DEHPCommon.Enumerators;
+
     using DEHPSTEPAP242.ViewModel.Rows;
-    using ReactiveUI;
     using STEP3DAdapter;
 
     /// <summary>
@@ -90,18 +94,31 @@ namespace DEHPSTEPAP242.DstController
         List<IdCorrespondence> IdCorrespondences { get; }
 
         /// <summary>
+        /// Updates the configured mapping
+        /// </summary>
+        /// <returns>A <see cref="Task"/></returns>
+        void UpdateExternalIdentifierMap();
+
+        /// <summary>
         /// Creates and sets the <see cref="DstController.ExternalIdentifierMap"/>
         /// </summary>
         /// <param name="newName">The model name to use for creating the new <see cref="DstController.ExternalIdentifierMap"/></param>
-        /// <returns>A awaitable <see cref="ExternalIdentifierMap"/></returns>
-        Task<ExternalIdentifierMap> CreateExternalIdentifierMap(string newName);
+        /// <returns>A newly created <see cref="DstController.ExternalIdentifierMap"/></returns>
+        ExternalIdentifierMap CreateExternalIdentifierMap(string newName);
+
+        /// <summary>
+        /// Adds one correspondance to the <see cref="IdCorrespondences"/>
+        /// </summary>
+        /// <param name="internalId">The thing that <see cref="externalId"/> corresponds to</param>
+        /// <param name="externalId">The external thing that <see cref="internalId"/> corresponds to</param>
+        void AddToExternalIdentifierMap(Guid internalId, string externalId);
 
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
         /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        Task Map(Step3dRowViewModel dst3DPart);
+        void Map(Step3dRowViewModel dst3DPart);
 
         /// <summary>
         /// Transfers the mapped parts to the Hub data source

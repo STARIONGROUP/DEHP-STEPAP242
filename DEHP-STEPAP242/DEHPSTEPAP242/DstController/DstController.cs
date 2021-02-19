@@ -51,6 +51,9 @@ namespace DEHPSTEPAP242.DstController
     using DEHPSTEPAP242.MappingRules;
 
     using STEP3DAdapter;
+    using DEHPCommon.UserInterfaces.ViewModels;
+    using DEHPCommon.Services.NavigationService;
+    using DEHPCommon.UserInterfaces.Views;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data 
@@ -69,6 +72,11 @@ namespace DEHPSTEPAP242.DstController
         /// The <see cref="IMappingEngine"/>
         /// </summary>
         private readonly IMappingEngine mappingEngine;
+
+        /// <summary>
+        /// The <see cref="INavigationService"/>
+        /// </summary>
+        private readonly INavigationService navigationService;
 
         /// <summary>
         /// The <see cref="IDstHubService"/>
@@ -209,31 +217,21 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        public async Task Map(Step3dRowViewModel dst3DPart)
+        public void Map(Step3dRowViewModel dst3DPart)
         {
-            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Mapping in progress of {dst3DPart.Description}..."));
-
             var parts = new List<Step3dRowViewModel> { dst3DPart };
 
-            try
-            {
-                var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
-                   this.mappingEngine.Map(parts);
+            var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
+                this.mappingEngine.Map(parts);
 
+            if (elements.Any())
+            {
                 this.MapResult.AddRange(elements);
                 this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
-                await this.UpdateExternalIdentifierMap();
-
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Mapping of {dst3DPart.Description} done"));
+                this.UpdateExternalIdentifierMap();
+                CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
             }
-            catch (Exception exception)
-            {
-                this.logger.Error(exception);
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Mapping of {dst3DPart.Description} failed"));
-            }
-
-            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
         }
 
         /// <summary>
@@ -256,51 +254,57 @@ namespace DEHPSTEPAP242.DstController
         /// Updates the configured mapping
         /// </summary>
         /// <returns>A <see cref="Task"/></returns>
-        public async Task UpdateExternalIdentifierMap()
+        public void UpdateExternalIdentifierMap()
         {
 #if DO_UPDATE_EXTERNAL_IDMAP
-            await this.hubController.Delete<ExternalIdentifierMap, IdCorrespondence>(this.ExternalIdentifierMap.Correspondence.ToList(),
-                (map, correspondence) => map.Correspondence.Remove(correspondence));
+            var unsusedIdCorrespondences = this.ExternalIdentifierMap.Correspondence
+                .Where(x => this.IdCorrespondences
+                    .All(c => c.Iid != x.Iid || c.ExternalId != x.ExternalId))
+                .ToList();
 
             this.ExternalIdentifierMap.Correspondence.Clear();
-
-            foreach (var correspondence in this.IdCorrespondences)
-            {
-                correspondence.Container = this.ExternalIdentifierMap;
-            }
-
-            await this.hubController.CreateOrUpdate<ExternalIdentifierMap, IdCorrespondence>(this.IdCorrespondences,
-                (map, correspondence) => map.Correspondence.Add(correspondence));
-
             this.ExternalIdentifierMap.Correspondence.AddRange(this.IdCorrespondences);
+            this.ExternalIdentifierMap.Correspondence.AddRange(unsusedIdCorrespondences);
             this.IdCorrespondences.Clear();
-            this.statusBar.Append("Mapping configuration saved");
 #else
             // Currently nothing to save (feature not fully implemented)
-            await Task.FromResult(0);
 #endif
         }
-
         /// <summary>
         /// Creates and sets the <see cref="ExternalIdentifierMap"/>
         /// </summary>
         /// <param name="newName">The model name to use for creating the new <see cref="ExternalIdentifierMap"/></param>
         /// <returns>A newly created <see cref="ExternalIdentifierMap"/></returns>
-        public async Task<ExternalIdentifierMap> CreateExternalIdentifierMap(string newName)
+        public ExternalIdentifierMap CreateExternalIdentifierMap(string newName)
         {
-            var externalIdentifierMap = new ExternalIdentifierMap(Guid.NewGuid(), null, null)
+            return new ExternalIdentifierMap()
             {
                 Name = newName,
                 ExternalToolName = this.ThisToolName,
                 ExternalModelName = newName,
                 Owner = this.hubController.CurrentDomainOfExpertise,
-                Container = this.hubController.OpenIteration
             };
+        }
 
-            await this.hubController.CreateOrUpdate<Iteration, ExternalIdentifierMap>(externalIdentifierMap,
-                (i, m) => i.ExternalIdentifierMap.Add(m), true);
-
-            return externalIdentifierMap;
+        /// <summary>
+        /// Adds one correspondance to the <see cref="IDstController.IdCorrespondences"/>
+        /// </summary>
+        /// <param name="internalId">The thing that <see cref="externalId"/> corresponds to</param>
+        /// <param name="externalId">The external thing that <see cref="internalId"/> corresponds to</param>
+        public void AddToExternalIdentifierMap(Guid internalId, string externalId)
+        {
+            if (internalId != Guid.Empty && !this.ExternalIdentifierMap.Correspondence
+                                             .Any(
+                x => x.ExternalId == externalId && x.InternalThing == internalId)
+                && !this.IdCorrespondences
+                    .Any(x => x.ExternalId == externalId && x.InternalThing == internalId))
+            {
+                this.IdCorrespondences.Add(new IdCorrespondence(Guid.NewGuid(), null, null)
+                {
+                    ExternalId = externalId,
+                    InternalThing = internalId
+                });
+            }
         }
 
         #endregion
@@ -312,13 +316,15 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="mappingEngine">The <<see cref="IMappingEngine"/></param>
+        /// <param name="navigationService">The <see cref="INavigationService"/></param>
         /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
         /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
-        public DstController(IHubController hubController, IMappingEngine mappingEngine, 
-            IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
+        public DstController(IHubController hubController, IMappingEngine mappingEngine,
+            INavigationService navigationService, IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
         {
             this.hubController = hubController;
             this.mappingEngine = mappingEngine;
+            this.navigationService = navigationService;
             this.dstHubService = dstHubService;
             this.statusBar = statusBar;
         }
@@ -328,43 +334,63 @@ namespace DEHPSTEPAP242.DstController
         #region Private Transfer Methods
 
         /// <summary>
+        /// Initializes a new <see cref="IThingTransaction"/> based on the current open <see cref="Iteration"/>
+        /// </summary>
+        /// <returns>A <see cref="ValueTuple"/> Containing the <see cref="Iteration"/> clone and the <see cref="IThingTransaction"/></returns>
+        private (Iteration clone, ThingTransaction transaction) GetIterationTransaction()
+        {
+            var iterationClone = this.hubController.OpenIteration.Clone(false);
+            return (iterationClone, new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone));
+        }
+
+        /// <summary>
         /// Transfers the input file and mapped parts to the Hub
+        /// 
+        /// Workflow:
+        /// 1. Update current STEP file to the Hub
+        /// 2. Get Uuid of its FileRevision and update "source" parameters
+        /// 3. Send CreateOrUpdate for ED/EU
+        /// 4. Update ValueSets
         /// </summary>
         /// <returns>A <see cref="Task"/></returns>
         private async Task TransferMappedThingsToHub()
         {
-            // Step 1: upload file
-            string filePath = Step3DFile.FileName;
-            var file = this.dstHubService.FindFile(filePath);
-
-            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Uploading STEP file to Hub: {filePath}"));
-            await this.hubController.Upload(filePath, file);
-
-            // Step 2: update Step3dParameter.source with FileRevision from uploaded file
-            file = this.dstHubService.FindFile(filePath);
-            var fileRevision = file.CurrentFileRevision;
-
-            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
-            foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
-            {
-                sourceFieldToUpdate.UpdateSource(fileRevision);
-            }
-
-            // Step 3: create/update things
             try
             {
                 var iterationClone = this.hubController.OpenIteration.Clone(false);
                 var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone);
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering {this.MapResult.Count} ElementDefinitions..."));
+                if (!(this.MapResult.Any() && this.TrySupplyingAndCreatingLogEntry(transaction)))
+                {
+                    return;
+                }
 
+                // Step 1: upload file
+                string filePath = Step3DFile.FileName;
+                var file = this.dstHubService.FindFile(filePath);
+
+                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Uploading STEP file to Hub: {filePath}"));
+                await this.hubController.Upload(filePath, file);
+
+                // Step 2: update Step3dParameter.source with FileRevision from uploaded file
+                file = this.dstHubService.FindFile(filePath);
+                var fileRevision = file.CurrentFileRevision;
+
+                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
+                foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
+                {
+                    sourceFieldToUpdate.UpdateSource(fileRevision);
+                }
+
+                // Step 3: create/update things
+                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering {this.MapResult.Count} ElementDefinitions..."));
                 foreach (var elementDefinition in this.MapResult)
                 {
                     var elementDefinitionCloned = this.TransactionCreateOrUpdate(transaction, elementDefinition, iterationClone.Element);
 
                     foreach (var parameter in elementDefinition.Parameter)
                     {
-                        _ = this.TransactionCreateOrUpdate(transaction, parameter, elementDefinitionCloned.Parameter);
+                        this.TransactionCreateOrUpdate(transaction, parameter, elementDefinitionCloned.Parameter);
                     }
 
                     foreach (var parameterOverride in elementDefinition.ContainedElement.SelectMany(x => x.ParameterOverride))
@@ -372,9 +398,11 @@ namespace DEHPSTEPAP242.DstController
                         var elementUsageClone = (ElementUsage)parameterOverride.Container.Clone(false);
                         transaction.CreateOrUpdate(elementUsageClone);
 
-                        _ = this.TransactionCreateOrUpdate(transaction, parameterOverride, elementUsageClone.ParameterOverride);
+                        this.TransactionCreateOrUpdate(transaction, parameterOverride, elementUsageClone.ParameterOverride);
                     }
                 }
+
+                //this.PersistExternalIdentifierMap(transaction);
 
                 transaction.CreateOrUpdate(iterationClone);
 
@@ -384,21 +412,17 @@ namespace DEHPSTEPAP242.DstController
                 // The ValueArray are constructed with the correct size
                 // in the last HubController.Write(transaction) call.
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
-
+                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
                 await this.UpdateParametersValueSets();
 
-                await this.UpdateExternalIdentifierMap();
-
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
-
+                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
                 await this.hubController.Refresh();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
             }
             catch (Exception e)
             {
                 this.logger.Error(e);
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub failed: {e.Message}"));
+                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub failed: {e.Message}"));
                 throw;
             }
         }
@@ -462,35 +486,29 @@ namespace DEHPSTEPAP242.DstController
         /// Updates the <see cref="IValueSet"/> of all <see cref="Parameter"/> and all <see cref="ParameterOverride"/>
         /// </summary>
         /// <returns>A <see cref="Task"/></returns>
-        private async Task UpdateParametersValueSets(Thing clonedContainer)
+        public async Task UpdateParametersValueSets()
         {
-            await this.UpdateParametersValueSets(this.MapResult.SelectMany(x => x.Parameter));
-            await this.UpdateParametersValueSets(this.MapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
-        }
+            var (iterationClone, transaction) = this.GetIterationTransaction();
 
-        /// <summary>
-        /// Updates the <see cref="IValueSet"/> of all <see cref="Parameter"/> and all <see cref="ParameterOverride"/>
-        /// </summary>
-        /// <returns>A <see cref="Task"/></returns>
-        private async Task UpdateParametersValueSets()
-        {
-            await this.UpdateParametersValueSets(this.MapResult.SelectMany(x => x.Parameter));
-            await this.UpdateParametersValueSets(this.MapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
+            this.UpdateParametersValueSets(transaction, this.MapResult.SelectMany(x => x.Parameter));
+            this.UpdateParametersValueSets(transaction, this.MapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
+
+            transaction.CreateOrUpdate(iterationClone);
+            await this.hubController.Write(transaction);
         }
 
         /// <summary>
         /// Updates the specified <see cref="Parameter"/> <see cref="IValueSet"/>
         /// </summary>
+        /// <param name="transaction">the <see cref="IThingTransaction"/></param>
         /// <param name="parameters">The collection of <see cref="Parameter"/></param>
-        private async Task UpdateParametersValueSets(IEnumerable<Parameter> parameters)
+        private void UpdateParametersValueSets(IThingTransaction transaction, IEnumerable<Parameter> parameters)
         {
             foreach (var parameter in parameters)
             {
                 this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out Parameter newParameter);
                 var container = newParameter.Clone(false);
 
-                var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(container), container);
-
                 for (var index = 0; index < parameter.ValueSet.Count; index++)
                 {
                     var clone = newParameter.ValueSet[index].Clone(false);
@@ -499,34 +517,29 @@ namespace DEHPSTEPAP242.DstController
                 }
 
                 transaction.CreateOrUpdate(container);
-
-                await this.hubController.Write(transaction);
             }
         }
 
         /// <summary>
         /// Updates the specified <see cref="ParameterOverride"/> <see cref="IValueSet"/>
         /// </summary>
+        /// <param name="transaction">the <see cref="IThingTransaction"/></param>
         /// <param name="parameters">The collection of <see cref="ParameterOverride"/></param>
-        private async Task UpdateParametersValueSets(IEnumerable<ParameterOverride> parameters)
+        private void UpdateParametersValueSets(IThingTransaction transaction, IEnumerable<ParameterOverride> parameters)
         {
             foreach (var parameter in parameters)
             {
                 this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out ParameterOverride newParameter);
-                var container = newParameter.Clone(false);
-
-                var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(container), container);
+                var newParameterClone = newParameter.Clone(true);
 
                 for (var index = 0; index < parameter.ValueSet.Count; index++)
                 {
-                    var clone = newParameter.ValueSet[index].Clone(false);
+                    var clone = newParameterClone.ValueSet[index];
                     UpdateValueSet(clone, parameter.ValueSet[index]);
                     transaction.CreateOrUpdate(clone);
                 }
 
-                transaction.CreateOrUpdate(container);
-
-                await this.hubController.Write(transaction);
+                transaction.CreateOrUpdate(newParameterClone);
             }
         }
 
@@ -541,56 +554,63 @@ namespace DEHPSTEPAP242.DstController
             clone.Computed = valueSet.Computed;
         }
 
-#if OLDMETHODS
-        private void UpdateParametersValueSets(IThingTransaction transaction, IEnumerable<Parameter> parameters)
+        /// <summary>
+        /// Updates the configured mapping, registering the <see cref="ExternalIdentifierMap"/> and its <see cref="IdCorrespondence"/>
+        /// to a <see name="IThingTransaction"/>
+        /// </summary>
+        /// <param name="transaction">the <see cref="IThingTransaction"/></param>
+        private void PersistExternalIdentifierMap(IThingTransaction transaction)
         {
-            foreach (var parameter in parameters)
+            this.UpdateExternalIdentifierMap();
+
+            var externalIdentifierMapClone = this.ExternalIdentifierMap.Clone(true);
+
+            if (externalIdentifierMapClone.Iid == Guid.Empty)
             {
-                this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out Parameter newParameter);
-
-                var container = newParameter.Clone(false);
-
-                for (var index = 0; index < parameter.ValueSet.Count; index++)
-                {
-                    var clone = newParameter.ValueSet[index].Clone(false);
-                    UpdateValueSet(clone, parameter.ValueSet[index]);
-                    transaction.CreateOrUpdate(clone);
-                }
-
-                transaction.CreateOrUpdate(container);
+                externalIdentifierMapClone.Iid = Guid.NewGuid();
+                this.ExternalIdentifierMap.Iid = externalIdentifierMapClone.Iid;
+                ((Iteration)transaction.AssociatedClone).ExternalIdentifierMap.Add(externalIdentifierMapClone);
+                transaction.CreateOrUpdate(externalIdentifierMapClone);
             }
-        }
 
-        private void UpdateParametersValueSets(IThingTransaction transaction, IEnumerable<ParameterOverride> parameters)
-        {
-            foreach (var parameter in parameters)
+            var idCorrespondencesToPersist = externalIdentifierMapClone.Correspondence.ToList();
+
+            externalIdentifierMapClone.Correspondence.Clear();
+
+            foreach (var clonedCorrespondence in idCorrespondencesToPersist)
             {
-                this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out ParameterOverride newParameter);
-
-                var container = newParameter.Clone(false);
-
-                for (var index = 0; index < parameter.ValueSet.Count; index++)
-                {
-                    var clone = newParameter.ValueSet[index].Clone(false);
-                    UpdateValueSet(clone, parameter.ValueSet[index]);
-                    transaction.CreateOrUpdate(clone);
-                }
-
-                transaction.CreateOrUpdate(container);
+                externalIdentifierMapClone.Correspondence.Add(clonedCorrespondence);
+                clonedCorrespondence.Container = externalIdentifierMapClone;
+                transaction.CreateOrUpdate(clonedCorrespondence);
             }
+
+            transaction.CreateOrUpdate(externalIdentifierMapClone);
+
+            this.ExternalIdentifierMap.Correspondence.Clear();
+            this.ExternalIdentifierMap.Correspondence.AddRange(idCorrespondencesToPersist);
+            this.statusBar.Append("Mapping configuration processed");
         }
 
-        private static void UpdateValueSet(ParameterValueSetBase clone, IValueSet valueSet)
+        /// <summary>
+        /// Pops the <see cref="CreateLogEntryDialog"/> and based on its result, either registers a new ModelLogEntry to the <see cref="transaction"/> or not
+        /// </summary>
+        /// <param name="transaction">The <see cref="IThingTransaction"/> that will get the changes registered to</param>
+        /// <returns>A boolean result, true if the user pressed OK, otherwise false</returns>
+        private bool TrySupplyingAndCreatingLogEntry(ThingTransaction transaction)
         {
-            clone.Reference = valueSet.Reference;
-            clone.Computed = valueSet.Computed;
-            clone.Manual = valueSet.Manual;
-            clone.ActualState = valueSet.ActualState;
-            clone.ActualOption = valueSet.ActualOption;
-            clone.Formula = valueSet.Formula;
-            clone.ValueSwitch = valueSet.ValueSwitch;
+            var vm = new CreateLogEntryDialogViewModel();
+
+            var dialogResult = this.navigationService.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(vm);
+
+            if (dialogResult != true)
+            {
+                return false;
+            }
+
+            this.hubController.RegisterNewLogEntryToTransaction(vm.LogEntryContent, transaction);
+            return true;
         }
-#endif
+
         #endregion
     }
 }
