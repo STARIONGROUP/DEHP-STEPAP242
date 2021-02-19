@@ -552,6 +552,7 @@ namespace DEHPSTEPAP242.DstController
         {
             // Only Computed IValueSet is being updated
             clone.Computed = valueSet.Computed;
+            clone.ValueSwitch = valueSet.ValueSwitch;
         }
 
         /// <summary>
