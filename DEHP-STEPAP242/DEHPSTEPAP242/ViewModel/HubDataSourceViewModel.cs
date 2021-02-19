@@ -47,6 +47,7 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.Services.DstHubService;
     using CDP4Dal;
     using DEHPCommon.Events;
+    using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
 
     /// <summary>
     /// View model that represents a data source panel which holds a tree like browser, a informational header and
@@ -70,14 +71,19 @@ namespace DEHPSTEPAP242.ViewModel
         private readonly IObjectBrowserTreeSelectorService treeSelectorService;
 
         /// <summary>
+        /// The <see cref="IHubBrowserHeaderViewModel"/>
+        /// </summary>
+        public IHubBrowserHeaderViewModel HubBrowserHeader { get; set; }
+
+        /// <summary>
         /// The <see cref="IObjectBrowserViewModel"/>
         /// </summary>
         public IHubObjectBrowserViewModel ObjectBrowser { get; set; }
 
         /// <summary>
-        /// The <see cref="IHubBrowserHeaderViewModel"/>
+        /// The <see cref="IPublicationBrowserViewModel"/>
         /// </summary>
-        public IHubBrowserHeaderViewModel HubBrowserHeader { get; set; }
+        public IPublicationBrowserViewModel PublicationBrowser { get; set; }
 
         /// <summary>
         /// The <see cref="IHubFileStoreBrowserViewModel"/>
@@ -87,25 +93,32 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Initializes a new <see cref="HubDataSourceViewModel"/>
         /// </summary>
-        /// <param name="navigationService">The <see cref="INavigationService"/></param>
-        /// <param name="dstHubService">The <see cref="IDstHubService "/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
-        /// <param name="objectBrowser">The <see cref="IHubObjectBrowserViewModel"/></param>
-        /// <param name="treeSelectorService">The <see cref="IObjectBrowserTreeSelectorService"/></param>
         /// <param name="hubBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
-        public HubDataSourceViewModel(INavigationService navigationService, IDstHubService dstHubService,
-            IHubController hubController, IHubObjectBrowserViewModel objectBrowser,
-            IObjectBrowserTreeSelectorService treeSelectorService, 
+        /// <param name="objectBrowser">The <see cref="IHubObjectBrowserViewModel"/></param>
+        /// <param name="publicationBrowser">The <see cref="IPublicationBrowserViewModel"/></param>
+        /// <param name="navigationService">The <see cref="INavigationService"/></param>
+        /// <param name="treeSelectorService">The <see cref="IObjectBrowserTreeSelectorService"/></param>
+        /// <param name="dstHubService">The <see cref="IDstHubService "/></param>
+        /// <param name="hubFileBrowser">The <see cref="IHubFileStoreBrowserViewModel "/></param>
+        public HubDataSourceViewModel(
+            IHubController hubController,
             IHubBrowserHeaderViewModel hubBrowserHeader, 
+            IHubObjectBrowserViewModel objectBrowser,
+            IPublicationBrowserViewModel publicationBrowser,
+            INavigationService navigationService,
+            IObjectBrowserTreeSelectorService treeSelectorService,
+            IDstHubService dstHubService,
             IHubFileStoreBrowserViewModel hubFileBrowser) : base(navigationService)
         {
-            this.dstHubService = dstHubService;
             this.hubController = hubController;
-            this.treeSelectorService = treeSelectorService;
-            this.ObjectBrowser = objectBrowser;
             this.HubBrowserHeader = hubBrowserHeader;
+            this.ObjectBrowser = objectBrowser;
+            this.PublicationBrowser = publicationBrowser;
+            this.treeSelectorService = treeSelectorService;
+            this.dstHubService = dstHubService;
             this.HubFileStoreBrowser = hubFileBrowser;
-            
+
             InitializeCommands();
         }
 

@@ -25,7 +25,7 @@
 namespace DEHPSTEPAP242.ViewModel.Interfaces
 {
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-
+    using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
     using ReactiveUI;
 
     /// <summary>
@@ -34,14 +34,19 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     public interface IHubDataSourceViewModel
     {
         /// <summary>
+        /// The <see cref="IHubBrowserHeaderViewModel"/>
+        /// </summary>
+        IHubBrowserHeaderViewModel HubBrowserHeader { get; }
+
+        /// <summary>
         /// The <see cref="IObjectBrowserViewModel"/>
         /// </summary>
         IHubObjectBrowserViewModel ObjectBrowser { get; }
 
         /// <summary>
-        /// The <see cref="IHubBrowserHeaderViewModel"/>
+        /// The <see cref="IPublicationBrowserViewModel"/>
         /// </summary>
-        IHubBrowserHeaderViewModel HubBrowserHeader { get; }
+        IPublicationBrowserViewModel PublicationBrowser { get; set; }
 
         /// <summary>
         /// The <see cref="IHubFileStoreBrowserViewModel"/>

@@ -9,6 +9,7 @@
         xmlns:common="clr-namespace:DEHPCommon.UserInterfaces.Views;assembly=DEHPCommon"
         xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
         xmlns:objectBrowser="clr-namespace:DEHPCommon.UserInterfaces.Views.ObjectBrowser;assembly=DEHPCommon"
+        xmlns:publicationBrowser="clr-namespace:DEHPCommon.UserInterfaces.Views.PublicationBrowser;assembly=DEHPCommon"
         xmlns:views="clr-namespace:DEHPSTEPAP242.Views" 
         Title="DEHP STEP-AP242 Adapter" WindowState="Maximized" 
         MinWidth="800" MinHeight="600" mc:Ignorable="d">
@@ -104,8 +105,10 @@
                                             </objectBrowser:ObjectBrowser>
                                         </Grid>
                                     </TabItem>
+                                    <TabItem Header="Publications">
+                                        <publicationBrowser:PublicationBrowser DataContext="{Binding HubDataSourceViewModel.PublicationBrowser}" />
+                                    </TabItem>
                                     <TabItem Header="File Store">
-                                        <!-- Files -->
                                         <views:HubFileStoreBrowser DataContext="{Binding HubDataSourceViewModel.HubFileStoreBrowser}" />
                                     </TabItem>
                                 </TabControl>
