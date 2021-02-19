@@ -59,11 +59,6 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="INavigationService"/>
         /// </summary>
         private readonly INavigationService navigationService;
-
-        /// <summary>
-        /// The <see cref="IDstHubService"/>
-        /// </summary>
-        private readonly IDstHubService dstHubService;
         
         #endregion Private Interface References
 
@@ -97,14 +92,6 @@ namespace DEHPSTEPAP242.ViewModel
             get => this.step3DHLR;
             private set => this.RaiseAndSetIfChanged(ref this.step3DHLR, value);
         }
-
-        /*
-        // IT DOES NOT WORK, THE TREE IS NOT UPDATED IN THE USER INTERFACE
-        ///// <summary>
-        ///// Gets or sets the Step3D High Level Representation structure.
-        ///// </summary>
-        public ReactiveList<Step3dRowViewModel> Step3DHLR { get; set; } = new ReactiveList<Step3dRowViewModel>();
-        */
 
         /// <summary>
         /// Backing field for <see cref="SelectedPart"/>
@@ -210,13 +197,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
-        /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
         public DstObjectBrowserViewModel(IDstController dstController, INavigationService navigationService, IHubController hubController, IDstHubService dstHubService)
         {
             this.dstController = dstController;
             this.navigationService = navigationService;
             this.hubController = hubController;
-            this.dstHubService = dstHubService;
 
             this.WhenAnyValue(vm => vm.dstController.IsLoading)
                 .Subscribe(_ => this.UpdateHLR());
@@ -274,15 +259,6 @@ namespace DEHPSTEPAP242.ViewModel
             viewModel.UpdatePropertiesBasedOnMappingConfiguration();
 
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
-        }
-
-        /// <summary>
-        /// Temporal command
-        /// </summary>
-        /// <todo>Remove this command</todo>
-        private async void TransferCommandExecute()
-        {
-            await this.dstController.Transfer();
         }
 
         /// <summary>
