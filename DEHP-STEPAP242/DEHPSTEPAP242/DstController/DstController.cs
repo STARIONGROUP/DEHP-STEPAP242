@@ -195,7 +195,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
-        public ReactiveList<ElementDefinition> MapResult { get; private set; } = new ReactiveList<ElementDefinition>();
+        public ReactiveList<ElementBase> MapResult { get; private set; } = new ReactiveList<ElementBase>();
 
         /// <summary>
         /// Gets the colection of mapped <see cref="Step3dTargetSourceParameter"/> which needs to be updated in the transfer operation
@@ -221,11 +221,34 @@ namespace DEHPSTEPAP242.DstController
         {
             var parts = new List<Step3dRowViewModel> { dst3DPart };
 
-            var (elements, sources) = ((IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>))
+            var (elements, sources) = ((List<ElementBase>, List<Step3dTargetSourceParameter>))
                 this.mappingEngine.Map(parts);
 
             if (elements.Any())
             {
+                foreach (var e in elements)
+                {
+                    // Remove previous mapping entries (keep only one)
+                    ElementBase elementOnMap = null;
+
+                    // New ElementDefinitions do not have Guid, look by name is required
+                    if (e.Iid == Guid.Empty)
+                    {
+                        elementOnMap = this.MapResult.FirstOrDefault(x => x.Name == e.Name);
+                    }
+                    else
+                    {
+                        elementOnMap = this.MapResult.FirstOrDefault(x => x.Iid == e.Iid);
+                    }
+
+                    if (elementOnMap is { })
+                    {
+                        this.MapResult.Remove(elementOnMap);
+                    }
+
+                    //this.MapResult.Remove(this.MapResult.FirstOrDefault(x => x.Iid == e.Iid && x.Name == e.Name));
+                }
+                
                 this.MapResult.AddRange(elements);
                 this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
@@ -384,6 +407,29 @@ namespace DEHPSTEPAP242.DstController
 
                 // Step 3: create/update things
                 //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering {this.MapResult.Count} ElementDefinitions..."));
+                foreach (var elementBase in this.MapResult)
+                {
+                    if (elementBase is ElementDefinition elementDefinition)
+                    {
+                        var elementDefinitionCloned = this.TransactionCreateOrUpdate(transaction, elementDefinition, iterationClone.Element);
+
+                        foreach (var parameter in elementDefinition.Parameter)
+                        {
+                            this.TransactionCreateOrUpdate(transaction, parameter, elementDefinitionCloned.Parameter);
+                        }
+                    }
+                    else if (elementBase is ElementUsage elementUsage)
+                    {
+                        foreach (var parameterOverride in elementUsage.ParameterOverride)
+                        {
+                            var elementUsageClone = elementUsage.Clone(false);
+                            transaction.CreateOrUpdate(elementUsageClone);
+                            this.TransactionCreateOrUpdate(transaction, parameterOverride, elementUsageClone.ParameterOverride);
+                        }
+                    }
+                }
+
+                /*
                 foreach (var elementDefinition in this.MapResult)
                 {
                     var elementDefinitionCloned = this.TransactionCreateOrUpdate(transaction, elementDefinition, iterationClone.Element);
@@ -401,6 +447,7 @@ namespace DEHPSTEPAP242.DstController
                         this.TransactionCreateOrUpdate(transaction, parameterOverride, elementUsageClone.ParameterOverride);
                     }
                 }
+                */
 
                 //this.PersistExternalIdentifierMap(transaction);
 
@@ -418,6 +465,9 @@ namespace DEHPSTEPAP242.DstController
                 //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
                 await this.hubController.Refresh();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+
+                this.MapResult.Clear();
+                this.TargetSourceParametersDstStep3dMaps.Clear();
             }
             catch (Exception e)
             {
@@ -490,8 +540,10 @@ namespace DEHPSTEPAP242.DstController
         {
             var (iterationClone, transaction) = this.GetIterationTransaction();
 
-            this.UpdateParametersValueSets(transaction, this.MapResult.SelectMany(x => x.Parameter));
-            this.UpdateParametersValueSets(transaction, this.MapResult.SelectMany(x => x.ContainedElement.SelectMany(p => p.ParameterOverride)));
+            //var elementDefinitions = this.MapResult.SelectMany(x => x is ElementDefinition);
+
+            this.UpdateParametersValueSets(transaction, this.MapResult.Where(x => x is ElementDefinition).Select(eb=>(ElementDefinition)eb).SelectMany(e => e.Parameter));
+            this.UpdateParametersValueSets(transaction, this.MapResult.Where(x => x is ElementUsage).Select(eb => (ElementUsage)eb).SelectMany(eu => eu.ParameterOverride));
 
             transaction.CreateOrUpdate(iterationClone);
             await this.hubController.Write(transaction);

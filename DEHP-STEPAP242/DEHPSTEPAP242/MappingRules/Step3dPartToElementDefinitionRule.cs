@@ -60,7 +60,7 @@ namespace DEHPSTEPAP242.MappingRules
     /// That takes a <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> as input 
     /// and outputs a E-TM-10-25 <see cref="ElementDefinition"/>.
     /// </summary>
-    public class Step3dPartToElementDefinitionRule : MappingRule<List<Step3dRowViewModel>, (IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>)>
+    public class Step3dPartToElementDefinitionRule : MappingRule<List<Step3dRowViewModel>, (List<ElementBase>, List<Step3dTargetSourceParameter>)>
     {
         /// <summary>
         /// The current class logger
@@ -81,6 +81,12 @@ namespace DEHPSTEPAP242.MappingRules
         /// Gets the <see cref="idCorrespondences"/>
         /// </summary>
         private List<IdCorrespondence> idCorrespondences;
+
+        /// <summary>
+        /// The <see cref="List{ElementBase}>"/> that needs to be updated 
+        /// before the transfer to the Hub.
+        /// </summary>
+        private List<ElementBase> targetSourceElementBase;
 
         /// <summary>
         /// The <see cref="List{Step3dTargetSourceParameter}>"/> that needs to be updated 
@@ -108,13 +114,14 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         /// <param name="input">The <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> to transform</param>
         /// <returns>An <see cref="List{ElementDefinition}"/> as the top level <see cref="Thing"/> with changes</returns>
-        public override (IEnumerable<ElementDefinition>, IEnumerable<Step3dTargetSourceParameter>) Transform (List<Step3dRowViewModel> input)
+        public override (List<ElementBase>, List<Step3dTargetSourceParameter>) Transform (List<Step3dRowViewModel> input)
         {
             try
             {
                 this.idCorrespondences = AppContainer.Container.Resolve<IDstController>().IdCorrespondences;
                 
                 this.targetSourceParameters = new List<Step3dTargetSourceParameter>();
+                this.targetSourceElementBase = new List<ElementBase>();
 
                 this.owner = this.hubController.CurrentDomainOfExpertise;
 
@@ -125,7 +132,7 @@ namespace DEHPSTEPAP242.MappingRules
                     // - Having parameter for:
                     //   + Product Definition (name, id, type)
                     //   + Assembly Usage, or Relation (label, id)
-                    //   + GUII of the file in the DomainFileStore (known only at Transfer time)
+                    //   + Uuid of the file in the DomainFileStore (known only at Transfer time)
                     //
 
 
@@ -141,14 +148,18 @@ namespace DEHPSTEPAP242.MappingRules
                     {
                         if (part.SelectedElementDefinition is null)
                         {
-                            part.SelectedElementDefinition = this.Bake<ElementDefinition>(x =>
+                            part.SelectedElementDefinition = this.GetElementDefinition();
+
+                            if (part.SelectedElementDefinition.Iid != Guid.Empty)
                             {
-                                x.Name = this.dstElementName;
-                                x.ShortName = this.dstElementName.Replace(" ", String.Empty);
-                                x.Owner = this.owner;
-                                x.Container = this.hubController.OpenIteration;
-                            });
+                                // When the ED was automatically selected from the Rule,
+                                // set also the expected parameter
+                                part.SelectedParameter = part.SelectedElementDefinition.Parameter
+                                    .FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
+                            }
                         }
+
+                        this.targetSourceElementBase.Add(part.SelectedElementDefinition);
 
                         this.AddsValueSetToTheSelectectedParameter(part);
                         this.AddToExternalIdentifierMap(part.SelectedElementDefinition.Iid, this.dstElementName);
@@ -159,7 +170,7 @@ namespace DEHPSTEPAP242.MappingRules
                 // (i.e. EU, Parameters, etc.) only the top thing in the 
                 // hierarchy is returned, the update will call
                 // CreateOrUpdate for all its related things.
-                return (input.Select(x => x.SelectedElementDefinition), this.targetSourceParameters);
+                return (this.targetSourceElementBase, this.targetSourceParameters);
             }
             catch (Exception exception)
             {
@@ -177,20 +188,18 @@ namespace DEHPSTEPAP242.MappingRules
         {
             foreach (var elementUsage in part.SelectedElementUsages)
             {
+                this.targetSourceElementBase.Add(elementUsage);
+
                 ParameterOverride parameterOverride;
 
                 if (part.SelectedParameter is { } parameter)
                 {
-                    if (elementUsage.ParameterOverride.FirstOrDefault(x => x.Parameter == parameter) is { } existingOverride)
+                    if (elementUsage.ParameterOverride.FirstOrDefault(x => x.Parameter.Iid == parameter.Iid) is { } existingOverride)
                     {
                         parameterOverride = existingOverride;
                     }
                     else
                     {
-                        //TODO: there is an error here
-                        // Exception Message: "Forbidden Set value for the derived property ParameterOverride.ParameterType"
-                        // StackTrace: "at CDP4Common.EngineeringModelData.ParameterOverride.set_ParameterType(ParameterType value)"
-
                         parameterOverride = this.Bake<ParameterOverride>(x =>
                         {
                             x.Parameter = parameter;
@@ -199,58 +208,75 @@ namespace DEHPSTEPAP242.MappingRules
                             //x.IsOptionDependent = parameter.IsOptionDependent;
                             x.Owner = this.owner;
                         });
-                    }
 
-                    elementUsage.ParameterOverride.Add(parameterOverride);
+                        var valueSet = this.Bake<ParameterOverrideValueSet>(x =>
+                        {
+                        });
+
+                        parameterOverride.ValueSet.Add(valueSet);
+
+                        elementUsage.ParameterOverride.Add(parameterOverride);
+                    }
                 }
                 else
                 {
-                    // THIS LINE 
-                    parameterOverride = elementUsage.ParameterOverride.FirstOrDefault(x => x.ParameterType.Name == this.dstParameterName);
-                    
+                    // No parameter selected, the parameter do not exist the first mapping time
+                    parameterOverride = elementUsage.ParameterOverride.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
+
                     if (parameterOverride is null &&
                         elementUsage.ElementDefinition.Parameter.FirstOrDefault(x => x.ParameterType.Name == this.dstParameterName) is { } parameterToOverride)
                     {
                         parameterOverride = this.Bake<ParameterOverride>(x =>
                         {
                             x.Parameter = parameterToOverride;
-                            x.ParameterType = parameterToOverride.ParameterType;
+                            //x.ParameterType = parameterToOverride.ParameterType;
                             x.StateDependence = parameterToOverride.StateDependence;
                             x.IsOptionDependent = parameterToOverride.IsOptionDependent;
+                            
                             x.Owner = this.owner;
-                            x.Container = elementUsage;
                         });
+
+                        elementUsage.ParameterOverride.Add(parameterOverride);
                     }
                 }
 
-                if (parameterOverride != null)
+                if (parameterOverride is { })
                 {
                     this.UpdateValueSet(part, parameterOverride);
                     this.AddToExternalIdentifierMap(parameterOverride.Iid, this.dstParameterName);
                 }
 
-#if OLD_CODE
-                // TODO: if the expected parameter is not Override-able?
-                foreach (var parameter in elementUsage.ParameterOverride
-                    .Where(x => x.ParameterType is CompoundParameterType parameterType
-                        && parameterType.Name.StartsWith("step")))
-                    //.Where(x => x.ParameterType is CompoundParameterType parameterType 
-                    //            && parameterType.Component.Count == 2 
-                    //            && parameterType.Component.SingleOrDefault(x => x.ParameterType is DateTimeParameterType) != null))
-                {
-                    this.UpdateValueSet(part, parameter);
-                    this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
-                }
-
                 this.AddToExternalIdentifierMap(elementUsage.Iid, this.dstElementName);
-#endif
             }
+        }
+
+        /// <summary>
+        /// Gets or Creates an <see cref="ElementDefinition"/> if it does not exist yet
+        /// </summary>
+        /// <returns>An <see cref="ElementDefinition"/>. New <see cref="ElementDefinition"/> is identified as <see cref="Guid.Empty"/></returns>
+        private ElementDefinition GetElementDefinition()
+        {
+            // Check if already exists in the hub
+            if (this.hubController.OpenIteration.Element
+                .FirstOrDefault(x => x.Name == this.dstElementName) is { } elementDefinition)
+            {
+                return elementDefinition;
+            }
+
+            // Create a new one
+            return this.Bake<ElementDefinition>(x =>
+            {
+                x.Name = this.dstElementName;
+                x.ShortName = this.dstElementName.Replace(" ", String.Empty);
+                x.Owner = this.owner;
+                x.Container = this.hubController.OpenIteration;
+            });
         }
 
         /// <summary>
         /// Adds the selected values to the corresponding valueset of the destination parameter
         /// </summary>
-        /// <param name="part">The input variable</param>
+        /// <param name="part">The input part</param>
         private void AddsValueSetToTheSelectectedParameter(Step3dRowViewModel part)
         {
             if (part.SelectedParameter is null)
@@ -263,9 +289,10 @@ namespace DEHPSTEPAP242.MappingRules
                 part.SelectedParameter = this.Bake<Parameter>(x =>
                 {
                     x.ParameterType = part.SelectedParameterType;
+                    //TODO: ask how to add parameter and make it option dependent --> ParameterOverride
                     x.Owner = this.owner;
                 });
-                
+
                 var valueSet = this.Bake<ParameterValueSet>(x =>
                 {
                 });
@@ -345,7 +372,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// <returns>A <typeparamref name="TThing"/> instance</returns>
         private TThing Bake<TThing>(Action<TThing> initialize = null) where TThing : Thing, new()
         {
-            var tThingInstance = Activator.CreateInstance(typeof(TThing), Guid.Empty /*Guid.NewGuid()*/, this.hubController.Session.Assembler.Cache, new Uri(this.hubController.Session.DataSourceUri)) as TThing;
+            var tThingInstance = Activator.CreateInstance(typeof(TThing), Guid.Empty, this.hubController.Session.Assembler.Cache, new Uri(this.hubController.Session.DataSourceUri)) as TThing;
             initialize?.Invoke(tThingInstance);
             return tThingInstance;
         }
@@ -360,38 +387,6 @@ namespace DEHPSTEPAP242.MappingRules
             var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(variable.SelectedOption, variable.SelectedActualFiniteState);
 
             this.UpdateComputedValueSet(variable, parameter, valueSet);
-
-            /*
-            IValueSet valueSet;
-
-            if (parameter.StateDependence != null && variable.SelectedActualFiniteState is { } actualFiniteState)
-            {
-                // QUESTION: are those valuesets correctly created... it requires new API maybe?
-                valueSet = parameter.ValueSets.Last(x => x.ActualState == actualFiniteState);
-            }
-            else
-            {
-                valueSet = parameter.ValueSets.LastOrDefault();
-                
-                //TODO: check new code from N.S. using the new API
-                if (valueSet is null)
-                {
-                    switch (parameter)
-                    {
-                        case ParameterOverride parameterOverride:
-                            valueSet = this.Bake<ParameterOverrideValueSet>();
-                            parameterOverride.ValueSet.Add((ParameterOverrideValueSet)valueSet);
-                            break;
-                        case Parameter parameterBase:
-                            valueSet = this.Bake<ParameterValueSet>();
-                            parameterBase.ValueSet.Add((ParameterValueSet)valueSet);
-                            break;
-                    }
-                }
-            }
-
-            this.UpdateValueSet(variable, parameter, (ParameterValueSetBase)valueSet);
-            */
         }
 
         /// <summary>

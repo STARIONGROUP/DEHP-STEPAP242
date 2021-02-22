@@ -24,6 +24,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.Services.DstHubService;
     using System.Diagnostics;
     using CDP4Common.CommonData;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -218,6 +219,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.UpdateAvailableFields(() =>
                 {
+                    this.UpdateSelectedParameter();
                     this.UpdateAvailableParameters();
                     this.UpdateAvailableElementUsages();
                 }));
@@ -245,11 +247,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             try
             {
-                // Update the selected parameter
-                if (this.SelectedThing.SelectedElementDefinition is { })
+                if (this.CheckSelection() == false)
                 {
-                    this.SelectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition.Parameter.FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
-                    //this.SelectedThing.SelectedParameterType = this.SelectedThing.SelectedParameter?.ParameterType;
+                    return;
                 }
 
                 this.IsBusy = true;
@@ -268,6 +268,40 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
+        private bool CheckSelection()
+        {
+            if (this.SelectedThing.SelectedElementDefinition is null)
+            {
+                // New ElementDefinition will be created
+                return true;
+            }
+
+            if (this.SelectedThing.SelectedParameter is null)
+            {
+                // 3D Geometric Parameter does not exist on current
+                // ElementDefinition, it will be added
+                return true;
+            }
+
+            if (this.SelectedThing.SelectedParameter.IsOptionDependent &&
+                this.SelectedThing.SelectedOption is null)
+            {
+                MessageBox.Show($"The target {this.SelectedThing.SelectedParameter.ParameterType.ShortName} parameter is Option dependent,\nplease select the Option to apply the mapping", 
+                    "Mapping incomplete", MessageBoxButton.OK);
+
+                return false;
+            }
+
+            if (this.SelectedThing.SelectedParameter.StateDependence is { } &&
+                this.SelectedThing.SelectedActualFiniteState is null)
+            {
+                MessageBox.Show($"The {this.SelectedThing.SelectedParameter.ParameterType.ShortName} has a State Dependence,\nplease select the State Dependence to apply the mapping",
+                    "Mapping incomplete", MessageBoxButton.OK);
+                return false;
+            }
+
+            return true;
+        }
         /// <summary>
         /// Update this view model properties
         /// </summary>
@@ -339,6 +373,23 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         }
 
         /// <summary>
+        /// Updates the target <see cref="Parameter"/>s for the <see cref="VariableRowViewModel.SelectedElementDefinition"/>
+        /// </summary>
+        private void UpdateSelectedParameter()
+        {
+            if (this.selectedThing?.SelectedElementDefinition != null)
+            {
+                this.selectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition
+                    .Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
+                    .FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
+            }
+            else
+            {
+                this.selectedThing.SelectedParameter = null;
+            }
+        }
+
+        /// <summary>
         /// Updates the available <see cref="Parameter"/>s for the <see cref="VariableRowViewModel.SelectedElementDefinition"/>
         /// </summary>
         private void UpdateAvailableParameters()
@@ -347,6 +398,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             if (this.selectedThing?.SelectedElementDefinition != null)
             {
+                // NOTE: list of available parameters not used, target goes to special one created by DST
                 this.AvailableParameters.AddRange(
                     this.SelectedThing.SelectedElementDefinition.Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
                     .Where(x => this.AvailableParameterTypes.Contains(x.ParameterType))
@@ -366,6 +418,53 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>())
                 .Select(e => e.Clone(true))
                 );
+
+            
+            /*
+            Debug.WriteLine("AvailableElementDefinitions.Usages");
+            foreach (var ed in this.AvailableElementDefinitions)
+            {
+                Debug.WriteLine($"ED {ed.Name}");
+
+                foreach (var item in ed.ReferencingElementUsages())
+                {
+                    Debug.WriteLine($"  EU {item.Name}");
+                }
+            }
+
+            Debug.WriteLine("OpenIteration.Element.Usages");
+            foreach (var ed in this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()))
+            {
+                Debug.WriteLine($"ED {ed.Name}");
+
+                foreach (var item in ed.ReferencingElementUsages())
+                {
+                    Debug.WriteLine($"  EU {item.Name}");
+                }
+            }
+
+            Debug.WriteLine("AvailableElementDefinitions.ContainedElements");
+            foreach (var ed in this.AvailableElementDefinitions)
+            {
+                Debug.WriteLine($"ED {ed.Name}");
+
+                foreach (var item in ed.ContainedElement)
+                {
+                    Debug.WriteLine($"  EU {item.Name}");
+                }
+            }
+
+            Debug.WriteLine("OpenIteration.Element.ContainedElements");
+            foreach (var ed in this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()))
+            {
+                Debug.WriteLine($"ED {ed.Name}");
+
+                foreach (var item in ed.ContainedElement)
+                {
+                    Debug.WriteLine($"  EU {item.Name}");
+                }
+            }
+            */
         }
 
         /// <summary>
@@ -378,14 +477,31 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing?.SelectedElementDefinition is {})
             {
                 var ed = this.SelectedThing.SelectedElementDefinition;
-                
-                // Note: both the owner of the DOE and ED are the owners of the EU
-                this.AvailableElementUsages.AddRange(
-                    ed.ReferencingElementUsages()
-                        .Where(x => x.ExcludeOption.Contains(this.selectedThing.SelectedOption) == false)
-                        .Select(x => x.Clone(true))
-                    );
+                this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(ed));
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ElementUsage"/> of <see cref="ElementDefinition"/>
+        /// </summary>
+        /// <param name="ed">The <see cref="ElementDefinition"/></param>
+        /// <returns>A <see cref="List{ElementUsage}"/></returns>
+        private List<ElementUsage> GetElementUsagesFor(ElementDefinition ed)
+        {
+            var usages = new List<ElementUsage>();
+
+            foreach (var element in this.AvailableElementDefinitions)
+            {
+                foreach (var containedEU in element.ContainedElement)
+                {
+                    if (containedEU.ElementDefinition.Iid == ed.Iid)
+                    {
+                        usages.Add(containedEU/*taken from cloned ED containedEU.Clone(true)*/);
+                    }
+                }
+            }
+
+            return usages;
         }
 
         /// <summary>

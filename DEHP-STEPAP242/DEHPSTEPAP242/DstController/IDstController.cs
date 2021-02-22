@@ -81,7 +81,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
-        ReactiveList<ElementDefinition> MapResult { get; }
+        ReactiveList<ElementBase> MapResult { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
