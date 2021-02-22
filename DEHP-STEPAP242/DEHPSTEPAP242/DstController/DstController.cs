@@ -226,6 +226,7 @@ namespace DEHPSTEPAP242.DstController
 
             if (elements.Any())
             {
+#if REMOVE_PREVIOUS_MAPPED_ELEMENTS
                 foreach (var e in elements)
                 {
                     // Remove previous mapping entries (keep only one)
@@ -248,7 +249,7 @@ namespace DEHPSTEPAP242.DstController
 
                     //this.MapResult.Remove(this.MapResult.FirstOrDefault(x => x.Iid == e.Iid && x.Name == e.Name));
                 }
-                
+#endif
                 this.MapResult.AddRange(elements);
                 this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
