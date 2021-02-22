@@ -7,7 +7,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
     using System.Reactive.Linq;
     using System.Text;
     using System.Threading.Tasks;
-
+    using CDP4Common.EngineeringModelData;
     using CDP4Dal;
 
     using DEHPCommon.Events;
@@ -77,6 +77,83 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             {
                 foreach (var thing in this.dstController.MapResult)
                 {
+                    if (thing is ElementDefinition elementDefinition)
+                    {
+                        var elementToUpdate = iterationRow.ContainedRows.OfType<ElementDefinitionRowViewModel>()
+                        .FirstOrDefault(x => x.Thing.Iid == elementDefinition.Iid);
+
+                        if (elementToUpdate is { })
+                        {
+                            if (!elementDefinition.Parameter.All(p => elementToUpdate.Thing.Parameter.Any(x => x.Iid == p.Iid)))
+                            {
+                                elementDefinition.Parameter.AddRange(elementToUpdate.Thing.Parameter.Where(x => elementDefinition.Parameter.All(p => p.Iid != x.Iid)));
+                            }
+
+                            foreach (var parameterOrOverrideBaseRowViewModel in elementToUpdate.ContainedRows.OfType<ParameterOrOverrideBaseRowViewModel>())
+                            {
+                                parameterOrOverrideBaseRowViewModel.SetProperties();
+                            }
+
+                            CDPMessageBus.Current.SendMessage(new HighlightEvent(elementToUpdate.Thing), elementToUpdate.Thing);
+
+                            elementToUpdate.ExpandAllRows();
+
+                            if (elementToUpdate.Thing.Original is null)
+                            {
+                                elementToUpdate.UpdateThing(elementDefinition);
+                            }
+                            else
+                            {
+                                elementToUpdate.Thing.Parameter.Clear();
+                                elementToUpdate.Thing.Parameter.AddRange(elementDefinition.Parameter);
+                            }
+
+                            elementToUpdate.UpdateChildren();
+                        }
+                        else
+                        {
+                            iterationRow.ContainedRows.Add(new ElementDefinitionRowViewModel(elementDefinition, this.HubController.CurrentDomainOfExpertise, this.HubController.Session, iterationRow));
+                            CDPMessageBus.Current.SendMessage(new HighlightEvent(elementDefinition), elementDefinition);
+                        }
+                    }
+                    else if (thing is ElementUsage elementUsage)
+                    {
+                        var elementUsageToUpdate = iterationRow.ContainedRows.OfType<ElementDefinitionRowViewModel>()
+                            .SelectMany(x => x.ContainedRows.OfType<ElementUsageRowViewModel>())
+                            .FirstOrDefault(x => x.Thing.Iid == elementUsage.Iid);
+
+                        if (elementUsageToUpdate is null)
+                        {
+                            continue;
+                        }
+
+                        if (!elementUsage.ParameterOverride.All(p => elementUsageToUpdate.Thing.ParameterOverride.Any(x => x.Iid == p.Iid)))
+                        {
+                            elementUsage.ParameterOverride.AddRange(elementUsageToUpdate.Thing.ParameterOverride.Where(x => elementUsage.ElementDefinition.Parameter.All(p => p.Iid != x.Iid)));
+                        }
+
+                        foreach (var parameterOrOverrideBaseRowViewModel in elementUsageToUpdate.ContainedRows.OfType<ParameterOrOverrideBaseRowViewModel>())
+                        {
+                            parameterOrOverrideBaseRowViewModel.SetProperties();
+                        }
+
+                        CDPMessageBus.Current.SendMessage(new ElementUsageHighlightEvent(elementUsageToUpdate.Thing.ElementDefinition), elementUsageToUpdate.Thing);
+
+                        elementUsageToUpdate.ExpandAllRows();
+
+                        if (elementUsageToUpdate.Thing.Original is null)
+                        {
+                            elementUsageToUpdate.UpdateThing(elementUsage);
+                        }
+                        else
+                        {
+                            elementUsageToUpdate.Thing.ParameterOverride.Clear();
+                            elementUsageToUpdate.Thing.ParameterOverride.AddRange(elementUsage.ParameterOverride);
+                        }
+
+                        elementUsageToUpdate.UpdateChildren();
+                    }
+#if OLD_CODE
                     var elementToUpdate = iterationRow.ContainedRows.OfType<ElementDefinitionRowViewModel>()
                         .FirstOrDefault(x => x.Thing.Iid == thing.Iid);
 
@@ -131,7 +208,8 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                         elementUsageToUpdate.UpdateThing(elementUsage);
                         elementUsageToUpdate.UpdateChildren();
                     }
-                }
+#endif
+                    }
             }
         }
 
