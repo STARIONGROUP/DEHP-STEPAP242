@@ -324,6 +324,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private async Task ProcessExternalIdentifierMap()
         {
+            await Task.FromResult(0);
             //this.dstController.ExternalIdentifierMap = this.SelectedExternalIdentifierMap ?? await
             //                                           this.dstController.CreateExternalIdentifierMap(this.ExternalIdentifierMapNewName);
         }

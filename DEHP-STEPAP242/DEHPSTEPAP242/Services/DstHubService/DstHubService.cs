@@ -44,7 +44,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// <summary>
         /// The <see cref="DEHPCommon.IHubController"/> instance
         /// </summary>
-        private IHubController hubController;
+        private readonly IHubController hubController;
 
         /// <summary>
         /// Constructor

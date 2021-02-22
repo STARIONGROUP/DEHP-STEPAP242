@@ -197,7 +197,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
-        public DstObjectBrowserViewModel(IDstController dstController, INavigationService navigationService, IHubController hubController, IDstHubService dstHubService)
+        public DstObjectBrowserViewModel(IDstController dstController, INavigationService navigationService, IHubController hubController)
         {
             this.dstController = dstController;
             this.navigationService = navigationService;
