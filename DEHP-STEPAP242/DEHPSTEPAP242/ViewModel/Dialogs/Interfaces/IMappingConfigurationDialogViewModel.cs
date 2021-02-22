@@ -48,16 +48,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         ReactiveList<ElementUsage> AvailableElementUsages { get; }
 
         /// <summary>
-        /// Gets the collection of the available <see cref="ParameterType"/>s from the connected Hub Model
-        /// </summary>
-        ReactiveList<ParameterType> AvailableParameterTypes { get; }
-
-        /// <summary>
-        /// Gets the collection of the available <see cref="Parameter"/>s from the connected Hub Model
-        /// </summary>
-        ReactiveList<Parameter> AvailableParameters { get; }
-
-        /// <summary>
         /// Gets the collection of the available <see cref="ActualFiniteState"/>s depending on the selected <see cref="Parameter"/>
         /// </summary>
         ReactiveList<ActualFiniteState> AvailableActualFiniteStates { get; }

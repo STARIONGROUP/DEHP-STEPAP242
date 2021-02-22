@@ -104,16 +104,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         public ReactiveList<ElementUsage> AvailableElementUsages { get; } = new ReactiveList<ElementUsage>();
 
         /// <summary>
-        /// Gets the collection of the available <see cref="ParameterType"/>s from the connected Hub Model
-        /// </summary>
-        public ReactiveList<ParameterType> AvailableParameterTypes { get; } = new ReactiveList<ParameterType>();
-
-        /// <summary>
-        /// Gets the collection of the available <see cref="Parameter"/>s from the connected Hub Model
-        /// </summary>
-        public ReactiveList<Parameter> AvailableParameters { get; } = new ReactiveList<Parameter>();
-        
-        /// <summary>
         /// Gets the collection of the available <see cref="ActualFiniteState"/>s depending on the selected <see cref="Parameter"/>
         /// </summary>
         public ReactiveList<ActualFiniteState> AvailableActualFiniteStates { get; } = new ReactiveList<ActualFiniteState>();
@@ -185,42 +175,39 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         #region Private Methods
 
         /// <summary>
+        /// Update this view model properties
+        /// </summary>
+        private void UpdateProperties()
+        {
+            this.IsBusy = true;
+
+            this.UpdateAvailableOptions();
+            this.UpdateAvailableElementDefinitions();
+            this.UpdateAvailableElementUsages();
+            this.UpdateAvailableActualFiniteStates();
+
+            this.IsBusy = false;
+        }
+
+        /// <summary>
         /// Initializes this view model <see cref="ICommand"/> and <see cref="Observable"/>
         /// </summary>
+        /// <remarks>
+        /// The strategy is to let the "Continue" button always enabled and
+        /// prevent the action in case the conditions are not satified. The reason
+        /// is showed to the user using a message dialog <seealso cref="CheckMappingDefinition"/>.
+        /// </remarks>
         private void InitializesCommandsAndObservableSubscriptions()
         {
-            //var canContinue = this.WhenAnyValue(x => x.SelectedThing.SelectedValues.CountChanged)
-            //    .SelectMany(x => x.Select(c => c > 0)).ObserveOn(RxApp.MainThreadScheduler);
-
-            //var canContinue = this.WhenAnyValue(x => /*x.SelectedThing != null*/ true);
-
-            //this.Variables.ForEach(x => canContinue.Merge(
-            //    x.WhenAny(v => v.SelectedValues, v => v.Value.Any())
-            //        .ObserveOn(RxApp.MainThreadScheduler)));
-
-            // By default the continue is available (new ED will be created)
-            //var canContinue = this.WhenAny(
-            //    vm => vm.SelectedThing,
-            //    vm => vm.SelectedThing.SelectedElementDefinition,
-            //    (part, ed) =>
-            //        part.Value != null && ed.Value != null
-            //    );
-            //
-            //this.ContinueCommand = ReactiveCommand.Create(canContinue);
-            //this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
             this.ContinueCommand = ReactiveCommand.Create();
             this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
 
-            this.WhenAnyValue(x => x.SelectedThing.SelectedOption)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => this.UpdateProperties());
-
+            // UI triggers
             this.WhenAnyValue(x => x.SelectedThing.SelectedElementDefinition)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.UpdateAvailableFields(() =>
                 {
                     this.UpdateSelectedParameter();
-                    this.UpdateAvailableParameters();
                     this.UpdateAvailableElementUsages();
                 }));
 
@@ -241,13 +228,120 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         }
 
         /// <summary>
+        /// Updates the <see cref="AvailableOptions"/> collection
+        /// </summary>
+        private void UpdateAvailableOptions()
+        {
+            this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
+
+#if FORCE_INITIAL_OPTION_SELECTION
+            // Initialize an Option for Option Dependent parameters with no value
+            if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.IsOptionDependent
+                && this.SelectedThing.SelectedOption is null)
+            {
+                this.SelectedThing.SelectedOption = this.AvailableOptions.FirstOrDefault(o => o.IsDefault);
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Updates the list of compatible element definitions
+        /// </summary>
+        private void UpdateAvailableElementDefinitions()
+        {
+            this.AvailableElementDefinitions.Clear();
+
+            this.AvailableElementDefinitions.AddRange(
+                this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>())
+                .Select(e => e.Clone(true))
+                );
+        }
+
+        /// <summary>
+        /// Updates the <see cref="AvailableElementUsages"/>
+        /// </summary>
+        private void UpdateAvailableElementUsages()
+        {
+            this.AvailableElementUsages.Clear();
+
+            if (this.SelectedThing?.SelectedElementDefinition is {})
+            {
+                var ed = this.SelectedThing.SelectedElementDefinition;
+                this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(ed));
+            }
+        }
+
+        /// <summary>
+        /// Updates the <see cref="AvailableActualFiniteStates"/>
+        /// </summary>
+        private void UpdateAvailableActualFiniteStates()
+        {
+            this.AvailableActualFiniteStates.Clear();
+
+            if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
+            {
+                this.AvailableActualFiniteStates.AddRange(stateDependence.ActualState);
+                this.SelectedThing.SelectedActualFiniteState = this.AvailableActualFiniteStates.FirstOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Updates the target <see cref="Step3dRowViewModel.SelectedParameter"/>s for the <see cref="Step3dRowViewModel.SelectedElementDefinition"/>
+        /// </summary>
+        private void UpdateSelectedParameter()
+        {
+            if (this.selectedThing?.SelectedElementDefinition != null)
+            {
+                this.selectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition
+                    .Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
+                    .FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
+            }
+            else
+            {
+                this.selectedThing.SelectedParameter = null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ElementUsage"/> of <see cref="ElementDefinition"/>
+        /// </summary>
+        /// <param name="ed">The <see cref="ElementDefinition"/></param>
+        /// <returns>A <see cref="List{ElementUsage}"/></returns>
+        private List<ElementUsage> GetElementUsagesFor(ElementDefinition ed)
+        {
+            var usages = new List<ElementUsage>();
+
+            foreach (var element in this.AvailableElementDefinitions)
+            {
+                foreach (var containedEU in element.ContainedElement)
+                {
+                    if (containedEU.ElementDefinition.Iid == ed.Iid)
+                    {
+                        // taken from cloned ED containedEU.Clone(true)
+                        usages.Add(containedEU);
+                    }
+                }
+            }
+
+            return usages;
+        }
+
+        /// <summary>
+        /// Verify that the <see cref="IOwnedThing"/> is owned by the current domain of expertise
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IOwnedThing"/> type</typeparam>
+        /// <returns>A <see cref="Func{T,T}"/> input parameter is <see cref="IOwnedThing"/> and outputs an assert whether the verification return true </returns>
+        private Func<T, bool> AreTheseOwnedByTheDomain<T>() where T : IOwnedThing
+            => x => x.Owner.Iid == this.hubController.CurrentDomainOfExpertise.Iid;
+
+        /// <summary>
         /// Executes the <see cref="ContinueCommand"/> to create the proper mapping
         /// </summary>
         private void ExecuteContinueCommand()
         {
             try
             {
-                if (this.CheckSelection() == false)
+                if (this.CheckMappingDefinition() == false)
                 {
                     return;
                 }
@@ -268,7 +362,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
-        private bool CheckSelection()
+        /// <summary>
+        /// Checks that the values for the mapping are corrects.
+        /// </summary>
+        /// <returns>True if the mapping definition is correct</returns>
+        private bool CheckMappingDefinition()
         {
             if (this.SelectedThing.SelectedElementDefinition is null)
             {
@@ -278,16 +376,16 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             if (this.SelectedThing.SelectedParameter is null)
             {
-                // 3D Geometric Parameter does not exist on current
-                // ElementDefinition, it will be added
+                // 3D Geometric Parameter does not exist in current ElementDefinition, 
+                // it will be added.
                 return true;
             }
 
             if (this.SelectedThing.SelectedParameter.IsOptionDependent &&
                 this.SelectedThing.SelectedOption is null)
             {
-                MessageBox.Show($"The target {this.SelectedThing.SelectedParameter.ParameterType.ShortName} parameter is Option dependent,\nplease select the Option to apply the mapping", 
-                    "Mapping incomplete", MessageBoxButton.OK);
+                MessageBox.Show($"The target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" is Option dependent,\nplease select one Option to apply the mapping",
+                    "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 return false;
             }
@@ -295,223 +393,14 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing.SelectedParameter.StateDependence is { } &&
                 this.SelectedThing.SelectedActualFiniteState is null)
             {
-                MessageBox.Show($"The {this.SelectedThing.SelectedParameter.ParameterType.ShortName} has a State Dependence,\nplease select the State Dependence to apply the mapping",
-                    "Mapping incomplete", MessageBoxButton.OK);
+                MessageBox.Show($"The target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" has a State Dependence,\nplease select one State Dependence to apply the mapping",
+                    "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
             return true;
         }
-        /// <summary>
-        /// Update this view model properties
-        /// </summary>
-        private void UpdateProperties()
-        {
-            this.IsBusy = true;
 
-            this.UpdateAvailableOptions();
-            this.UpdateAvailableElementDefinitions();
-            this.UpdateAvailableParameters();
-            this.UpdateAvailableElementUsages();
-            this.UpdateAvailableActualFiniteStates();
-
-            this.IsBusy = false;
-        }
-
-        /// <summary>
-        /// Updates the list of compatible parameters
-        /// </summary>
-        /// <remarks>
-        /// This DST targets the information against one special parameter type
-        /// created by the DST <seealso cref="DstHubService.CheckParameterTypes"/>
-        /// </remarks>
-        private void UpdateAvailableParameterTypes()
-        {
-            this.AvailableParameterTypes.Clear();
-
-            // EXAMPLE CODE quering from chained Rdls
-            //var paramList = this.hubController.GetSiteDirectory().AvailableReferenceDataLibraries()
-            //            .SelectMany(x => x.QueryParameterTypesFromChainOfRdls())
-            //            .Where(x => this.dstHubService.IsSTEPParameterType(x));
-            //
-            //foreach (var item in paramList)
-            //{
-            //    Debug.WriteLine($"step param: {item.Name}/{item.ShortName}");
-            //}
-
-            // Parameter Types are stored in a specific RDL (see this service to change the target)
-            var rdl = this.dstHubService.GetReferenceDataLibrary();
-
-            this.AvailableParameterTypes.AddRange(rdl.ParameterType.Where(
-                x => this.dstHubService.IsSTEPParameterType(x))
-                .OrderBy(x => x.Name));
-        }
-
-        /// <summary>
-        /// Updates the <see cref="AvailableActualFiniteStates"/>
-        /// </summary>
-        private void UpdateAvailableActualFiniteStates()
-        {
-            this.AvailableActualFiniteStates.Clear();
-
-            if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
-            {
-                this.AvailableActualFiniteStates.AddRange(stateDependence.ActualState);
-                this.SelectedThing.SelectedActualFiniteState = this.AvailableActualFiniteStates.FirstOrDefault();
-            }
-        }
-
-        /// <summary>
-        /// Updates the <see cref="AvailableOptions"/> collection
-        /// </summary>
-        private void UpdateAvailableOptions()
-        {
-            this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
-            
-            // Called in constructor, this reference is not yet selected
-            //this.SelectedThing.SelectedOption = this.AvailableOptions.Last();
-        }
-
-        /// <summary>
-        /// Updates the target <see cref="Parameter"/>s for the <see cref="VariableRowViewModel.SelectedElementDefinition"/>
-        /// </summary>
-        private void UpdateSelectedParameter()
-        {
-            if (this.selectedThing?.SelectedElementDefinition != null)
-            {
-                this.selectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition
-                    .Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
-                    .FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
-            }
-            else
-            {
-                this.selectedThing.SelectedParameter = null;
-            }
-        }
-
-        /// <summary>
-        /// Updates the available <see cref="Parameter"/>s for the <see cref="VariableRowViewModel.SelectedElementDefinition"/>
-        /// </summary>
-        private void UpdateAvailableParameters()
-        {
-            this.AvailableParameters.Clear();
-
-            if (this.selectedThing?.SelectedElementDefinition != null)
-            {
-                // NOTE: list of available parameters not used, target goes to special one created by DST
-                this.AvailableParameters.AddRange(
-                    this.SelectedThing.SelectedElementDefinition.Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
-                    .Where(x => this.AvailableParameterTypes.Contains(x.ParameterType))
-                // ALTERNATIVE, checking from service instead already constructed list AvailableParameterTypes
-                //.Where(x => this.dstHubService.IsSTEPParameterType(x.ParameterType))
-                );
-            }
-        }
-
-        /// <summary>
-        /// Updates the list of compatible element definitions
-        /// </summary>
-        private void UpdateAvailableElementDefinitions()
-        {
-            this.AvailableElementDefinitions.Clear();
-            this.AvailableElementDefinitions.AddRange(
-                this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>())
-                .Select(e => e.Clone(true))
-                );
-
-            
-            /*
-            Debug.WriteLine("AvailableElementDefinitions.Usages");
-            foreach (var ed in this.AvailableElementDefinitions)
-            {
-                Debug.WriteLine($"ED {ed.Name}");
-
-                foreach (var item in ed.ReferencingElementUsages())
-                {
-                    Debug.WriteLine($"  EU {item.Name}");
-                }
-            }
-
-            Debug.WriteLine("OpenIteration.Element.Usages");
-            foreach (var ed in this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()))
-            {
-                Debug.WriteLine($"ED {ed.Name}");
-
-                foreach (var item in ed.ReferencingElementUsages())
-                {
-                    Debug.WriteLine($"  EU {item.Name}");
-                }
-            }
-
-            Debug.WriteLine("AvailableElementDefinitions.ContainedElements");
-            foreach (var ed in this.AvailableElementDefinitions)
-            {
-                Debug.WriteLine($"ED {ed.Name}");
-
-                foreach (var item in ed.ContainedElement)
-                {
-                    Debug.WriteLine($"  EU {item.Name}");
-                }
-            }
-
-            Debug.WriteLine("OpenIteration.Element.ContainedElements");
-            foreach (var ed in this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>()))
-            {
-                Debug.WriteLine($"ED {ed.Name}");
-
-                foreach (var item in ed.ContainedElement)
-                {
-                    Debug.WriteLine($"  EU {item.Name}");
-                }
-            }
-            */
-        }
-
-        /// <summary>
-        /// Updates the <see cref="AvailableElementUsages"/>
-        /// </summary>
-        private void UpdateAvailableElementUsages()
-        {
-            this.AvailableElementUsages.Clear();
-
-            if (this.SelectedThing?.SelectedElementDefinition is {})
-            {
-                var ed = this.SelectedThing.SelectedElementDefinition;
-                this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(ed));
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see cref="ElementUsage"/> of <see cref="ElementDefinition"/>
-        /// </summary>
-        /// <param name="ed">The <see cref="ElementDefinition"/></param>
-        /// <returns>A <see cref="List{ElementUsage}"/></returns>
-        private List<ElementUsage> GetElementUsagesFor(ElementDefinition ed)
-        {
-            var usages = new List<ElementUsage>();
-
-            foreach (var element in this.AvailableElementDefinitions)
-            {
-                foreach (var containedEU in element.ContainedElement)
-                {
-                    if (containedEU.ElementDefinition.Iid == ed.Iid)
-                    {
-                        usages.Add(containedEU/*taken from cloned ED containedEU.Clone(true)*/);
-                    }
-                }
-            }
-
-            return usages;
-        }
-
-        /// <summary>
-        /// Verify that the <see cref="IOwnedThing"/> is owned by the current domain of expertise
-        /// </summary>
-        /// <typeparam name="T">The <see cref="IOwnedThing"/> type</typeparam>
-        /// <returns>A <see cref="Func{T,T}"/> input parameter is <see cref="IOwnedThing"/> and outputs an assert whether the verification return true </returns>
-        private Func<T, bool> AreTheseOwnedByTheDomain<T>() where T : IOwnedThing 
-            => x => x.Owner.Iid == this.hubController.CurrentDomainOfExpertise.Iid;
-
-        #endregion
+#endregion
     }
 }
