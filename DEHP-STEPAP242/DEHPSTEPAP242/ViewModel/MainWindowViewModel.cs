@@ -93,6 +93,9 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="hubHubDataSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
         /// <param name="dstSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
         /// <param name="statusBarControlViewModel">The <see cref="IStatusBarControlViewModel"/></param>
+        /// <param name="dstController">The <see cref="IDstController"/></param>
+        /// <param name="hubNetChangePreviewViewModel">The <see cref="IHubNetChangePreviewViewModel"/></param>
+        /// <param name="transferControlViewModel">The <see cref="ITransferControlViewModel"/></param>
         public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel, 
             IDstDataSourceViewModel dstSourceViewModelViewModel, 
             IStatusBarControlViewModel statusBarControlViewModel,

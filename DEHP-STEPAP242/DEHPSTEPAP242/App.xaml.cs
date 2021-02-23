@@ -117,6 +117,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();
             containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
             containerBuilder.RegisterType<MappingConfigurationDialogViewModel>().As<IMappingConfigurationDialogViewModel>();
+            containerBuilder.RegisterType<MappingConfigurationManagerDialogViewModel>().As<IMappingConfigurationManagerDialogViewModel>();
             containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>();
         }
     }

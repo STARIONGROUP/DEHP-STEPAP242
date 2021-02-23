@@ -28,7 +28,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
 
     /// <summary>
-    /// The <see cref="MappingConfigurationDialogViewModel"/> is the view model to let the user configure the mapping
+    /// The <see cref="MappingConfigurationDialogViewModel"/> is the view model to let the user configure the mapping to the hub source
     /// </summary>
     public class MappingConfigurationDialogViewModel : ReactiveObject, IMappingConfigurationDialogViewModel, ICloseWindowViewModel
     {
@@ -118,36 +118,44 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         public void UpdatePropertiesBasedOnMappingConfiguration()
         {
-            //this.dstHubService.CheckHubDependencies
-            //this.SelectedThing.SelectedParameter = this.dstHubService.
-            //this.IsBusy = true;
-            //
-            //var part = this.SelectedThing;
-            //
-            //foreach (var idCorrespondence in part.MappingConfigurations)
-            //{
-            //    if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
-            //    {
-            //        Action action = thing switch
-            //        {
-            //            ElementDefinition elementDefinition => (() => part.SelectedElementDefinition = elementDefinition),
-            //            ElementUsage elementUsage => (() => part.SelectedElementUsages.Add(elementUsage)),
-            //            Parameter parameter => (() => part.SelectedParameter = parameter),
-            //            Option option => (() => part.SelectedOption = option),
-            //            ActualFiniteState state => (() => part.SelectedActualFiniteState = state),
-            //            _ => null
-            //        };
-            //
-            //        action?.Invoke();
-            //
-            //        if (action is null && this.hubController.GetThingById(idCorrespondence.InternalThing, out CompoundParameterType parameterType))
-            //        {
-            //            part.SelectedParameterType = parameterType;
-            //        }
-            //    }
-            //}
-            //
-            //this.IsBusy = false;
+            this.IsBusy = true;
+            
+            var part = this.SelectedThing;
+            
+            foreach (var idCorrespondence in part.MappingConfigurations)
+            {
+                if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
+                {
+                    Action action = thing switch
+                    {
+                        ElementDefinition elementDefinition => (() => part.SelectedElementDefinition =
+                            this.AvailableElementDefinitions.FirstOrDefault(x => x.Iid == thing.Iid)),
+
+                        ElementUsage elementUsage => (() =>
+                        {
+                            if (this.AvailableElementDefinitions.SelectMany(e => e.ContainedElement)
+                                .FirstOrDefault(x => x.Iid == thing.Iid) is { } usage)
+                            {
+                                part.SelectedElementUsages.Add(usage);
+                            }
+                        }),
+
+                        Parameter parameter => (() => part.SelectedParameter =
+                            this.AvailableElementDefinitions.SelectMany(e => e.Parameter)
+                                .FirstOrDefault(p => p.Iid == thing.Iid)),
+
+                        Option option => (() => part.SelectedOption = option),
+
+                        ActualFiniteState state => (() => part.SelectedActualFiniteState = state),
+
+                        _ => null
+                    };
+
+                    action?.Invoke();
+                }
+            }
+            
+            this.IsBusy = false;
         }
 
         #endregion

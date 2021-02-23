@@ -42,6 +42,11 @@ namespace DEHPSTEPAP242.DstController
     public interface IDstController
     {
         /// <summary>
+        /// Gets this running tool name
+        /// </summary>
+        string ThisToolName { get; }
+
+        /// <summary>
         /// Returns the status of the last load action.
         /// </summary>
         bool IsFileOpen { get; }

@@ -54,6 +54,7 @@ namespace DEHPSTEPAP242.DstController
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.Views;
+    using System.Runtime.ExceptionServices;
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data 
@@ -95,12 +96,12 @@ namespace DEHPSTEPAP242.DstController
 
         #endregion
 
+        #region IDstController interface
+
         /// <summary>
         /// Gets this running tool name
         /// </summary>
         public string ThisToolName => this.GetType().Assembly.GetName().Name;
-
-        #region IDstController interface
 
         /// <summary>
         /// Backing field for <see cref="Step3DFile"/>
@@ -280,7 +281,7 @@ namespace DEHPSTEPAP242.DstController
         /// <returns>A <see cref="Task"/></returns>
         public void UpdateExternalIdentifierMap()
         {
-#if DO_UPDATE_EXTERNAL_IDMAP
+//#if DO_UPDATE_EXTERNAL_IDMAP
             var unsusedIdCorrespondences = this.ExternalIdentifierMap.Correspondence
                 .Where(x => this.IdCorrespondences
                     .All(c => c.Iid != x.Iid || c.ExternalId != x.ExternalId))
@@ -290,10 +291,8 @@ namespace DEHPSTEPAP242.DstController
             this.ExternalIdentifierMap.Correspondence.AddRange(this.IdCorrespondences);
             this.ExternalIdentifierMap.Correspondence.AddRange(unsusedIdCorrespondences);
             this.IdCorrespondences.Clear();
-#else
-            // Currently nothing to save (feature not fully implemented)
-#endif
         }
+
         /// <summary>
         /// Creates and sets the <see cref="ExternalIdentifierMap"/>
         /// </summary>
@@ -317,10 +316,10 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="externalId">The external thing that <see cref="internalId"/> corresponds to</param>
         public void AddToExternalIdentifierMap(Guid internalId, string externalId)
         {
-            if (internalId != Guid.Empty && !this.ExternalIdentifierMap.Correspondence
-                                             .Any(
-                x => x.ExternalId == externalId && x.InternalThing == internalId)
-                && !this.IdCorrespondences
+            if (internalId != Guid.Empty && 
+                !this.ExternalIdentifierMap.Correspondence
+                    .Any(x => x.ExternalId == externalId && x.InternalThing == internalId) &&
+                !this.IdCorrespondences
                     .Any(x => x.ExternalId == externalId && x.InternalThing == internalId))
             {
                 this.IdCorrespondences.Add(new IdCorrespondence(Guid.NewGuid(), null, null)
@@ -450,6 +449,7 @@ namespace DEHPSTEPAP242.DstController
                 }
                 */
 
+                //NOTE: raises the exception "The container of ExternalIdentifierMap with iid <Iid> is null, the TopContainer cannot be computed."
                 //this.PersistExternalIdentifierMap(transaction);
 
                 transaction.CreateOrUpdate(iterationClone);
@@ -473,6 +473,7 @@ namespace DEHPSTEPAP242.DstController
             catch (Exception e)
             {
                 this.logger.Error(e);
+                ExceptionDispatchInfo.Capture(e).Throw();
                 //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub failed: {e.Message}"));
                 throw;
             }

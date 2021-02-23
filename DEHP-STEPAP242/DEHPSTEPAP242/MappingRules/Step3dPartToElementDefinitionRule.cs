@@ -68,6 +68,11 @@ namespace DEHPSTEPAP242.MappingRules
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
+        /// The <see cref="IDstController"/>
+        /// </summary>
+        private IDstController dstController;
+
+        /// <summary>
         /// The <see cref="IHubController"/>
         /// </summary>
         private readonly IHubController hubController = AppContainer.Container.Resolve<IHubController>();
@@ -76,11 +81,6 @@ namespace DEHPSTEPAP242.MappingRules
         /// The <see cref="IDstHubService"/>
         /// </summary>
         private readonly IDstHubService dstHubService = AppContainer.Container.Resolve<IDstHubService>();
-
-        /// <summary>
-        /// Gets the <see cref="idCorrespondences"/>
-        /// </summary>
-        private List<IdCorrespondence> idCorrespondences;
 
         /// <summary>
         /// The <see cref="List{ElementBase}>"/> that needs to be updated 
@@ -118,7 +118,7 @@ namespace DEHPSTEPAP242.MappingRules
         {
             try
             {
-                this.idCorrespondences = AppContainer.Container.Resolve<IDstController>().IdCorrespondences;
+                this.dstController = AppContainer.Container.Resolve<IDstController>();
                 
                 this.targetSourceParameters = new List<Step3dTargetSourceParameter>();
                 this.targetSourceElementBase = new List<ElementBase>();
@@ -485,23 +485,6 @@ namespace DEHPSTEPAP242.MappingRules
         /// <param name="internalId">The thing that <see cref="externalId"/> corresponds to</param>
         /// <param name="externalId">The external thing that <see cref="internalId"/> corresponds to</param>
         private void AddToExternalIdentifierMap(Guid internalId, string externalId)
-        {
-            // OLD:
-            //var identifierMap = this.Bake<ExternalIdentifierMap>(x =>
-            //{
-            //    x.ExternalToolName = typeof(Step3dPartToElementDefinitionRule).Assembly.GetName().Name;
-            //    x.Container = this.hubController.OpenIteration;
-            //});
-            //
-            //var idCorrespondence = this.Bake<IdCorrespondence>(x =>
-            //{
-            //    x.ExternalId = externalId;
-            //    x.InternalThing = internalId;
-            //});
-            //
-            //identifierMap.Correspondence.Add(idCorrespondence);
-            //
-            //this.externalIdentifierMap.Add(identifierMap);
-        }
+            => this.dstController.AddToExternalIdentifierMap(internalId, externalId);
     }
 }

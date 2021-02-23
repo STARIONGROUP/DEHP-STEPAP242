@@ -153,6 +153,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         public ReactiveCommand<object> MapCommand { get; set; }
 
+        public ReactiveCommand<object> OpenMappingConfigurationManagerCommand { get; set; }
+
         /// <summary>
         /// Populate the context menu for this browser
         /// </summary>
@@ -185,6 +187,22 @@ namespace DEHPSTEPAP242.ViewModel
                     MenuItemKind.Export,
                     ClassKind.NotThing)
                 );
+
+            
+            ContextMenu.Add(new ContextMenuItemViewModel(
+                    "---", "",
+                    ReactiveCommand.Create(),
+                    MenuItemKind.None,
+                    ClassKind.NotThing)
+                );
+
+            ContextMenu.Add(new ContextMenuItemViewModel(
+                    "Select Mapping Configuration...", "",
+                    OpenMappingConfigurationManagerCommand,
+                    MenuItemKind.None,
+                    ClassKind.NotThing)
+                );
+
         }
 
         #endregion
@@ -238,6 +256,9 @@ namespace DEHPSTEPAP242.ViewModel
 #else
             MapCommand = ReactiveCommand.Create();
             MapCommand.Subscribe(_ => this.MapCommandExecute());
+
+            OpenMappingConfigurationManagerCommand = ReactiveCommand.Create();
+            OpenMappingConfigurationManagerCommand.Subscribe(_ => this.OpenMappingConfigurationManagerExecute());
 #endif
         }
 
@@ -261,16 +282,22 @@ namespace DEHPSTEPAP242.ViewModel
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
 
+        private void OpenMappingConfigurationManagerExecute()
+        {
+            //var viewModel = AppContainer.Container.Resolve<IMappingConfigurationManagerDialogViewModel>();
+            this.navigationService.ShowDialog<MappingConfigurationManagerDialog>();
+        }
+
         /// <summary>
         /// Assings a mapping configuration to the selected part
         /// </summary>
         private void AssignMapping()
         {
             //TODO: implement, null pointer right now
-            //this.SelectedPart?.MappingConfigurations.AddRange(
-            //    this.dstController.ExternalIdentifierMap.Correspondence.Where(
-            //        x => x.ExternalId == this.SelectedPart.ElementName ||
-            //                x.ExternalId == this.SelectedPart.ParameterName));
+            this.SelectedPart?.MappingConfigurations.AddRange(
+                this.dstController.ExternalIdentifierMap?.Correspondence.Where(
+                    x => x.ExternalId == this.SelectedPart.ElementName ||
+                         x.ExternalId == this.SelectedPart.ParameterName));
         }
 
         #endregion
