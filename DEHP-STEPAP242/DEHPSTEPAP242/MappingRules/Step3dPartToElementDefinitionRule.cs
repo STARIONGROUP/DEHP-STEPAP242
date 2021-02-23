@@ -153,7 +153,7 @@ namespace DEHPSTEPAP242.MappingRules
                             if (part.SelectedElementDefinition.Iid != Guid.Empty)
                             {
                                 // When the ED was automatically selected from the Rule,
-                                // set also the expected parameter
+                                // set also the expected parameter (if does exist, it rests as null)
                                 part.SelectedParameter = part.SelectedElementDefinition.Parameter
                                     .FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
                             }
@@ -243,7 +243,6 @@ namespace DEHPSTEPAP242.MappingRules
                 if (parameterOverride is { })
                 {
                     this.UpdateValueSet(part, parameterOverride);
-                    this.AddToExternalIdentifierMap(parameterOverride.Iid, this.dstParameterName);
                 }
 
                 this.AddToExternalIdentifierMap(elementUsage.Iid, this.dstElementName);
@@ -380,13 +379,13 @@ namespace DEHPSTEPAP242.MappingRules
         /// <summary>
         /// Updates the correct value set
         /// </summary>
-        /// <param name="variable">The <see cref="VariableRowViewModel"/></param>
+        /// <param name="part">The <see cref="VariableRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Parameter"/></param>
-        private void UpdateValueSet(Step3dRowViewModel variable, ParameterBase parameter)
+        private void UpdateValueSet(Step3dRowViewModel part, ParameterBase parameter)
         {
-            var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(variable.SelectedOption, variable.SelectedActualFiniteState);
+            var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(part.SelectedOption, part.SelectedActualFiniteState);
 
-            this.UpdateComputedValueSet(variable, parameter, valueSet);
+            this.UpdateComputedValueSet(part, parameter, valueSet);
         }
 
         /// <summary>
@@ -429,6 +428,16 @@ namespace DEHPSTEPAP242.MappingRules
                 valueSet.ValueSwitch = ParameterSwitchKind.COMPUTED;
 
                 this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
+
+                if (part.SelectedOption is { })
+                {
+                    this.AddToExternalIdentifierMap(part.SelectedOption.Iid, this.dstParameterName);
+                }
+
+                if (part.SelectedActualFiniteState is { })
+                {
+                    this.AddToExternalIdentifierMap(part.SelectedActualFiniteState.Iid, this.dstParameterName);
+                }
             }
         }
 
