@@ -70,9 +70,9 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// Gets a label of association
         /// </summary>
         /// <remarks>
-        /// Using as label the <see cref="STEP3D_PartRelation.id"/> because 
-        /// it was the only unique value exported by the different 
-        /// CAD applications tested.
+        /// Using as label the <see cref="STEP3D_PartRelation.id"/> instead 
+        /// <see cref="STEP3D_PartRelation.name"/> because it was the only unique value 
+        /// exported by the different CAD applications tested during developments.
         /// </remarks>
         public string RelationLabel { get => relation?.id; }
 
@@ -80,7 +80,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// Gets the Get STEP entity file Id of the relation (NAUO)
         /// </summary>
         /// </remarks>
-        public string RelationId { get => relation?.id; }
+        public string RelationId { get => $"{relation?.stepId}"; }
 
         #endregion
 
