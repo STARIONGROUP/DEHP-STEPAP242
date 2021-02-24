@@ -263,7 +263,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.AvailableElementUsages.Clear();
 
-            if (this.SelectedThing?.SelectedElementDefinition is {})
+            if (this.SelectedThing.SelectedElementDefinition is {})
             {
                 var ed = this.SelectedThing.SelectedElementDefinition;
                 this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(ed));
@@ -277,7 +277,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.AvailableActualFiniteStates.Clear();
 
-            if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
+            if (this.SelectedThing.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
             {
                 this.AvailableActualFiniteStates.AddRange(stateDependence.ActualState);
                 this.SelectedThing.SelectedActualFiniteState = this.AvailableActualFiniteStates.FirstOrDefault();
@@ -289,7 +289,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void UpdateSelectedParameter()
         {
-            if (this.selectedThing?.SelectedElementDefinition != null)
+            if (this.selectedThing.SelectedElementDefinition != null)
             {
                 this.selectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition
                     .Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())

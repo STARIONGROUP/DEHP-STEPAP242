@@ -99,16 +99,20 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// <returns>The <see cref="CDP4Common.EngineeringModelData.FileRevision"/> or null if does not exist</returns>
         public FileRevision FindFileRevision(string guid)
         {
-            // NOTE: HubController.GetThingById() does not contemplates file revisions, only FileType
-            //this.hubController.GetThingById(new Guid(guid), out FileRevision fileRevision);
+            // NOTE: HubController.GetThingById() does not contemplates file revisions, only FileType.
+            //       Local inspection at each File entry is required
 
             var currentDomainOfExpertise = this.hubController.CurrentDomainOfExpertise;
             var dfStore = this.hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
 
-            var files = dfStore?.File;
+            if (dfStore is null)
+            {
+                return null;
+            }
+
             var targetIid = new System.Guid(guid);
 
-            foreach (var file in files)
+            foreach (var file in dfStore.File)
             {
                 var fileRevision = file.FileRevision.FirstOrDefault(x => x.Iid == targetIid);
                 if (fileRevision is { })
