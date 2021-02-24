@@ -32,6 +32,11 @@ namespace DEHPSTEPAP242.MappingRules
     public class Step3dTargetSourceParameter
     {
         /// <summary>
+        /// The <see cref="Step3dRowViewModel"/> originating the change
+        /// </summary>
+        public Step3dRowViewModel part;
+
+        /// <summary>
         /// The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest
         /// </summary>
         public ValueArray<string> values;
@@ -41,8 +46,9 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         private int componentIndex;
 
-        public Step3dTargetSourceParameter(ValueArray<string> values, int componentIndex)
+        public Step3dTargetSourceParameter(Step3dRowViewModel part, ValueArray<string> values, int componentIndex)
         {
+            this.part = part;
             this.values = values;
             this.componentIndex = componentIndex;
         }
@@ -164,6 +170,8 @@ namespace DEHPSTEPAP242.MappingRules
                         this.AddsValueSetToTheSelectectedParameter(part);
                         this.AddToExternalIdentifierMap(part.SelectedElementDefinition.Iid, this.dstElementName);
                     }
+
+                    part.SetMappedStatus();
                 }
 
                 // When changes can be also performed in other things
@@ -477,7 +485,7 @@ namespace DEHPSTEPAP242.MappingRules
                         // NOTE: FileRevision.Iid will be known at Transfer time
                         //       store the current index to know which possition corresponds
                         //       to the source (avoid searching it again)
-                        this.targetSourceParameters.Add(new Step3dTargetSourceParameter(valuearray, index));
+                        this.targetSourceParameters.Add(new Step3dTargetSourceParameter(part, valuearray, index));
                         valuearray[index++] = "";
                     }
                     break;

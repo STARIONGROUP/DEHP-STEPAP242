@@ -29,6 +29,9 @@ namespace DEHPSTEPAP242.ViewModel
     using STEP3DAdapter;
     using System.Reactive.Linq;
     using System.Windows;
+    using DEHPSTEPAP242.ViewModel.Dialogs;
+    using CDP4Dal;
+    using DEHPSTEPAP242.Events;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -211,22 +214,29 @@ namespace DEHPSTEPAP242.ViewModel
             this.navigationService = navigationService;
             this.hubController = hubController;
 
-            // Show automatically the mapping configuration after:
-            // a) STEP file loaded
+            // Update HLR when new file is available
             this.WhenAnyValue(vm => vm.dstController.IsLoading)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.UpdateHLR());
+
+            // Show automatically the mapping configuration after:
+            // a) STEP file loaded (at UpdateHLR() method)
             // b) Iteration is open
             this.WhenAnyValue(vm => vm.hubController.OpenIteration)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
+                {
+                    if (this.CanMap())
                     {
-                        if (this.CanMap())
-                        {
-                            this.OpenMappingConfigurationManagerExecute();
-                        }
+                        this.OpenMappingConfigurationManagerExecute();
                     }
+                }
                 );
+
+            // Update mapping under request, triggered by MappingConfigurationDialogViewModel
+            CDPMessageBus.Current.Listen<ExternalIdentifierMapChangedEvent>()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => this.AssignMappingsToAllParts());
 
             InitializeCommands();
         }
@@ -309,18 +319,54 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Assings a mapping configuration associated to the selected part
         /// </summary>
+        /// <remarks>This method could be not required. Check in the future</remarks>
         private void AssignMapping()
         {
-            if (this.dstController.ExternalIdentifierMap is null)
+            if (this.dstController.ExternalIdentifierMap is null || this.SelectedPart is null)
             {
                 return;
             }
 
-            this.SelectedPart?.MappingConfigurations.Clear();
-            this.SelectedPart?.MappingConfigurations.AddRange(
+            // Note: a change in the Mapping Configuration will not affect 
+            // current Mapped parts... do not remove that status
+            if (this.SelectedPart.MappingStatus != Step3dRowViewModel.MappingStatusType.Mapped)
+            {
+                this.SelectedPart.ResetMappingStatus();
+            }
+
+            this.SelectedPart.MappingConfigurations.Clear();
+            this.SelectedPart.MappingConfigurations.AddRange(
                 this.dstController.ExternalIdentifierMap.Correspondence.Where(
                     x => x.ExternalId == this.SelectedPart.ElementName ||
                          x.ExternalId == this.SelectedPart.ParameterName));
+
+            this.SelectedPart.UpdateMappingStatus();
+        }
+
+        /// <summary>
+        /// Assings a mapping configuration associated to the selected part
+        /// </summary>
+        private void AssignMappingsToAllParts()
+        {
+            var externalIdentifierMap = this.dstController.ExternalIdentifierMap;
+
+            foreach (var part in this.Step3DHLR)
+            {
+                // Note: a change in the Mapping Configuration will not affect 
+                // current Mapped parts... do not remove that status
+                if (part.MappingStatus != Step3dRowViewModel.MappingStatusType.Mapped)
+                {
+                    part.ResetMappingStatus();
+                }
+
+                part.MappingConfigurations.Clear();
+                part.MappingConfigurations.AddRange(
+                    this.dstController.ExternalIdentifierMap.Correspondence.Where(
+                        x => x.ExternalId == part.ElementName ||
+                             x.ExternalId == part.ParameterName));
+
+                part.UpdateMappingStatus();
+            }
         }
 
         #endregion

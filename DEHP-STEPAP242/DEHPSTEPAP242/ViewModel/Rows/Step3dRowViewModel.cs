@@ -176,9 +176,142 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         public string ParameterName => $"{this.Name} 3d geometry";
 
-        #endregion
+        /// <summary>
+        /// Enumeration of the possible mapping status of the current part
+        /// </summary>
+        public enum MappingStatusType
+        {
+            /// <summary>
+            /// Noting refers to no <see cref="IdCorrespondence"/> information about mapping for the part
+            /// </summary>
+            Nothing,
 
-        #region Constructor
+            /// <summary>
+            /// WithConfiguration refers to a <see cref="IdCorrespondence"/> entries not yet used for the mapping process
+            /// </summary>
+            Configured,
+
+            /// <summary>
+            /// Mapped refers to an already mapped part, independently of current <see cref="IdCorrespondence"/> defined
+            /// </summary>
+            Mapped,
+
+            /// <summary>
+            /// Transfered refers to an already transfered part, independently of current <see cref="IdCorrespondence"/> defined
+            /// </summary>
+            Transfered
+        }
+
+        /// <summary>
+        /// Gets the mapping status code
+        /// </summary>
+        public MappingStatusType MappingStatus { get; private set; }
+
+        /// <summary>
+        /// Backing field for <see cref="MappingStatusMessage"/>
+        /// </summary>
+        private string mappingStatusMessage;
+
+        /// <summary>
+        /// Gets the <see cref="MappingStatus"/> string representation
+        /// </summary>
+        public string MappingStatusMessage
+        {
+            get => this.mappingStatusMessage;
+            private set => this.RaiseAndSetIfChanged(ref this.mappingStatusMessage, value);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="MappingStatus"/> and updates the <see cref="MappingStatusMessage"/>
+        /// </summary>
+        /// <param name="mappingStatusType"></param>
+        private void SetMappingStatus(MappingStatusType mappingStatusType)
+        {
+            this.MappingStatus = mappingStatusType;
+
+            switch (this.MappingStatus)
+            {
+                case MappingStatusType.Nothing:
+                    this.MappingStatusMessage = string.Empty;
+                    break;
+                case MappingStatusType.Configured:
+                    this.MappingStatusMessage = "Configured";
+                    break;
+                case MappingStatusType.Mapped:
+                    this.MappingStatusMessage = "Mapped";
+                    break;
+                case MappingStatusType.Transfered:
+                    this.MappingStatusMessage = "Transfered";
+                    break;
+                default:
+                    // Not expected
+                    this.MappingStatusMessage = string.Empty;
+                break;
+            }
+        }
+
+        /// <summary>
+        /// Update the <see cref="MappingStatus"/> according to current situation
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="MappingStatusType.Nothing"/> or <see cref="MappingStatusType.Configured"/> status can
+        /// be changed between them at any time using the <see cref="MappingConfigurations"/> content.
+        /// 
+        /// Once the status is set to <see cref="MappingStatusType.Mapped"/> or <see cref="MappingStatusType.Transfered"/>
+        /// the <see cref="MappingStatusType.Nothing"/> or <see cref="MappingStatusType.Configured"/> status cannot be set.
+        /// 
+        /// The <see cref="MappingStatusType.Mapped"/> status should remain untouchable until the transfer is executed
+        /// or the current pending mappings are removed.
+        /// 
+        /// <seealso cref="ResetMappingStatus"/>
+        /// </remarks>
+        public void UpdateMappingStatus()
+        {
+            // On these no change is informed
+            if (this.MappingStatus >= MappingStatusType.Mapped)
+            {
+                return;
+            }
+
+            // Only possible change
+            if (this.MappingConfigurations.Count == 0)
+            {
+                this.SetMappingStatus(MappingStatusType.Nothing);
+            }
+            else
+            {
+                this.SetMappingStatus(MappingStatusType.Configured);
+            }
+        }
+
+        /// <summary>
+        /// Sets the <see cref="MappingStatusType.Mapped"/> status
+        /// </summary>
+        public void SetMappedStatus()
+        {
+            this.SetMappingStatus(MappingStatusType.Mapped);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="MappingStatusType.Transfered"/> status
+        /// </summary>
+        public void SetTransferedStatus()
+        {
+            this.SetMappingStatus(MappingStatusType.Transfered);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="MappingStatusType.Nothing"/> status
+        /// independently of  <see cref="MappingConfigurations"/>
+        /// </summary>
+        public void ResetMappingStatus()
+        {
+            this.SetMappingStatus(MappingStatusType.Nothing);
+        }
+
+#endregion
+
+#region Constructor
 
         /// <summary>
         /// Constructor
@@ -189,8 +322,13 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         {
             this.part = part;
             this.relation = relation;
+
+            this.ResetMappingStatus();
+
+            //TODO: not working as expected
+            //this.WhenAnyValue(x => x.MappingConfigurations).Subscribe(x => this.UpdateMappingStatus());
         }
 
-        #endregion
+#endregion
     }
 }

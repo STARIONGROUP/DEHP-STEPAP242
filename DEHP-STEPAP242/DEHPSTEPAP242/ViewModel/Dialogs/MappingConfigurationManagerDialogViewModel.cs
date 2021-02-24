@@ -19,6 +19,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.Settings;
     using CDP4Common.EngineeringModelData;
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Events;
+    using CDP4Dal;
 
     /// <summary>
     /// The view-model for the Mapping Configuration Manager dialog that allows users
@@ -176,6 +178,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.ProcessExternalIdentifierMap();
             this.SaveMappingAssociation();
             this.CloseWindowBehavior?.Close();
+
+            CDPMessageBus.Current.SendMessage(new ExternalIdentifierMapChangedEvent());
         }
 
         /// <summary>

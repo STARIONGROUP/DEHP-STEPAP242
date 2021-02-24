@@ -451,6 +451,11 @@ namespace DEHPSTEPAP242.DstController
                 //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
                 await this.UpdateParametersValueSets();
 
+                foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
+                {
+                    sourceFieldToUpdate.part.SetTransferedStatus();
+                }
+
                 //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
                 await this.hubController.Refresh();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));

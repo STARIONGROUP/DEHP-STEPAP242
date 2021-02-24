@@ -44,6 +44,7 @@
                 <dxg:TreeListColumn FieldName="Description" />
                 <dxg:TreeListColumn FieldName="RelationLabel" />
                 <dxg:TreeListColumn FieldName="RepresentationType" />
+                <dxg:TreeListColumn FieldName="MappingStatusMessage" Header="Mapping Status"/>
             </dxg:TreeListControl.Columns>
 
         </dxg:TreeListControl>
