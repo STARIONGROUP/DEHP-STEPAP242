@@ -133,13 +133,20 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             {
                 this.SelectedExternalIdentifierMap = this.AvailableExternalIdentifierMap.FirstOrDefault(
                     x => x.Name == usedMappingName);
-
+                
                 // In case the Configuration name is not found, propose the creation
                 if (this.SelectedExternalIdentifierMap is null)
                 {
                     this.CreateNewMappingConfigurationChecked = true;
                     this.NewExternalIdentifierMapName = usedMappingName;
                 }
+            }
+            else if (this.AvailableExternalIdentifierMap.Count == 0)
+            {
+                // Create new configuration is the only possibility here,
+                // propose the file name as initial name
+                this.CreateNewMappingConfigurationChecked = true;
+                this.NewExternalIdentifierMapName = $"{System.IO.Path.GetFileNameWithoutExtension(this.dstController.Step3DFile?.FileName)} Configuration";
             }
         }
 
@@ -148,8 +155,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void InitializeCommands()
         {
-            // this.WhenAnyValue(x => x.CreateNewMappingConfigurationChecked).Subscribe(_ => this.UpdateExternalIdentifierSelector());
-
             var canApply = this.WhenAnyValue(
                 vm => vm.CreateNewMappingConfigurationChecked,
                 vm => vm.NewExternalIdentifierMapName,
@@ -162,21 +167,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.ApplyCommand = ReactiveCommand.Create(canApply);
             this.ApplyCommand.Subscribe(_ => this.ApplyCommandExecute());
         }
-
-        ///// <summary>
-        ///// Updates the respective field depending on the user selection
-        ///// </summary>
-        //private void UpdateExternalIdentifierSelector()
-        //{
-        //    if (this.CreateNewMappingConfigurationChecked)
-        //    {
-        //        this.SelectedExternalIdentifierMap = null;
-        //    }
-        //    else
-        //    {
-        //        this.NewExternalIdentifierMapName = null;
-        //    }
-        //}
 
         /// <summary>
         /// Applies the selection of <see cref="ExternalIdentifierMap"/> to the current STEP file

@@ -121,7 +121,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.IsBusy = true;
             
             var part = this.SelectedThing;
-            
+
             foreach (var idCorrespondence in part.MappingConfigurations)
             {
                 if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
@@ -241,15 +241,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         private void UpdateAvailableOptions()
         {
             this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
-
-#if FORCE_INITIAL_OPTION_SELECTION
-            // Initialize an Option for Option Dependent parameters with no value
-            if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.IsOptionDependent
-                && this.SelectedThing.SelectedOption is null)
-            {
-                this.SelectedThing.SelectedOption = this.AvailableOptions.FirstOrDefault(o => o.IsDefault);
-            }
-#endif
         }
 
         /// <summary>

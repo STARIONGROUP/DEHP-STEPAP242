@@ -11,7 +11,7 @@
         xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
         xmlns:partmapper="clr-namespace:DEHPSTEPAP242.Views.Dialogs"
         mc:Ignorable="d"
-        Title="Mapping Configuration Dialog" Height="350" Width="680">
+        Title="STEP-AP242 to Hub Mapping Configuration" Height="320" Width="740">
     <Window.Resources>
         <ResourceDictionary>
             <dx:NullableToVisibilityConverter x:Key="NullToVisibilityConverter"></dx:NullableToVisibilityConverter>
@@ -21,6 +21,7 @@
     <dxmvvm:Interaction.Behaviors>
         <behaviors:CloseWindowBehavior/>
     </dxmvvm:Interaction.Behaviors>
+    
     <dx:LoadingDecorator BorderEffect="Default" BorderEffectColor="Blue" IsSplashScreenShown="{Binding IsBusy}" OwnerLock="LoadingContent">
         <Grid Margin="10">
             <Grid.RowDefinitions>
