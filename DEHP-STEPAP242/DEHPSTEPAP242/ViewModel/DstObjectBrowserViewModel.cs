@@ -27,6 +27,8 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 
     using STEP3DAdapter;
+    using System.Reactive.Linq;
+    using System.Windows;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -61,7 +63,6 @@ namespace DEHPSTEPAP242.ViewModel
         private readonly INavigationService navigationService;
         
         #endregion Private Interface References
-
 
         #region IDstObjectBrowserViewModel interface
 
@@ -137,6 +138,11 @@ namespace DEHPSTEPAP242.ViewModel
             Step3DHLR = builder.CreateHLR(dstController.Step3DFile);
 
             IsBusy = false;
+
+            if (this.CanMap())
+            {
+                this.OpenMappingConfigurationManagerExecute();
+            }
         }
 
         #endregion
@@ -162,7 +168,7 @@ namespace DEHPSTEPAP242.ViewModel
         {
             ContextMenu.Clear();
 
-            if (SelectedPart is null)
+            if (this.CanMap() == false)
             {
                 return;
             }
@@ -170,31 +176,16 @@ namespace DEHPSTEPAP242.ViewModel
 #if USE_CANMAP_OBSERVABLE
             // Nothing to do, validation already done in the "canMap" observable of the command
 #else
-            bool canMap = this.SelectedPart != null && this.hubController.OpenIteration != null &&
-                    this.dstController.MappingDirection is MappingDirection.FromDstToHub &&
-                    !this.IsBusy;
-
-            if (canMap == false)
+            if (this.SelectedPart != null)
             {
-                // Do not add menu entry when the action is not supported
-                return;
-            }
-#endif
-
-            ContextMenu.Add(new ContextMenuItemViewModel(
+                ContextMenu.Add(new ContextMenuItemViewModel(
                     $"Map {SelectedPart.Description}", "",
                     MapCommand,
                     MenuItemKind.Export,
                     ClassKind.NotThing)
                 );
-
-            
-            ContextMenu.Add(new ContextMenuItemViewModel(
-                    "---", "",
-                    ReactiveCommand.Create(),
-                    MenuItemKind.None,
-                    ClassKind.NotThing)
-                );
+            }
+#endif
 
             ContextMenu.Add(new ContextMenuItemViewModel(
                     "Select Mapping Configuration...", "",
@@ -202,7 +193,6 @@ namespace DEHPSTEPAP242.ViewModel
                     MenuItemKind.None,
                     ClassKind.NotThing)
                 );
-
         }
 
         #endregion
@@ -221,8 +211,22 @@ namespace DEHPSTEPAP242.ViewModel
             this.navigationService = navigationService;
             this.hubController = hubController;
 
+            // Show automatically the mapping configuration after:
+            // a) STEP file loaded
             this.WhenAnyValue(vm => vm.dstController.IsLoading)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.UpdateHLR());
+            // b) Iteration is open
+            this.WhenAnyValue(vm => vm.hubController.OpenIteration)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                    {
+                        if (this.CanMap())
+                        {
+                            this.OpenMappingConfigurationManagerExecute();
+                        }
+                    }
+                );
 
             InitializeCommands();
         }
@@ -230,6 +234,18 @@ namespace DEHPSTEPAP242.ViewModel
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Checks if general mapping is possible
+        /// </summary>
+        /// <returns>True if possible</returns>
+        private bool CanMap()
+        {
+            return (this.Step3DHLR != null && this.Step3DHLR.Count > 0) &&
+                this.hubController.OpenIteration != null &&
+                this.dstController.MappingDirection is MappingDirection.FromDstToHub &&
+                !this.IsBusy;
+        }
 
         /// <summary>
         /// Initializes the <see cref="ICommand"/> of this view model
@@ -282,20 +298,27 @@ namespace DEHPSTEPAP242.ViewModel
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
 
+        /// <summary>
+        /// Opens the <see cref="MappingConfigurationManagerDialog"/>
+        /// </summary>
         private void OpenMappingConfigurationManagerExecute()
         {
-            //var viewModel = AppContainer.Container.Resolve<IMappingConfigurationManagerDialogViewModel>();
             this.navigationService.ShowDialog<MappingConfigurationManagerDialog>();
         }
 
         /// <summary>
-        /// Assings a mapping configuration to the selected part
+        /// Assings a mapping configuration associated to the selected part
         /// </summary>
         private void AssignMapping()
         {
-            //TODO: implement, null pointer right now
+            if (this.dstController.ExternalIdentifierMap is null)
+            {
+                return;
+            }
+
+            this.SelectedPart?.MappingConfigurations.Clear();
             this.SelectedPart?.MappingConfigurations.AddRange(
-                this.dstController.ExternalIdentifierMap?.Correspondence.Where(
+                this.dstController.ExternalIdentifierMap.Correspondence.Where(
                     x => x.ExternalId == this.SelectedPart.ElementName ||
                          x.ExternalId == this.SelectedPart.ParameterName));
         }
