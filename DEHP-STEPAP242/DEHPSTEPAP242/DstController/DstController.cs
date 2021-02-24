@@ -276,20 +276,11 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
-        /// Updates the configured mapping
+        /// Updates the configured mapping 
         /// </summary>
-        /// <returns>A <see cref="Task"/></returns>
         public void UpdateExternalIdentifierMap()
         {
-//#if DO_UPDATE_EXTERNAL_IDMAP
-            var unsusedIdCorrespondences = this.ExternalIdentifierMap.Correspondence
-                .Where(x => this.IdCorrespondences
-                    .All(c => c.Iid != x.Iid || c.ExternalId != x.ExternalId))
-                .ToList();
-
-            this.ExternalIdentifierMap.Correspondence.Clear();
             this.ExternalIdentifierMap.Correspondence.AddRange(this.IdCorrespondences);
-            this.ExternalIdentifierMap.Correspondence.AddRange(unsusedIdCorrespondences);
             this.IdCorrespondences.Clear();
         }
 
@@ -305,7 +296,7 @@ namespace DEHPSTEPAP242.DstController
                 Name = newName,
                 ExternalToolName = this.ThisToolName,
                 ExternalModelName = newName,
-                Owner = this.hubController.CurrentDomainOfExpertise,
+                Owner = this.hubController.CurrentDomainOfExpertise
             };
         }
 
@@ -317,12 +308,10 @@ namespace DEHPSTEPAP242.DstController
         public void AddToExternalIdentifierMap(Guid internalId, string externalId)
         {
             if (internalId != Guid.Empty && 
-                !this.ExternalIdentifierMap.Correspondence
-                    .Any(x => x.ExternalId == externalId && x.InternalThing == internalId) &&
-                !this.IdCorrespondences
-                    .Any(x => x.ExternalId == externalId && x.InternalThing == internalId))
+                !this.ExternalIdentifierMap.Correspondence.Any(x => x.ExternalId == externalId && x.InternalThing == internalId) &&
+                !this.IdCorrespondences.Any(x => x.ExternalId == externalId && x.InternalThing == internalId))
             {
-                this.IdCorrespondences.Add(new IdCorrespondence(Guid.NewGuid(), null, null)
+                this.IdCorrespondences.Add(new IdCorrespondence()
                 {
                     ExternalId = externalId,
                     InternalThing = internalId
@@ -449,8 +438,7 @@ namespace DEHPSTEPAP242.DstController
                 }
                 */
 
-                //NOTE: raises the exception "The container of ExternalIdentifierMap with iid <Iid> is null, the TopContainer cannot be computed."
-                //this.PersistExternalIdentifierMap(transaction);
+                this.PersistExternalIdentifierMap(transaction, iterationClone);
 
                 transaction.CreateOrUpdate(iterationClone);
 
@@ -613,36 +601,29 @@ namespace DEHPSTEPAP242.DstController
         /// Updates the configured mapping, registering the <see cref="ExternalIdentifierMap"/> and its <see cref="IdCorrespondence"/>
         /// to a <see name="IThingTransaction"/>
         /// </summary>
-        /// <param name="transaction">the <see cref="IThingTransaction"/></param>
-        private void PersistExternalIdentifierMap(IThingTransaction transaction)
+        /// <param name="transaction">The <see cref="IThingTransaction"/></param>
+        /// <param name="iterationClone">The <see cref="Iteration"/> clone</param>
+        private void PersistExternalIdentifierMap(IThingTransaction transaction, Iteration iterationClone)
         {
             this.UpdateExternalIdentifierMap();
 
-            var externalIdentifierMapClone = this.ExternalIdentifierMap.Clone(true);
-
-            if (externalIdentifierMapClone.Iid == Guid.Empty)
+            if (this.ExternalIdentifierMap.Iid == Guid.Empty)
             {
-                externalIdentifierMapClone.Iid = Guid.NewGuid();
-                this.ExternalIdentifierMap.Iid = externalIdentifierMapClone.Iid;
-                ((Iteration)transaction.AssociatedClone).ExternalIdentifierMap.Add(externalIdentifierMapClone);
-                transaction.CreateOrUpdate(externalIdentifierMapClone);
+                this.ExternalIdentifierMap.Iid = Guid.NewGuid();
+                iterationClone.ExternalIdentifierMap.Add(this.ExternalIdentifierMap);
             }
 
-            var idCorrespondencesToPersist = externalIdentifierMapClone.Correspondence.ToList();
-
-            externalIdentifierMapClone.Correspondence.Clear();
-
-            foreach (var clonedCorrespondence in idCorrespondencesToPersist)
+            foreach (var correspondence in this.ExternalIdentifierMap.Correspondence)
             {
-                externalIdentifierMapClone.Correspondence.Add(clonedCorrespondence);
-                clonedCorrespondence.Container = externalIdentifierMapClone;
-                transaction.CreateOrUpdate(clonedCorrespondence);
+                if (correspondence.Iid == Guid.Empty)
+                {
+                    correspondence.Iid = Guid.NewGuid();
+                    transaction.Create(correspondence);
+                }
             }
 
-            transaction.CreateOrUpdate(externalIdentifierMapClone);
+            transaction.CreateOrUpdate(this.ExternalIdentifierMap);
 
-            this.ExternalIdentifierMap.Correspondence.Clear();
-            this.ExternalIdentifierMap.Correspondence.AddRange(idCorrespondencesToPersist);
             this.statusBar.Append("Mapping configuration processed");
         }
 
