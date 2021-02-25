@@ -18,7 +18,7 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// <summary>
         /// Full path to the storage directory
         /// </summary>
-        public string StorageDirectoryPath;
+        private string StorageDirectoryPath;
 
         /// <summary>
         /// The <see cref="IUserPreferenceService{AppSettings}"/> instance
@@ -137,14 +137,6 @@ namespace DEHPSTEPAP242.Services.FileStoreService
             CheckStorageDirectory();
 
             if (doClean) Clean();
-
-            // /* Configuration from the App.config */
-            //var storageSettings = ConfigurationManager.GetSection("FileStoreSettings") as NameValueCollection;
-            //
-            //string dirName = storageSettings["DirectoryName"];
-            //bool doClean = storageSettings["CleanOnInit"] == "true";
-            //
-            //if (doClean) Clean();
         }
 
         /// <summary>

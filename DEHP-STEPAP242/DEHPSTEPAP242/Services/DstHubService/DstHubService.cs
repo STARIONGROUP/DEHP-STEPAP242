@@ -100,7 +100,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         public FileRevision FindFileRevision(string guid)
         {
             // NOTE: HubController.GetThingById() does not contemplates file revisions, only FileType.
-            //       Local inspection at each File entry is required
+            //       Local inspection at each File entry is required.
 
             var currentDomainOfExpertise = this.hubController.CurrentDomainOfExpertise;
             var dfStore = this.hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
@@ -143,16 +143,16 @@ namespace DEHPSTEPAP242.Services.DstHubService
         {
             if (this.hubController.OpenIteration is null)
             {
-                return null;
+                return new List<FileRevision>();
             }
-
-            var revisions = new List<FileRevision>();
 
             var currentDomainOfExpertise = hubController.CurrentDomainOfExpertise;
             logger.Debug($"Domain of Expertise: { currentDomainOfExpertise.Name }");
 
             var dfStore = hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
             logger.Debug($"DomainFileStore: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
+
+            var revisions = new List<FileRevision>();
 
             logger.Debug($"Files Count: {dfStore.File.Count}");
             foreach (var f in dfStore.File)
@@ -177,7 +177,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         {
             var fileType = this.FirstSTEPFileType(fileRevision);
 
-            return (fileType is null) == false;
+            return !(fileType is null);
         }
 
         /// <summary>
@@ -206,14 +206,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         {
             if (param is CompoundParameterType compountParameter)
             {
-                foreach (ParameterTypeComponent comp in compountParameter.Component)
-                {
-                    Debug.WriteLine($"FindSourceParameterType component {comp.ShortName} {comp.ParameterType.ShortName}");
-                }
-
-                var p = compountParameter.Component.FirstOrDefault(x => x.ShortName == "source");
-                var r = compountParameter.Component.FirstOrDefault(x => x.ParameterType.Name == STEP_FILE_REF_NAME);
-                return p;
+                return compountParameter.Component.FirstOrDefault(x => x.ShortName == "source");
             }
 
             return null;
@@ -235,18 +228,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             var modelSetup = model.EngineeringModelSetup;
             var rdls = modelSetup.RequiredRdl;
 
-            var rdl = rdls.First();
-            
-            //// Search From SiteDirectory
-            //var site = hubController.GetSiteDirectory();
-            //var rdl = site.SiteReferenceDataLibrary.FirstOrDefault(r => r.ShortName == RDL_SHORT_NAME);
-            //
-            //if (rdl is null)
-            //{
-            //    logger.Error($"Unexpected ReferenceDataLibrary not found when looking for '{RDL_SHORT_NAME}'");
-            //}
-
-            return rdl;
+            return rdls.First();
         }
 
         /// <summary>
@@ -269,7 +251,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             // Verify that any known STEP extension is checked
             foreach (var ext in APPLICATION_STEP_EXTENSIONS)
             {
-                if (rdl.FileType.Any(t => t.Extension == ext) == false)
+                if (!rdl.FileType.Any(t => t.Extension == ext))
                 {
                     missingExtensions.Add(ext);
                 }
@@ -336,7 +318,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             var scales = rdl.Scale;
             var parameters = rdl.ParameterType;
 
-            MeasurementUnit oneUnit = units.OfType<SimpleUnit>().FirstOrDefault(u => u.ShortName == "1" && u is SimpleUnit);
+            MeasurementUnit oneUnit = units.OfType<SimpleUnit>().FirstOrDefault(u => u.ShortName == "1");
             MeasurementScale stepIdScale = scales.OfType<OrdinalScale>().FirstOrDefault(x => x.Name == STEP_ID_NAME && !x.IsDeprecated);
             ParameterType stepIdParameter = parameters.OfType<SimpleQuantityKind>().FirstOrDefault(x => x.Name == STEP_ID_NAME && !x.IsDeprecated);
             ParameterType stepLabelParameter = parameters.OfType<TextParameterType>().FirstOrDefault(x => x.Name == STEP_LABEL_NAME && !x.IsDeprecated);
@@ -346,7 +328,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             var rdlClone = rdl.Clone(false);
             var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(rdlClone), rdlClone);
 
-            if (oneUnit is null)
+            if (oneUnit is null || !(oneUnit is SimpleUnit))
             {
                 oneUnit = this.CreateUnit(transaction, rdlClone, STEP_ID_UNIT_NAME, "1");
             }
@@ -381,8 +363,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                     new KeyValuePair<string, ParameterType>("rep_type", stepLabelParameter),
                     new KeyValuePair<string, ParameterType>("assembly_label", stepLabelParameter),
                     new KeyValuePair<string, ParameterType>("assembly_id", stepIdParameter),
-                    //new KeyValuePair<string, ParameterType>("source", stepFileRefParameter)
-                    new KeyValuePair<string, ParameterType>("source", stepLabelParameter)
+                    new KeyValuePair<string, ParameterType>("source", stepFileRefParameter)
                 };
 
                 this.CreateCompoundParameter(transaction, rdlClone, STEP_GEOMETRY_NAME, "step_geo", entries);

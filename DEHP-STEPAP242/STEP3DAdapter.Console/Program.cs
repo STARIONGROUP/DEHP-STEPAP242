@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using STEP3DAdapter;
-
-
+﻿
 namespace STEP3DAdapter.Console
 {
-	class Program
+	using System;
+
+	using STEP3DAdapter;
+
+	static class Program
 	{
 		static private void ShowSTEP3DInformation(String fname)
 		{

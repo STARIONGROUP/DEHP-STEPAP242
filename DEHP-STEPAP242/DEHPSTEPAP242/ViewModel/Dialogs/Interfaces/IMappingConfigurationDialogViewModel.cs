@@ -2,13 +2,10 @@
 namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
 {
     using CDP4Common.EngineeringModelData;
-    using CDP4Common.SiteDirectoryData;
 
     using DEHPCommon.UserInterfaces.Behaviors;
 
     using DEHPSTEPAP242.ViewModel.Rows;
-
-    //using DevExpress.Xpf.Editors;
 
     using ReactiveUI;
 

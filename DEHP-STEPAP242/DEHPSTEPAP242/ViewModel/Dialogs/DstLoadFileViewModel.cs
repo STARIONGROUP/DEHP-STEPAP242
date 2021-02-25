@@ -138,9 +138,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
         #region Public Reactive Properties
 
-        //public int WindowWidth { get; set; }
-        //public int WindowHeight { get; set; }
-
         /// <summary>
         /// Backing field for <see cref="MainLabel"/>
         /// </summary>
@@ -216,13 +213,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             // Load recent files and initialize with the last opened file
             PopulateRecentFiles();
 
-            if (RecentFiles.IsEmpty == false)
+            if (!RecentFiles.IsEmpty)
             {
                 FilePath = RecentFiles[0];
             }
-
-            //WindowHeight = 500;
-            //WindowWidth = 500;
         }
 
         /// <summary>
@@ -319,15 +313,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             userPreferenceService.Save();
         }
 
-        /// <summary>
-        /// Creates a new <see cref="ExternalIdentifierMap"/> and or set the <see cref="IDstController.ExternalIdentifierMap"/>
-        /// </summary>
-        private async Task ProcessExternalIdentifierMap()
-        {
-            await Task.FromResult(0);
-            //this.dstController.ExternalIdentifierMap = this.SelectedExternalIdentifierMap ?? await
-            //                                           this.dstController.CreateExternalIdentifierMap(this.ExternalIdentifierMapNewName);
-        }
         #endregion
     }
 }
