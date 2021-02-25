@@ -96,7 +96,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstHubService>().As<IDstHubService>().SingleInstance();
             containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
             containerBuilder.RegisterType<MappingEngine>().As<IMappingEngine>().WithParameter(MappingEngine.ParameterName, Assembly.GetExecutingAssembly());
-            containerBuilder.RegisterType<HLRBuilder>().As<IHLRBuilder>();
+            containerBuilder.RegisterType<HighLevelRepresentationBuilder>().As<IHighLevelRepresentationBuilder>();
         }
 
         /// <summary>

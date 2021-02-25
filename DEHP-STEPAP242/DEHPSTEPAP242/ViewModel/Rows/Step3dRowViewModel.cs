@@ -12,12 +12,12 @@ namespace DEHPSTEPAP242.ViewModel.Rows
     using STEP3DAdapter;
 
     /// <summary>
-    /// The <see cref="Step3dRowViewModel"/> is the node in the HLR tree structure.
+    /// The <see cref="Step3DRowViewModel"/> is the node in the HLR tree structure.
     /// 
     /// <seealso cref="DstObjectBrowserViewModel"/>
-    /// <seealso cref="Builds.HighLevelRepresentationBuilder.HLRBuilder"/>
+    /// <seealso cref="Builds.HighLevelRepresentationBuilder.HighLevelRepresentationBuilder"/>
     /// </summary>
-    public class Step3dRowViewModel : ReactiveObject
+    public class Step3DRowViewModel : ReactiveObject
     {
         internal STEP3D_Part part;
         internal STEP3D_PartRelation relation;
@@ -318,7 +318,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         /// <param name="part">Reference to <see cref="STEP3D_Part"/> entity in the <see cref="STEP3DFile"/></param>
         /// <param name="relation">Reference to <see cref="STEP3D_Part"/> entity in the <see cref="STEP3DFile"/></param>
-        public Step3dRowViewModel(STEP3D_Part part, STEP3D_PartRelation relation)
+        public Step3DRowViewModel(STEP3D_Part part, STEP3D_PartRelation relation)
         {
             this.part = part;
             this.relation = relation;

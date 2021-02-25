@@ -46,7 +46,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// The file name without extension of the current STEP file
         /// </summary>
-        private string fileName;
+        private readonly string fileName;
 
         /// <summary>
         /// Backing field for <see cref="NewExternalIdentifierMapName"/>
@@ -112,6 +112,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.hubController = hubController;
             this.userPreferenceService = userPreferenceService;
 
+            // Keep the file name reference in lower case to have a case-insensitive map key
             this.fileName = System.IO.Path.GetFileNameWithoutExtension(this.dstController.Step3DFile?.FileName).ToLower();
 
             InitializeUI();

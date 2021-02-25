@@ -199,9 +199,9 @@ namespace DEHPSTEPAP242.DstController
         public ReactiveList<ElementBase> MapResult { get; private set; } = new ReactiveList<ElementBase>();
 
         /// <summary>
-        /// Gets the colection of mapped <see cref="Step3dTargetSourceParameter"/> which needs to be updated in the transfer operation
+        /// Gets the colection of mapped <see cref="Step3DTargetSourceParameter"/> which needs to be updated in the transfer operation
         /// </summary>
-        public List<Step3dTargetSourceParameter> TargetSourceParametersDstStep3dMaps { get; private set; } = new List<Step3dTargetSourceParameter>();
+        public List<Step3DTargetSourceParameter> TargetSourceParametersDstStep3dMaps { get; private set; } = new List<Step3DTargetSourceParameter>();
 
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
@@ -216,13 +216,13 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
-        /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
+        /// <param name="dst3DPart">The <see cref="Step3DRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        public void Map(Step3dRowViewModel dst3DPart)
+        public void Map(Step3DRowViewModel dst3DPart)
         {
-            var parts = new List<Step3dRowViewModel> { dst3DPart };
+            var parts = new List<Step3DRowViewModel> { dst3DPart };
 
-            var (elements, sources) = ((List<ElementBase>, List<Step3dTargetSourceParameter>))
+            var (elements, sources) = ((List<ElementBase>, List<Step3DTargetSourceParameter>))
                 this.mappingEngine.Map(parts);
 
             if (elements.Any())

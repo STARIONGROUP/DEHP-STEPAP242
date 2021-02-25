@@ -25,9 +25,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         bool IsBusy { get; set; }
 
         /// <summary>
-        /// Gets or sets the selected row that represents a <see cref="Step3dRowViewModel"/>
+        /// Gets or sets the selected row that represents a <see cref="Step3DRowViewModel"/>
         /// </summary>
-        Step3dRowViewModel SelectedThing { get; set; }
+        Step3DRowViewModel SelectedThing { get; set; }
 
         /// <summary>
         /// Gets the collection of the available <see cref="Option"/> from the connected Hub Model

@@ -1,19 +1,20 @@
 ﻿
 namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
 {
-    using DEHPSTEPAP242.ViewModel.Rows;
-    using ReactiveUI;
-    using STEP3DAdapter;
     using System.Collections.Generic;
+
+    using DEHPSTEPAP242.ViewModel.Rows;
+
+    using STEP3DAdapter;
 
     /// <summary>
     /// Helper class to create the High Level Representation (HLR) View Model for STEP AP242 file
     /// </summary>
-    public interface IHLRBuilder
+    public interface IHighLevelRepresentationBuilder
     {
         /// <summary>
         /// Creates the High Level Representation (HLR) View Model for STEP AP242 file
         /// </summary>
-        List<Step3dRowViewModel> CreateHLR(STEP3DFile step3d);
+        List<Step3DRowViewModel> CreateHLR(STEP3DFile step3d);
     }
 }

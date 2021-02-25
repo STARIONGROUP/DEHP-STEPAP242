@@ -44,7 +44,7 @@ namespace DEHPSTEPAP242.ViewModel
     /// - Key Field: This field should contain unique values used to identify nodes.
     /// - Parent Field: This field should contain values that indicate parent nodes.
     /// 
-    /// <seealso cref="Step3dRowViewModel"/>
+    /// <seealso cref="Step3DRowViewModel"/>
     /// </summary>
     public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel, IHaveContextMenuViewModel
     {
@@ -86,12 +86,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Backing field for <see cref="Step3DHLR"/>
         /// </summary>
-        private List<Step3dRowViewModel> step3DHLR = new List<Step3dRowViewModel>();
+        private List<Step3DRowViewModel> step3DHLR = new List<Step3DRowViewModel>();
 
         /// <summary>
         /// Gets or sets the Step3D High Level Representation structure.
         /// </summary>
-        public List<Step3dRowViewModel> Step3DHLR
+        public List<Step3DRowViewModel> Step3DHLR
         {
             get => this.step3DHLR;
             private set => this.RaiseAndSetIfChanged(ref this.step3DHLR, value);
@@ -100,12 +100,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Backing field for <see cref="SelectedPart"/>
         /// </summary>
-        private Step3dRowViewModel selectedPart;
+        private Step3DRowViewModel selectedPart;
 
         /// <summary>
-        /// Gets or sets the selected row that represents a <see cref="Step3dRowViewModel"/>
+        /// Gets or sets the selected row that represents a <see cref="Step3DRowViewModel"/>
         /// </summary>
-        public Step3dRowViewModel SelectedPart
+        public Step3DRowViewModel SelectedPart
         {
             get => this.selectedPart;
             set => this.RaiseAndSetIfChanged(ref this.selectedPart, value);
@@ -136,7 +136,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             SelectedPart = null;
 
-            var builder = AppContainer.Container.Resolve<IHLRBuilder>();
+            var builder = AppContainer.Container.Resolve<IHighLevelRepresentationBuilder>();
 
             Step3DHLR = builder.CreateHLR(dstController.Step3DFile);
 
@@ -329,7 +329,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             // Note: a change in the Mapping Configuration will not affect 
             // current Mapped parts... do not remove that status
-            if (this.SelectedPart.MappingStatus != Step3dRowViewModel.MappingStatusType.Mapped)
+            if (this.SelectedPart.MappingStatus != Step3DRowViewModel.MappingStatusType.Mapped)
             {
                 this.SelectedPart.ResetMappingStatus();
             }
@@ -354,7 +354,7 @@ namespace DEHPSTEPAP242.ViewModel
             {
                 // Note: a change in the Mapping Configuration will not affect 
                 // current Mapped parts... do not remove that status
-                if (part.MappingStatus != Step3dRowViewModel.MappingStatusType.Mapped)
+                if (part.MappingStatus != Step3DRowViewModel.MappingStatusType.Mapped)
                 {
                     part.ResetMappingStatus();
                 }

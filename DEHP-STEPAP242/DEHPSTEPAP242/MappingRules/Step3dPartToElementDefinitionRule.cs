@@ -29,30 +29,34 @@ namespace DEHPSTEPAP242.MappingRules
     /// that needs to me updated with the new <see cref="FileRevision"/> of the source
     /// STEP 3D file in the Hub.
     /// </summary>
-    public class Step3dTargetSourceParameter
+    public class Step3DTargetSourceParameter
     {
         /// <summary>
-        /// The <see cref="Step3dRowViewModel"/> originating the change
+        /// The <see cref="Step3DRowViewModel"/> originating the change
         /// </summary>
-        public Step3dRowViewModel part;
+        public readonly Step3DRowViewModel part;
 
         /// <summary>
         /// The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest
         /// </summary>
-        public ValueArray<string> values;
+        private readonly ValueArray<string> values;
 
         /// <summary>
         /// The index in the <see cref="ValueArray{string}"/> for the <see cref="ParameterTypeComponent"/> corresponding to the "source" field
         /// </summary>
-        private int componentIndex;
+        private readonly int componentIndex;
 
-        public Step3dTargetSourceParameter(Step3dRowViewModel part, ValueArray<string> values, int componentIndex)
+        public Step3DTargetSourceParameter(Step3DRowViewModel part, ValueArray<string> values, int componentIndex)
         {
             this.part = part;
             this.values = values;
             this.componentIndex = componentIndex;
         }
 
+        /// <summary>
+        /// Updates the <see cref="ValueArray{string}"/> associated to the source parameter
+        /// </summary>
+        /// <param name="fileRevision"></param>
         public void UpdateSource(FileRevision fileRevision)
         {
             this.values[componentIndex] = fileRevision.Iid.ToString();
@@ -60,13 +64,13 @@ namespace DEHPSTEPAP242.MappingRules
     }
 
     /// <summary>
-    /// The <see cref="Step3dPartToElementDefinitionRule"/> is a <see cref="IMappingRule"/> 
+    /// The <see cref="Step3DPartToElementDefinitionRule"/> is a <see cref="IMappingRule"/> 
     /// for the <see cref="MappingEngine"/>.
     /// 
-    /// That takes a <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> as input 
+    /// That takes a <see cref="List{T}"/> of <see cref="Step3DRowViewModel"/> as input 
     /// and outputs a E-TM-10-25 <see cref="ElementDefinition"/>.
     /// </summary>
-    public class Step3dPartToElementDefinitionRule : MappingRule<List<Step3dRowViewModel>, (List<ElementBase>, List<Step3dTargetSourceParameter>)>
+    public class Step3DPartToElementDefinitionRule : MappingRule<List<Step3DRowViewModel>, (List<ElementBase>, List<Step3DTargetSourceParameter>)>
     {
         /// <summary>
         /// The current class logger
@@ -98,7 +102,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// The <see cref="List{Step3dTargetSourceParameter}>"/> that needs to be updated 
         /// before the transfer to the Hub.
         /// </summary>
-        private List<Step3dTargetSourceParameter> targetSourceParameters;
+        private List<Step3DTargetSourceParameter> targetSourceParameters;
 
         /// <summary>
         /// The current <see cref="DomainOfExpertise"/>
@@ -106,27 +110,27 @@ namespace DEHPSTEPAP242.MappingRules
         private DomainOfExpertise owner;
 
         /// <summary>
-        /// Holds the current processing <see cref="Step3dRowViewModel"/> element name
+        /// Holds the current processing <see cref="Step3DRowViewModel"/> element name
         /// </summary>
         private string dstElementName;
 
         /// <summary>
-        /// Holds the current processing <see cref="Step3dRowViewModel"/> parameter name
+        /// Holds the current processing <see cref="Step3DRowViewModel"/> parameter name
         /// </summary>
         private string dstParameterName;
 
         /// <summary>
-        /// Transforms a <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> into an <see cref="ElementDefinition"/>
+        /// Transforms a <see cref="List{T}"/> of <see cref="Step3DRowViewModel"/> into an <see cref="ElementDefinition"/>
         /// </summary>
-        /// <param name="input">The <see cref="List{T}"/> of <see cref="Step3dRowViewModel"/> to transform</param>
+        /// <param name="input">The <see cref="List{T}"/> of <see cref="Step3DRowViewModel"/> to transform</param>
         /// <returns>An <see cref="List{ElementDefinition}"/> as the top level <see cref="Thing"/> with changes</returns>
-        public override (List<ElementBase>, List<Step3dTargetSourceParameter>) Transform (List<Step3dRowViewModel> input)
+        public override (List<ElementBase>, List<Step3DTargetSourceParameter>) Transform (List<Step3DRowViewModel> input)
         {
             try
             {
                 this.dstController = AppContainer.Container.Resolve<IDstController>();
                 
-                this.targetSourceParameters = new List<Step3dTargetSourceParameter>();
+                this.targetSourceParameters = new List<Step3DTargetSourceParameter>();
                 this.targetSourceElementBase = new List<ElementBase>();
 
                 this.owner = this.hubController.CurrentDomainOfExpertise;
@@ -191,8 +195,8 @@ namespace DEHPSTEPAP242.MappingRules
         /// <summary>
         /// Updates the parameters overrides from the selected <see cref="ElementUsage"/>s
         /// </summary>
-        /// <param name="part">The current <see cref="Step3dRowViewModel"/></param>
-        private void UpdateValueSetsFromElementUsage(Step3dRowViewModel part)
+        /// <param name="part">The current <see cref="Step3DRowViewModel"/></param>
+        private void UpdateValueSetsFromElementUsage(Step3DRowViewModel part)
         {
             foreach (var elementUsage in part.SelectedElementUsages)
             {
@@ -284,7 +288,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// Adds the selected values to the corresponding valueset of the destination parameter
         /// </summary>
         /// <param name="part">The input part</param>
-        private void AddsValueSetToTheSelectectedParameter(Step3dRowViewModel part)
+        private void AddsValueSetToTheSelectectedParameter(Step3DRowViewModel part)
         {
             if (part.SelectedParameter is null)
             {
@@ -389,7 +393,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         /// <param name="part">The <see cref="VariableRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Parameter"/></param>
-        private void UpdateValueSet(Step3dRowViewModel part, ParameterBase parameter)
+        private void UpdateValueSet(Step3DRowViewModel part, ParameterBase parameter)
         {
             var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(part.SelectedOption, part.SelectedActualFiniteState);
 
@@ -399,10 +403,10 @@ namespace DEHPSTEPAP242.MappingRules
         /// <summary>
         /// Updates the Computed <see cref="ParameterValueSetBase"/> <see cref="ValueArray{T}"/>
         /// </summary>
-        /// <param name="part">The <see cref="Step3dRowViewModel"/></param>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Thing"/> <see cref="Parameter"/> or <see cref="ParameterOverride"/></param>
         /// <param name="valueSet">The <see cref="ParameterValueSetBase"/></param>
-        private void UpdateComputedValueSet(Step3dRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
+        private void UpdateComputedValueSet(Step3DRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
         {
             ParameterBase paramBase = (ParameterBase)parameter;
             var paramType = paramBase.ParameterType;
@@ -452,14 +456,14 @@ namespace DEHPSTEPAP242.MappingRules
         /// <summary>
         /// Update <see cref="CompoundParameterType"/> <see cref="ValueArray{string}"/>
         /// </summary>
-        /// <param name="part">The <see cref="Step3dRowViewModel"/></param>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/></param>
         /// <param name="parameter">The <see cref="CompoundParameterType"/></param>
         /// <param name="valuearray">The <see cref="ValueArray{string}"/></param>
         /// <remarks>
-        /// Creates a <seealso cref="Step3dTargetSourceParameter"/> entry when a
+        /// Creates a <seealso cref="Step3DTargetSourceParameter"/> entry when a
         /// <see cref="ParameterTypeComponent"/> named "source" is present in the <paramref name="parameter"/>.
         /// </remarks>
-        private void UpdateValueArrayForCompoundParameterType(Step3dRowViewModel part, CompoundParameterType parameter, ValueArray<string> valuearray)
+        private void UpdateValueArrayForCompoundParameterType(Step3DRowViewModel part, CompoundParameterType parameter, ValueArray<string> valuearray)
         {
             // Component is an OrderedItemList, and the order could be 
             // changed externally by modifyind the ParameterType definition,
@@ -485,7 +489,7 @@ namespace DEHPSTEPAP242.MappingRules
                         // NOTE: FileRevision.Iid will be known at Transfer time
                         //       store the current index to know which possition corresponds
                         //       to the source (avoid searching it again)
-                        this.targetSourceParameters.Add(new Step3dTargetSourceParameter(part, valuearray, index));
+                        this.targetSourceParameters.Add(new Step3DTargetSourceParameter(part, valuearray, index));
                         valuearray[index++] = "";
                     }
                     break;

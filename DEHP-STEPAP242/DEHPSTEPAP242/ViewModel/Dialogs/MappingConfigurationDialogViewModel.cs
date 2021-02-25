@@ -75,12 +75,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Backing field for <see cref="SelectedThing"/>
         /// </summary>
-        private Step3dRowViewModel selectedThing;
+        private Step3DRowViewModel selectedThing;
 
         /// <summary>
         /// Gets or sets the selected row that represents a <see cref="ReferenceDescription"/>
         /// </summary>
-        public Step3dRowViewModel SelectedThing
+        public Step3DRowViewModel SelectedThing
         {
             get => this.selectedThing;
             set => this.RaiseAndSetIfChanged(ref this.selectedThing, value);
@@ -295,7 +295,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         }
 
         /// <summary>
-        /// Updates the target <see cref="Step3dRowViewModel.SelectedParameter"/>s for the <see cref="Step3dRowViewModel.SelectedElementDefinition"/>
+        /// Updates the target <see cref="Step3DRowViewModel.SelectedParameter"/>s for the <see cref="Step3DRowViewModel.SelectedElementDefinition"/>
         /// </summary>
         private void UpdateSelectedParameter()
         {

@@ -24,7 +24,7 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// - Key Field --> Step3DPartTreeNode.ID
         /// - Parent Field --> Step3DPartTreeNode.ParentID
         /// </summary>
-        List<Step3dRowViewModel> Step3DHLR { get; }
+        List<Step3DRowViewModel> Step3DHLR { get; }
 
         /// <summary>
         /// Create the HLR tree from the Parts/Relations.

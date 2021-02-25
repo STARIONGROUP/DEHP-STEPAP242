@@ -121,9 +121,9 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
-        /// <param name="dst3DPart">The <see cref="Step3dRowViewModel"/> data</param>
+        /// <param name="dst3DPart">The <see cref="Step3DRowViewModel"/> data</param>
         /// <returns>A awaitable assert whether the mapping was successful</returns>
-        void Map(Step3dRowViewModel dst3DPart);
+        void Map(Step3DRowViewModel dst3DPart);
 
         /// <summary>
         /// Transfers the mapped parts to the Hub data source

@@ -40,7 +40,10 @@ namespace DEHPSTEPAP242.ViewModel
     {
         #region Private Members
 
-        private IDstController dstController;
+        /// <summary>
+        /// The <see cref="IDstController"/> instance
+        /// </summary>
+        private readonly IDstController dstController;
 
         #endregion
 
@@ -182,8 +185,6 @@ namespace DEHPSTEPAP242.ViewModel
         {
             if (dstController.IsLoading)
             {
-                // TODO: block the UI??
-
                 InitializeValues();
                 FilePath = "LOADING A FILE...";
 
