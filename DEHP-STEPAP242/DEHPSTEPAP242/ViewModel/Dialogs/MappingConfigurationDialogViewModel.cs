@@ -2,6 +2,7 @@
 namespace DEHPSTEPAP242.ViewModel.Dialogs
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Windows;
@@ -11,20 +12,18 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
     using DevExpress.Mvvm.Native;
 
+    using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
-    using CDP4Common.SiteDirectoryData;
 
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Rows;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using System.Diagnostics;
-    using CDP4Common.CommonData;
-    using System.Collections.Generic;
+    using DEHPCommon.Enumerators;
 
 
     /// <summary>
@@ -46,6 +45,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// The <see cref="IDstHubService"/>
         /// </summary>
         private readonly IDstHubService dstHubService;
+
+        /// <summary>
+        /// The <see cref="IStatusBarControlViewModel"/> instance
+        /// </summary>
+        private readonly IStatusBarControlViewModel statusBar;
 
         /// <summary>
         /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
@@ -79,13 +83,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         public Step3dRowViewModel SelectedThing
         {
             get => this.selectedThing;
-            set
-            {
-                // Parts are stored in parameters of a specifci type (created by Dst)
-                //value.SelectedParameterType = this.AvailableParameterTypes.FirstOrDefault();
-
-                this.RaiseAndSetIfChanged(ref this.selectedThing, value);
-            }
+            set => this.RaiseAndSetIfChanged(ref this.selectedThing, value);
         }
 
         /// <summary>
@@ -133,10 +131,19 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
                         ElementUsage elementUsage => (() =>
                         {
-                            if (this.AvailableElementDefinitions.SelectMany(e => e.ContainedElement)
-                                .FirstOrDefault(x => x.Iid == thing.Iid) is { } usage)
+                            // Set the ED the first time (all EU belong to the same ED)
+                            if (part.SelectedElementDefinition is null)
                             {
-                                part.SelectedElementUsages.Add(usage);
+                                part.SelectedElementDefinition = this.AvailableElementDefinitions.FirstOrDefault(x => x.Iid == elementUsage.ElementDefinition.Iid);
+                            }
+
+                            if (part.SelectedElementDefinition is { })
+                            {
+                                var usage = this.GetElementUsagesFor(part.SelectedElementDefinition).FirstOrDefault(x => x.Iid == elementUsage.Iid);
+                                if (usage is { })
+                                {
+                                    part.SelectedElementUsages.Add(usage);
+                                }
                             }
                         }),
 
@@ -168,11 +175,14 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
-        public MappingConfigurationDialogViewModel(IHubController hubController, IDstController dstController, IDstHubService dstHubService)
+        /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
+        public MappingConfigurationDialogViewModel(IHubController hubController, IDstController dstController, 
+            IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
         {
             this.hubController = hubController;
             this.dstController = dstController;
             this.dstHubService = dstHubService;
+            this.statusBar = statusBar;
 
             this.UpdateProperties();
             this.InitializesCommandsAndObservableSubscriptions();
@@ -263,7 +273,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.AvailableElementUsages.Clear();
 
-            if (this.SelectedThing.SelectedElementDefinition is {})
+            if (this.SelectedThing?.SelectedElementDefinition is {})
             {
                 var ed = this.SelectedThing.SelectedElementDefinition;
                 this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(ed));
@@ -277,7 +287,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.AvailableActualFiniteStates.Clear();
 
-            if (this.SelectedThing.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
+            if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
             {
                 this.AvailableActualFiniteStates.AddRange(stateDependence.ActualState);
                 this.SelectedThing.SelectedActualFiniteState = this.AvailableActualFiniteStates.FirstOrDefault();
@@ -340,19 +350,24 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             try
             {
-                if (this.CheckMappingDefinition() == false)
+                if (!this.CheckMappingDefinition())
                 {
                     return;
                 }
 
                 this.IsBusy = true;
 
-                //this.statusBar.Append($"Mapping in progress of {SelectedThing.Description}...");
+                this.statusBar.Append($"Mapping in progress of {SelectedThing.Description}...");
+
                 this.dstController.Map(this.SelectedThing);
+
+                this.statusBar.Append($"{SelectedThing.Description} mapped");
+
                 this.CloseWindowBehavior?.Close();
             }
             catch (Exception e)
             {
+                this.statusBar.Append($"Mapping of {SelectedThing.Description} failed", StatusBarMessageSeverity.Error);
                 MessageBox.Show($"{e.Message}");
             }
             finally
