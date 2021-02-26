@@ -384,22 +384,40 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             if (this.SelectedThing.SelectedElementDefinition is null)
             {
-                // New ElementDefinition will be created
+                // New ElementDefinition and Parameter will be created
+
+                if (this.SelectedThing.SelectedOption is { })
+                {
+                    MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created,\nthe selected option \"{this.SelectedThing.SelectedOption.Name}\" will not be used in the mapping",
+                        "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created",
+                        "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
                 return true;
             }
 
             if (this.SelectedThing.SelectedParameter is null)
             {
-                // 3D Geometric Parameter does not exist in current ElementDefinition, 
-                // it will be added.
+                // 3D Geometric Parameter does not exist in current ElementDefinition, it will be added
+
+                if (this.SelectedThing.SelectedOption is { })
+                {
+                    MessageBox.Show($"The target parameter \"{this.dstHubService.FindSTEPParameterType()?.Name}\" does not exist at \"{this.SelectedThing.SelectedElementDefinition.Name}\",\nthe selected option \"{this.SelectedThing.SelectedOption.Name}\" will not be used in the mapping",
+                        "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
                 return true;
             }
 
             if (this.SelectedThing.SelectedParameter.IsOptionDependent &&
                 this.SelectedThing.SelectedOption is null)
             {
-                MessageBox.Show($"The target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" is Option dependent,\nplease select one Option to apply the mapping",
-                    "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"The existing target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" is Option dependent,\nplease select one Option to apply the mapping",
+                    "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
                 return false;
             }
@@ -407,8 +425,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing.SelectedParameter.StateDependence is { } &&
                 this.SelectedThing.SelectedActualFiniteState is null)
             {
-                MessageBox.Show($"The target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" has a State Dependence,\nplease select one State Dependence to apply the mapping",
-                    "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"The existing target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" has a State Dependence,\nplease select one State Dependence to apply the mapping",
+                    "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
                 return false;
             }
 
