@@ -35,6 +35,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         private static readonly string STEP_LABEL_NAME = "step label";
         private static readonly string STEP_FILE_REF_NAME = "step file reference";
         private static readonly string STEP_GEOMETRY_NAME = "step geometry";
+        private static readonly string STEP_GEOMETRY_SHORTNAME = "step_geo";
 
         /// <summary>
         /// The current class <see cref="NLog.Logger"/>
@@ -188,13 +189,25 @@ namespace DEHPSTEPAP242.Services.DstHubService
         public bool IsSTEPParameterType(ParameterType param)
         {
             if (param is CompoundParameterType &&
-                param.Name.StartsWith("step", StringComparison.CurrentCultureIgnoreCase)
+                param.ShortName.Equals("step_geo", StringComparison.CurrentCultureIgnoreCase)
                 )
             {
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets the step geometric parameter where to store a STEP-AP242 part information
+        /// </summary>
+        /// <returns>A <see cref="ParameterType"/></returns>
+        public ParameterType FindSTEPParameterType()
+        {
+            var rdl = this.GetReferenceDataLibrary();
+            var parameters = rdl.ParameterType;
+
+            return parameters.OfType<CompoundParameterType>().FirstOrDefault(x => x.ShortName == STEP_GEOMETRY_SHORTNAME && !x.IsDeprecated);
         }
 
         /// <summary>

@@ -47,6 +47,12 @@ namespace DEHPSTEPAP242.Services.DstHubService
         bool IsSTEPParameterType(ParameterType param);
 
         /// <summary>
+        /// Gets the step geometric parameter where to store a STEP-AP242 part information
+        /// </summary>
+        /// <returns>A <see cref="ParameterType"/></returns>
+        public ParameterType FindSTEPParameterType();
+
+        /// <summary>
         /// Gets the <see cref="ParameterTypeComponent"/> corresponding to the source file reference
         /// </summary>
         /// <param name="param">The <see cref="ParameterType"/> to check</param>
