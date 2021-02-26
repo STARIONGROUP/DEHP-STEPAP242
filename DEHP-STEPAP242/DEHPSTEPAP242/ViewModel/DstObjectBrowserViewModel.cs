@@ -171,7 +171,7 @@ namespace DEHPSTEPAP242.ViewModel
         {
             ContextMenu.Clear();
 
-            if (this.CanMap() == false)
+            if (!this.CanMap())
             {
                 return;
             }
@@ -348,12 +348,10 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void AssignMappingsToAllParts()
         {
-            var externalIdentifierMap = this.dstController.ExternalIdentifierMap;
-
             foreach (var part in this.Step3DHLR)
             {
-                // Note: a change in the Mapping Configuration will not affect 
-                // current Mapped parts... do not remove that status
+                // Note: a change in the Mapping Configuration will not affect current Mapped parts,
+                //       they remains until transfer action is performed.
                 if (part.MappingStatus != Step3DRowViewModel.MappingStatusType.Mapped)
                 {
                     part.ResetMappingStatus();

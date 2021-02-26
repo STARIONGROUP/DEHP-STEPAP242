@@ -48,7 +48,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <RibbonTwoLineText VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="Select the Mapping Configuration to be use in current STEP file" HorizontalAlignment="Left" FontSize="18" />
+            <RibbonTwoLineText VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="Select the Mapping Configuration to be used in current STEP file" HorizontalAlignment="Left" FontSize="18" />
 
             <Grid Grid.Row="1" Name="selectFileGrid">
                 <Grid.RowDefinitions>

@@ -271,7 +271,7 @@ namespace DEHPSTEPAP242.DstController
             }
             else
             {
-                //TODO: nothing in that direction
+                // No transfer to STEP AP242 file is available
             }
         }
 
@@ -535,10 +535,8 @@ namespace DEHPSTEPAP242.DstController
         {
             var (iterationClone, transaction) = this.GetIterationTransaction();
 
-            //var elementDefinitions = this.MapResult.SelectMany(x => x is ElementDefinition);
-
-            this.UpdateParametersValueSets(transaction, this.MapResult.Where(x => x is ElementDefinition).Select(eb=>(ElementDefinition)eb).SelectMany(e => e.Parameter));
-            this.UpdateParametersValueSets(transaction, this.MapResult.Where(x => x is ElementUsage).Select(eb => (ElementUsage)eb).SelectMany(eu => eu.ParameterOverride));
+            this.UpdateParametersValueSets(transaction, this.MapResult.OfType<ElementDefinition>().SelectMany(e => e.Parameter));
+            this.UpdateParametersValueSets(transaction, this.MapResult.OfType<ElementUsage>().SelectMany(eu => eu.ParameterOverride));
 
             transaction.CreateOrUpdate(iterationClone);
             await this.hubController.Write(transaction);
@@ -554,7 +552,8 @@ namespace DEHPSTEPAP242.DstController
             foreach (var parameter in parameters)
             {
                 this.hubController.GetThingById(parameter.Iid, this.hubController.OpenIteration, out Parameter newParameter);
-                var container = newParameter.Clone(false);
+
+                var newParameterCloned = newParameter.Clone(false);
 
                 for (var index = 0; index < parameter.ValueSet.Count; index++)
                 {
@@ -563,7 +562,7 @@ namespace DEHPSTEPAP242.DstController
                     transaction.CreateOrUpdate(clone);
                 }
 
-                transaction.CreateOrUpdate(container);
+                transaction.CreateOrUpdate(newParameterCloned);
             }
         }
 
@@ -597,7 +596,6 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="valueSet">The <see cref="IValueSet"/> of reference</param>
         private static void UpdateValueSet(ParameterValueSetBase clone, IValueSet valueSet)
         {
-            // Only Computed IValueSet is being updated
             clone.Computed = valueSet.Computed;
             clone.ValueSwitch = valueSet.ValueSwitch;
         }

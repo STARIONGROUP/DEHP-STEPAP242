@@ -27,19 +27,34 @@ namespace DEHPSTEPAP242.ViewModel
     using System.Windows;
 
     /// <summary>
-    /// Wrapper class to display <see cref="FileRevision"/>
+    /// Wrapper class to display <see cref="FileRevision"/> of a STEP <see cref="File"/>
     /// </summary>
     public class HubFile
     {
-        public string FileName { get; private set; }
+        /// <summary>
+        /// Gets the <see cref="FileRevision.Path"/>
+        /// </summary>
+        public string FilePath { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="FileRevision.RevisionNumber"/>
+        /// </summary>
         public int RevisionNumber { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="FileRevision.CreatedOn"/>
+        /// </summary>
         public DateTime CreatedOn { get; private set; }
 
-        //		public string CreatorName { get; private set; }
-        //		public string CreatorSurname { get; private set; }
+        /// <summary>
+        /// Gets the <see cref="Person"/> full name creator of this <see cref="FileRevision"/>
+        /// </summary>
         public string CreatorFullName { get; private set; }
 
-        internal FileRevision FileRev;
+        /// <summary>
+        /// The referenced <see cref="FileRevision"/>
+        /// </summary>
+        internal FileRevision FileRev { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -49,7 +64,7 @@ namespace DEHPSTEPAP242.ViewModel
         {
             FileRev = fileRevision;
 
-            FileName = FileRev.Path;
+            FilePath = FileRev.Path;
             RevisionNumber = FileRev.RevisionNumber;
             CreatedOn = FileRev.CreatedOn;
             CreatorFullName = $"{FileRev.Creator.Person.GivenName} {FileRev.Creator.Person.Surname.ToUpper()}";
@@ -237,8 +252,6 @@ namespace DEHPSTEPAP242.ViewModel
 
             this.IsBusy = true;
 
-            Debug.WriteLine("UpdateFileList:");
-
             var revisions = dstHubService.GetFileRevisions();
 
             List<HubFile> hubfiles = new List<HubFile>();
@@ -253,11 +266,6 @@ namespace DEHPSTEPAP242.ViewModel
             HubFiles.Clear();
             HubFiles.AddRange(hubfiles);
 
-            foreach (var i in HubFiles)
-            {
-                Debug.WriteLine($">>> HF {i.FileName}");
-            }
-
             this.IsBusy = false;
         }
 
@@ -267,7 +275,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <returns>The <see cref="FileRevision"/></returns>
         private FileRevision CurrentFileRevision()
         {
-            var frev = HubFiles.FirstOrDefault(x => x.FileName == CurrentHubFile?.FileName);
+            var frev = HubFiles.FirstOrDefault(x => x.FilePath == CurrentHubFile?.FilePath);
 
             if (frev is null)
             {

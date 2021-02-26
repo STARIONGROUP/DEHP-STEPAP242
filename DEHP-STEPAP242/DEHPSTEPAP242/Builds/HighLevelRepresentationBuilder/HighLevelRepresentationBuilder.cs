@@ -143,7 +143,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// <returns>True is not used as related part</returns>
         private bool IsIsolatedPart(STEP3D_Part part)
         {
-            return relatedParts.Contains(part.stepId) == false;
+            return !relatedParts.Contains(part.stepId);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// <returns>List of child Part and PartRelation generating the instance</returns>
         private List<(STEP3D_Part, STEP3D_PartRelation)> FindChildren(int parentId)
         {
-            if (partChildren.ContainsKey(parentId) == false)
+            if (!partChildren.ContainsKey(parentId))
             {
                 // Create cached list the first time is required
                 var childrenRelation = new List<(STEP3D_Part, STEP3D_PartRelation)>();
