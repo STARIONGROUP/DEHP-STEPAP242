@@ -1,4 +1,6 @@
 ﻿
+#define USE_CANMAP_OBSERVABLE
+
 namespace DEHPSTEPAP242.ViewModel
 {
     using System;
@@ -144,7 +146,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             if (this.CanMap())
             {
-                this.OpenMappingConfigurationManagerExecute();
+                this.OpenMappingConfigurationManager();
             }
         }
 
@@ -160,9 +162,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Gets the command that allows to map the selected part
         /// </summary>
-        public ReactiveCommand<object> MapCommand { get; set; }
+        private ReactiveCommand<object> MapCommand { get; set; }
 
-        public ReactiveCommand<object> OpenMappingConfigurationManagerCommand { get; set; }
+        /// <summary>
+        /// Gets the command that allows to change the mappping configuration
+        /// </summary>
+        private ReactiveCommand<object> OpenMappingConfigurationManagerCommand { get; set; }
 
         /// <summary>
         /// Populate the context menu for this browser
@@ -171,15 +176,7 @@ namespace DEHPSTEPAP242.ViewModel
         {
             ContextMenu.Clear();
 
-            if (!this.CanMap())
-            {
-                return;
-            }
-
-#if USE_CANMAP_OBSERVABLE
-            // Nothing to do, validation already done in the "canMap" observable of the command
-#else
-            if (this.SelectedPart != null)
+            if (this.SelectedPart is { })
             {
                 ContextMenu.Add(new ContextMenuItemViewModel(
                     $"Map {SelectedPart.Description}", "",
@@ -188,10 +185,9 @@ namespace DEHPSTEPAP242.ViewModel
                     ClassKind.NotThing)
                 );
             }
-#endif
 
             ContextMenu.Add(new ContextMenuItemViewModel(
-                    "Select Mapping Configuration...", "",
+                    "Change Mapping Configuration", "",
                     OpenMappingConfigurationManagerCommand,
                     MenuItemKind.None,
                     ClassKind.NotThing)
@@ -228,7 +224,7 @@ namespace DEHPSTEPAP242.ViewModel
                 {
                     if (this.CanMap())
                     {
-                        this.OpenMappingConfigurationManagerExecute();
+                        this.OpenMappingConfigurationManager();
                     }
                 }
                 );
@@ -251,7 +247,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <returns>True if possible</returns>
         private bool CanMap()
         {
-            return (this.Step3DHLR != null && this.Step3DHLR.Count > 0) &&
+            return (this.Step3DHLR.Count > 0) &&
                 this.hubController.OpenIteration != null &&
                 this.dstController.MappingDirection is MappingDirection.FromDstToHub &&
                 !this.IsBusy;
@@ -262,7 +258,20 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void InitializeCommands()
         {
-#if USE_CANMAP_OBSERVABLE
+            var canSelectExternalIdMap = this.WhenAny(
+                vm => vm.Step3DHLR,
+                vm => vm.hubController.OpenIteration,
+                vm => vm.dstController.MappingDirection,
+                vm => vm.isBusy,
+                (hlr, iteration, mappingDirection, busy) =>
+                    hlr.Value.Count>0 && iteration.Value != null &&
+                    mappingDirection.Value is MappingDirection.FromDstToHub &&
+                    !busy.Value
+                );
+
+            OpenMappingConfigurationManagerCommand = ReactiveCommand.Create(canSelectExternalIdMap);
+            OpenMappingConfigurationManagerCommand.Subscribe(_ => this.OpenMappingConfigurationManager());
+
             var canMap = this.WhenAny(
                 vm => vm.SelectedPart,
                 vm => vm.hubController.OpenIteration,
@@ -274,18 +283,8 @@ namespace DEHPSTEPAP242.ViewModel
                     !busy.Value
                 );
 
-            //TODO: helper debug line, for some reason MapCommand is not activated after a second load
-            canMap.Subscribe(x => Debug.WriteLine($"canMap={x}, vm.IsBusy={this.IsBusy}"));
-
             MapCommand = ReactiveCommand.Create(canMap);
             MapCommand.Subscribe(_ => this.MapCommandExecute());
-#else
-            MapCommand = ReactiveCommand.Create();
-            MapCommand.Subscribe(_ => this.MapCommandExecute());
-
-            OpenMappingConfigurationManagerCommand = ReactiveCommand.Create();
-            OpenMappingConfigurationManagerCommand.Subscribe(_ => this.OpenMappingConfigurationManagerExecute());
-#endif
         }
 
         /// <summary>
@@ -301,9 +300,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             this.AssignMapping();
             
-            viewModel.SelectedThing = this.SelectedPart;
-
-            viewModel.UpdatePropertiesBasedOnMappingConfiguration();
+            viewModel.SetPart(this.SelectedPart);
 
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
@@ -311,7 +308,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Opens the <see cref="MappingConfigurationManagerDialog"/>
         /// </summary>
-        private void OpenMappingConfigurationManagerExecute()
+        private void OpenMappingConfigurationManager()
         {
             this.navigationService.ShowDialog<MappingConfigurationManagerDialog>();
         }

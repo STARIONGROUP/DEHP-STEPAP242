@@ -167,6 +167,19 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         public ReactiveList<IdCorrespondence> MappingConfigurations { get; set; } = new ReactiveList<IdCorrespondence>();
 
         /// <summary>
+        /// Cleans all the "Selected" fields
+        /// </summary>
+        public void CleanSelections()
+        {
+            this.SelectedElementDefinition = null;
+            this.SelectedParameter = null;
+            this.SelectedParameterType = null; //TODO: remove unsed
+            this.SelectedElementUsages.Clear();
+            this.SelectedOption = null;
+            this.SelectedActualFiniteState = null;
+        }
+
+        /// <summary>
         /// Gets this represented ElementName
         /// </summary>
         public string ElementName => this.Name;

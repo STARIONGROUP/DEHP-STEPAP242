@@ -25,6 +25,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         bool IsBusy { get; set; }
 
         /// <summary>
+        /// Sets the target <see cref="Step3DRowViewModel"/> to map
+        /// </summary>
+        /// <param name="part"></param>
+        void SetPart(Step3DRowViewModel part);
+
+        /// <summary>
         /// Gets or sets the selected row that represents a <see cref="Step3DRowViewModel"/>
         /// </summary>
         Step3DRowViewModel SelectedThing { get; set; }
@@ -53,10 +59,5 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs.Interfaces
         /// Gets the <see cref="ICommand"/> to continue
         /// </summary>
         ReactiveCommand<object> ContinueCommand { get; set; }
-
-        /// <summary>
-        /// Updates the mapping based on the available 10-25 elements
-        /// </summary>
-        void UpdatePropertiesBasedOnMappingConfiguration();
     }
 }

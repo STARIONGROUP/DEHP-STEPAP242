@@ -112,60 +112,222 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         public ReactiveCommand<object> ContinueCommand { get; set; }
 
         /// <summary>
+        /// Sets the target <see cref="Step3DRowViewModel"/> to map
+        /// </summary>
+        /// <param name="part"></param>
+        public void SetPart(Step3DRowViewModel part)
+        {
+            this.SelectedThing = part;
+            this.UpdatePropertiesBasedOnMappingConfiguration();
+        }
+
+        /// <summary>
         /// Updates the mapping based on the available 10-25 elements
         /// </summary>
-        public void UpdatePropertiesBasedOnMappingConfiguration()
+        /// <remarks>
+        /// The mapping configuration could not be compatible with the current
+        /// things existing on the Hub. Informs the used about this situation.
+        /// </remarks>
+        private void UpdatePropertiesBasedOnMappingConfiguration()
         {
-            this.IsBusy = true;
-            
             var part = this.SelectedThing;
+            var warnings = new List<string>();
 
+            part.CleanSelections();
+
+            // First: check ED before processing other things
             foreach (var idCorrespondence in part.MappingConfigurations)
             {
                 if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
                 {
+                    if (thing is ElementDefinition ed)
+                    {
+                        this.UpdateSelectionFromMappedConfiguredThing(part, ed, warnings);
+                        break;
+                    }
+                }
+            }
+
+            // Second: process the rest
+            foreach (var idCorrespondence in part.MappingConfigurations)
+            {
+                if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
+                {
+                    switch (thing)
+                    {
+                        case ElementDefinition elementDefinition:
+                            // Ignore already processed thing
+                            break;
+
+                        case ElementUsage elementUsage:
+                            this.UpdateSelectionFromMappedConfiguredThing(part, elementUsage, warnings);
+                            break;
+
+                        case Parameter parameter:
+                            this.UpdateSelectionFromMappedConfiguredThing(part, parameter, warnings);
+                            break;
+
+                        case ParameterOverride parameterOverride:
+                            this.UpdateSelectionFromMappedConfiguredThing(part, parameterOverride, warnings);
+                            break;
+
+                        case Option option:
+                            this.UpdateSelectionFromMappedConfiguredThing(part, option, warnings);
+                            break;
+
+                        case ActualFiniteState state:
+                            this.UpdateSelectionFromMappedConfiguredThing(part, state, warnings);
+                            break;
+
+                        default:
+                            warnings.Add($"The mapped Thing \"{thing.Iid}\" [{thing}] is not managed");
+                            break;
+                    };
+#if ACTION_SWITCH
                     Action action = thing switch
                     {
-                        ElementDefinition elementDefinition => (() => part.SelectedElementDefinition =
-                            this.AvailableElementDefinitions.FirstOrDefault(x => x.Iid == thing.Iid)),
-
                         ElementUsage elementUsage => (() =>
                         {
-                            // Set the ED the first time (all EU belong to the same ED)
-                            if (part.SelectedElementDefinition is null)
-                            {
-                                part.SelectedElementDefinition = this.AvailableElementDefinitions.FirstOrDefault(x => x.Iid == elementUsage.ElementDefinition.Iid);
-                            }
+                            var eu = this.AvailableElementUsages.FirstOrDefault(x => x.Iid == elementUsage.Iid);
 
-                            if (part.SelectedElementDefinition is { })
+                            if (eu is null)
                             {
-                                var usage = this.GetElementUsagesFor(part.SelectedElementDefinition).FirstOrDefault(x => x.Iid == elementUsage.Iid);
-                                if (usage is { })
-                                {
-                                    part.SelectedElementUsages.Add(usage);
-                                }
+                                warnings.Add($"The mapped ElementUsage \"{elementUsage.Name}\" [{elementUsage.ShortName}] is not more available");
+                            }
+                            else
+                            {
+                                part.SelectedElementUsages.Add(eu);
                             }
                         }),
 
-                        Parameter parameter => (() => part.SelectedParameter =
-                            this.AvailableElementDefinitions.SelectMany(e => e.Parameter)
-                                .FirstOrDefault(p => p.Iid == thing.Iid)),
+                        Parameter parameter => (() =>
+                        {
+                            if (part.SelectedParameter is null)
+                            {
+                                warnings.Add($"The mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ParameterType.ShortName}] is not more available");
+                            }
+                            else if (part.SelectedParameter.Iid != parameter.Iid)
+                            {
+                                warnings.Add($"The mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ParameterType.ShortName}] is not more available");
+                            }
+                        }),
 
-                        Option option => (() => part.SelectedOption = option),
+                        Option option => (() =>
+                        {
+                            part.SelectedOption = option;
+                        }),
 
-                        ActualFiniteState state => (() => part.SelectedActualFiniteState = state),
+                        ActualFiniteState state => (() => 
+                        {
+                            if (this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == state.Iid) is null)
+                            {
+                                warnings.Add($"The mapped ActualFiniteState \"{state.Name}\" [{state.ShortName}] is not more available");
+                            }
+                            else
+                            {
+                                part.SelectedActualFiniteState = state;
+                            }
+                        }),
 
                         _ => null
                     };
 
                     action?.Invoke();
+#endif
                 }
             }
-            
-            this.IsBusy = false;
+
+            if (warnings.Count > 0 /*&& part.MappingStatus == Step3DRowViewModel.MappingStatusType.Configured*/)
+            {
+                var text = string.Join(Environment.NewLine + Environment.NewLine, warnings);
+                MessageBox.Show(text, "Mapping Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
-        #endregion
+        private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ElementDefinition ed, List<string> warnings)
+        {
+            part.SelectedElementDefinition = this.AvailableElementDefinitions.FirstOrDefault(x => x.Iid == ed.Iid);
+
+            if (part.SelectedElementDefinition is null)
+            {
+                warnings.Add($"The mapped ElementDefinition \"{ed.Name}\" [{ed.ModelCode()}] is not more available");
+            }
+            else
+            {
+                // Update what can be selected before reading information from the mapping
+                this.UpdateAvailableElementUsages();
+                this.UpdateSelectedParameter();
+                this.UpdateAvailableActualFiniteStates();
+            }
+        }
+
+        private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ElementUsage elementUsage, List<string> warnings)
+        {
+            if (part.SelectedElementDefinition is null)
+            {
+                warnings.Add($"Ignoring mapped ElementUsage \"{elementUsage.Name}\" [{elementUsage.ModelCode()}] is not available because ElementDefinition was not defined");
+                return;
+            }
+
+            var eu = this.AvailableElementUsages.FirstOrDefault(x => x.Iid == elementUsage.Iid);
+
+            if (eu is null)
+            {
+                warnings.Add($"The mapped ElementUsage \"{elementUsage.Name}\" [{elementUsage.ModelCode()}] is not more available");
+            }
+            else
+            {
+                part.SelectedElementUsages.Add(eu);
+            }
+        }
+
+        private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, Parameter parameter, List<string> warnings)
+        {
+            if (part.SelectedElementDefinition is null)
+            {
+                warnings.Add($"Ignoring mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ModelCode()}] is not available because ElementDefinition was not defined");
+                return;
+            }
+
+            if (part.SelectedParameter is null)
+            {
+                warnings.Add($"The mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ModelCode()}] is not more available");
+            }
+            else if (part.SelectedParameter.Iid != parameter.Iid)
+            {
+                warnings.Add($"The mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ModelCode()}] is not more available");
+            }
+        }
+
+        private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ParameterOverride parameterOverride, List<string> warnings)
+        {
+            if (part.SelectedElementDefinition is null)
+            {
+                warnings.Add($"Ignoring mapped ParameterOverride \"{parameterOverride.ParameterType.Name}\" [{parameterOverride.ModelCode()}] is not available because ElementDefinition was not defined");
+                return;
+            }
+
+            this.UpdateSelectionFromMappedConfiguredThing(part, parameterOverride.Parameter, warnings);
+        }
+
+        private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, Option option, List<string> warnings)
+        {
+            part.SelectedOption = option;
+        }
+
+        private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ActualFiniteState state, List<string> warnings)
+        {
+            if (this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == state.Iid) is null)
+            {
+                warnings.Add($"The mapped ActualFiniteState \"{state.Name}\" [{state.ShortName}] is not more available");
+            }
+            else
+            {
+                part.SelectedActualFiniteState = state;
+            }
+        }
+
+#endregion
 
         #region Constructor
 
@@ -184,27 +346,23 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.dstHubService = dstHubService;
             this.statusBar = statusBar;
 
-            this.UpdateProperties();
+            this.InitializeAvailableProperties();
             this.InitializesCommandsAndObservableSubscriptions();
         }
 
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
 
         /// <summary>
         /// Update this view model properties
         /// </summary>
-        private void UpdateProperties()
+        private void InitializeAvailableProperties()
         {
-            this.IsBusy = true;
-
             this.UpdateAvailableOptions();
             this.UpdateAvailableElementDefinitions();
-            this.UpdateAvailableElementUsages();
+            //this.UpdateAvailableElementUsages(); // calculated when ED is selected
             this.UpdateAvailableActualFiniteStates();
-
-            this.IsBusy = false;
         }
 
         /// <summary>
@@ -221,6 +379,13 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
 
             // UI triggers
+            this.WhenAnyValue(x => x.SelectedThing.SelectedOption)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => this.UpdateAvailableFields(() =>
+                {
+                    this.UpdateAvailableElementUsages();
+                }));
+
             this.WhenAnyValue(x => x.SelectedThing.SelectedElementDefinition)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.UpdateAvailableFields(() =>
@@ -250,7 +415,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void UpdateAvailableOptions()
         {
-            this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
+            //this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
+            this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option);
         }
 
         /// <summary>
@@ -258,8 +424,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void UpdateAvailableElementDefinitions()
         {
-            this.AvailableElementDefinitions.Clear();
-
             this.AvailableElementDefinitions.AddRange(
                 this.hubController.OpenIteration.Element.Where(this.AreTheseOwnedByTheDomain<ElementDefinition>())
                 .Select(e => e.Clone(true))
@@ -273,10 +437,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.AvailableElementUsages.Clear();
 
-            if (this.SelectedThing?.SelectedElementDefinition is {})
+            if (this.SelectedThing?.SelectedElementDefinition is { })
             {
-                var ed = this.SelectedThing.SelectedElementDefinition;
-                this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(ed));
+                this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(this.SelectedThing.SelectedElementDefinition));
             }
         }
 
@@ -299,20 +462,20 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void UpdateSelectedParameter()
         {
-            if (this.selectedThing.SelectedElementDefinition != null)
+            if (this.SelectedThing.SelectedElementDefinition is { })
             {
-                this.selectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition
+                this.SelectedThing.SelectedParameter = this.SelectedThing.SelectedElementDefinition
                     .Parameter.Where(this.AreTheseOwnedByTheDomain<Parameter>())
                     .FirstOrDefault(x => this.dstHubService.IsSTEPParameterType(x.ParameterType));
             }
             else
             {
-                this.selectedThing.SelectedParameter = null;
+                this.SelectedThing.SelectedParameter = null;
             }
         }
 
         /// <summary>
-        /// Gets the <see cref="ElementUsage"/> of <see cref="ElementDefinition"/>
+        /// Gets the <see cref="ElementUsage"/> of <see cref="ElementDefinition"/> available for the current selected <see cref="Option"/>
         /// </summary>
         /// <param name="ed">The <see cref="ElementDefinition"/></param>
         /// <returns>A <see cref="List{ElementUsage}"/></returns>
@@ -320,17 +483,37 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             var usages = new List<ElementUsage>();
 
-            foreach (var element in this.AvailableElementDefinitions)
+            var option = this.SelectedThing?.SelectedOption;
+            
+            if (option is null)
             {
-                foreach (var containedEU in element.ContainedElement)
-                {
-                    if (containedEU.ElementDefinition.Iid == ed.Iid)
-                    {
-                        // taken from cloned ED containedEU.Clone(true)
-                        usages.Add(containedEU);
-                    }
-                }
+                // All ElementUsages can be selected
+                usages.AddRange(this.AvailableElementDefinitions.SelectMany(d => d.ContainedElement)
+                    .Where(u => u.ElementDefinition.Iid == ed.Iid).Select(x => x.Clone(true))
+                    );
             }
+            else
+            {
+                // Filter ElementUsages when an Option is selected
+                usages.AddRange(this.AvailableElementDefinitions.SelectMany(d => d.ContainedElement)
+                    .Where(u => u.ElementDefinition.Iid == ed.Iid && 
+                        !u.ExcludeOption.Contains(option)).Select(x => x.Clone(true))
+                    );
+            }
+
+            //usages.RemoveAll(u => u.ExcludeOption.Contains(option));
+
+            //foreach (var element in this.AvailableElementDefinitions)
+            //{
+            //    foreach (var containedEU in element.ContainedElement)
+            //    {
+            //        if (containedEU.ElementDefinition.Iid == ed.Iid)
+            //        {
+            //            // taken from cloned ED containedEU.Clone(true)
+            //            usages.Add(containedEU);
+            //        }
+            //    }
+            //}
 
             return usages;
         }
