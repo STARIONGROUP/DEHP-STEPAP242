@@ -413,11 +413,13 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /// <summary>
-        /// Executes the <see cref="LoadFileCommand"/> asynchronously.
-        /// 
-        /// File is loaded from the local storage <see cref="FileStoreService"/>.
-        /// If file does not exists, it is first downloaded.
+        /// Executes the <see cref="LoadFileCommand"/> on <see cref="CurrentHubFile"/> asynchronously.
         /// </summary>
+        /// <remarks>
+        /// If file does not exists in the local cache <see cref="FileStoreService"/>, it is first downloaded from the Hub.
+        /// 
+        /// File is loaded by the current default application from the local storage <see cref="FileStoreService"/>.
+        /// </remarks>
         private async Task LoadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
@@ -437,10 +439,31 @@ namespace DEHPSTEPAP242.ViewModel
 
             Application.Current.Dispatcher.Invoke(() => statusBar.Append($"Loading from Hub: {destinationPath}"));
 
-            // TODO: load STEP file into a View
+            bool openOK = this.OpenWithDefaultProgram(destinationPath);
 
-            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Load successful"));
+            if (openOK)
+            {
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Load successful"));
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Load failed", StatusBarMessageSeverity.Error));
+            }
+
             IsBusy = false;
+        }
+
+        /// <summary>
+        /// Opens a file using the default application defined in the system
+        /// </summary>
+        /// <param name="path">Full path to the file to be opened</param>
+        /// <returns>True if the execution was performed</returns>
+        private bool OpenWithDefaultProgram(string path)
+        {
+            Process fileopener = new Process();
+            fileopener.StartInfo.FileName = "explorer";
+            fileopener.StartInfo.Arguments = "\"" + path + "\"";
+            return fileopener.Start();
         }
 
         #endregion
