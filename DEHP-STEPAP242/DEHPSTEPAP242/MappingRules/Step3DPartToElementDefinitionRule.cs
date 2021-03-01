@@ -188,7 +188,7 @@ namespace DEHPSTEPAP242.MappingRules
             {
                 Logger.Error(exception);
                 ExceptionDispatchInfo.Capture(exception).Throw();
-                return default;
+                throw;
             }
         }
 
@@ -257,6 +257,7 @@ namespace DEHPSTEPAP242.MappingRules
                     this.UpdateValueSet(part, parameterOverride);
                 }
 
+                this.AddToExternalIdentifierMap(elementUsage.ElementDefinition.Iid, this.dstElementName);
                 this.AddToExternalIdentifierMap(elementUsage.Iid, this.dstElementName);
             }
         }
