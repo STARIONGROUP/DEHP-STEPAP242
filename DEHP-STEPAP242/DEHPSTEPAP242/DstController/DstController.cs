@@ -679,10 +679,10 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="iterationClone">The <see cref="Iteration"/> clone</param>
         private void PersistExternalIdentifierMap(IThingTransaction transaction, Iteration iterationClone)
         {
-            //this.UpdateExternalIdentifierMap();
-
+#if DEBUG_SHOW_CORRESPONDENCES
             this.ShowCorrespondances(this.ExternalIdentifierMap.Correspondence);
-
+#endif
+            
             if (this.ExternalIdentifierMap.Iid == Guid.Empty)
             {
                 this.ExternalIdentifierMap = this.ExternalIdentifierMap.Clone(true);
@@ -692,7 +692,9 @@ namespace DEHPSTEPAP242.DstController
 
             foreach (var correspondence in this.ExternalIdentifierMap.Correspondence)
             {
+#if DEBUG_SHOW_CORRESPONDENCES
                 this.ShowCorrespondance(correspondence);
+#endif
 
                 if (correspondence.Iid == Guid.Empty)
                 {
@@ -729,6 +731,6 @@ namespace DEHPSTEPAP242.DstController
             return true;
         }
 
-        #endregion
+#endregion
     }
 }

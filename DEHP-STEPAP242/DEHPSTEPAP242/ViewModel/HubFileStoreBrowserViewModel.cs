@@ -148,8 +148,6 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         public ReactiveCommand<object> UploadFileCommand { get; private set; }
 
-        //public ReactiveCommand<string,Unit> DownloadGuidFileRevisionAsCommand { get; private set; }
-
         /// <summary>
         /// Downloads one STEP-AP242 file from the <see cref="DomainFileStore"/> of active domain into user choosen location
         ///
@@ -429,14 +427,14 @@ namespace DEHPSTEPAP242.ViewModel
                 return;
             }
             
-            if (fileStoreService.Exists(fileRevision) == false)
+            if (!fileStoreService.Exists(fileRevision))
             {
                 await DownloadFileCommandExecute();
             }
 
-            IsBusy = true;
             var destinationPath = fileStoreService.GetPath(fileRevision);
 
+            IsBusy = true;
             Application.Current.Dispatcher.Invoke(() => statusBar.Append($"Loading from Hub: {destinationPath}"));
 
             bool openOK = this.OpenWithDefaultProgram(destinationPath);

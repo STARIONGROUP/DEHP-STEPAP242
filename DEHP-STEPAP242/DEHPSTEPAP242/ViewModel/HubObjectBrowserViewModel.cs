@@ -128,7 +128,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="parameter"><see cref="ParameterOverride"/> </param>
         private void ProcessParameterContextMenu(ParameterOrOverrideBase parameter)
         {
-            if (this.dstHubService.IsSTEPParameterType(parameter.ParameterType) == false)
+            if (!this.dstHubService.IsSTEPParameterType(parameter.ParameterType))
             {
                 return;
             }
@@ -191,7 +191,7 @@ namespace DEHPSTEPAP242.ViewModel
                 // Find if there is a child row with the STEP geometrical information
                 if (irow is ParameterRowViewModel parameter)
                 {
-                    if (this.dstHubService.IsSTEPParameterType(parameter.Thing.ParameterType) == true)
+                    if (this.dstHubService.IsSTEPParameterType(parameter.Thing.ParameterType))
                     {
                         this.ProcessParameterContextMenu(parameter.Thing);
                         break;
