@@ -98,6 +98,8 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         List<IdCorrespondence> IdCorrespondences { get; }
 
+        void ShowCorrespondances(IEnumerable<IdCorrespondence> correspondences);
+
         /// <summary>
         /// Updates the configured mapping
         /// </summary>

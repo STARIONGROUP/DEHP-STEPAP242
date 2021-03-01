@@ -34,6 +34,7 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.ViewModel.Dialogs;
     using CDP4Dal;
     using DEHPSTEPAP242.Events;
+    using CDP4Common.EngineeringModelData;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -299,7 +300,11 @@ namespace DEHPSTEPAP242.ViewModel
             var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
 
             this.AssignMapping();
-            
+
+#if DEBUG_DST_OBJECT_BROWSER
+            this.ShowMappingConfigurations(this.SelectedPart);
+#endif
+
             viewModel.SetPart(this.SelectedPart);
 
             this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
@@ -337,6 +342,10 @@ namespace DEHPSTEPAP242.ViewModel
                     x => x.ExternalId == this.SelectedPart.ElementName ||
                          x.ExternalId == this.SelectedPart.ParameterName));
 
+#if DEBUG_DST_OBJECT_BROWSER
+            this.ShowMappingConfigurations(this.selectedPart);
+#endif
+
             this.SelectedPart.UpdateMappingStatus();
         }
 
@@ -363,6 +372,17 @@ namespace DEHPSTEPAP242.ViewModel
                 part.UpdateMappingStatus();
             }
         }
+
+#if DEBUG_DST_OBJECT_BROWSER
+        private void ShowMappingConfigurations(Step3DRowViewModel part)
+        {
+            Debug.WriteLine($"MappingConfigurations for: {part.Description}");
+            Debug.WriteLine($"  Status: {part.MappingStatusMessage}");
+            this.dstController.ShowCorrespondances(part.MappingConfigurations);
+
+            Debug.WriteLine("");
+        }
+#endif
 
         #endregion
     }

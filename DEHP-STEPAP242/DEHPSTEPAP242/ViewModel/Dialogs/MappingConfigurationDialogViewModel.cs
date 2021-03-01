@@ -24,6 +24,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPCommon.Enumerators;
+    using System.Diagnostics;
 
 
     /// <summary>
@@ -135,6 +136,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             part.CleanSelections();
 
+#if DEBUG_MAPPING_CONFIGURATION
+            Debug.WriteLine($"UpdatePropertiesBasedOnMappingConfiguration: {part.Description}");
+#endif
+
             // First: check ED before processing other things
             foreach (var idCorrespondence in part.MappingConfigurations)
             {
@@ -153,10 +158,13 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             {
                 if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
                 {
+#if DEBUG_MAPPING_CONFIGURATION
+                    Debug.WriteLine($"Correspondance Thing = {thing}");
+#endif
                     switch (thing)
                     {
                         case ElementDefinition elementDefinition:
-                            // Ignore already processed thing
+                            // Ignore already processed ED thing
                             break;
 
                         case ElementUsage elementUsage:
@@ -183,67 +191,22 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                             warnings.Add($"The mapped Thing \"{thing.Iid}\" [{thing}] is not managed");
                             break;
                     };
-#if ACTION_SWITCH
-                    Action action = thing switch
-                    {
-                        ElementUsage elementUsage => (() =>
-                        {
-                            var eu = this.AvailableElementUsages.FirstOrDefault(x => x.Iid == elementUsage.Iid);
-
-                            if (eu is null)
-                            {
-                                warnings.Add($"The mapped ElementUsage \"{elementUsage.Name}\" [{elementUsage.ShortName}] is not more available");
-                            }
-                            else
-                            {
-                                part.SelectedElementUsages.Add(eu);
-                            }
-                        }),
-
-                        Parameter parameter => (() =>
-                        {
-                            if (part.SelectedParameter is null)
-                            {
-                                warnings.Add($"The mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ParameterType.ShortName}] is not more available");
-                            }
-                            else if (part.SelectedParameter.Iid != parameter.Iid)
-                            {
-                                warnings.Add($"The mapped Parameter \"{parameter.ParameterType.Name}\" [{parameter.ParameterType.ShortName}] is not more available");
-                            }
-                        }),
-
-                        Option option => (() =>
-                        {
-                            part.SelectedOption = option;
-                        }),
-
-                        ActualFiniteState state => (() => 
-                        {
-                            if (this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == state.Iid) is null)
-                            {
-                                warnings.Add($"The mapped ActualFiniteState \"{state.Name}\" [{state.ShortName}] is not more available");
-                            }
-                            else
-                            {
-                                part.SelectedActualFiniteState = state;
-                            }
-                        }),
-
-                        _ => null
-                    };
-
-                    action?.Invoke();
-#endif
                 }
             }
 
-            if (warnings.Count > 0 /*&& part.MappingStatus == Step3DRowViewModel.MappingStatusType.Configured*/)
+            if (warnings.Count > 0)
             {
                 var text = string.Join(Environment.NewLine + Environment.NewLine, warnings);
                 MessageBox.Show(text, "Mapping Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
+        /// <summary>
+        /// Updates selection based on the current mapping to 10-25 elements
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/> to be updated</param>
+        /// <param name="ed">The <see cref="ElementDefinition"/> to me selected</param>
+        /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ElementDefinition ed, List<string> warnings)
         {
             part.SelectedElementDefinition = this.AvailableElementDefinitions.FirstOrDefault(x => x.Iid == ed.Iid);
@@ -261,6 +224,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
+        /// <summary>
+        /// Updates selection based on the current mapping to 10-25 elements
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/> to be updated</param>
+        /// <param name="ed">The <see cref="ElementUsage"/> to me selected</param>
+        /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ElementUsage elementUsage, List<string> warnings)
         {
             if (part.SelectedElementDefinition is null)
@@ -281,6 +250,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
+        /// <summary>
+        /// Updates selection based on the current mapping to 10-25 elements
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/> to be updated</param>
+        /// <param name="ed">The <see cref="Parameter"/> to me selected</param>
+        /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, Parameter parameter, List<string> warnings)
         {
             if (part.SelectedElementDefinition is null)
@@ -299,6 +274,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
+        /// <summary>
+        /// Updates selection based on the current mapping to 10-25 elements
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/> to be updated</param>
+        /// <param name="ed">The <see cref="ParameterOverride"/> to me selected</param>
+        /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ParameterOverride parameterOverride, List<string> warnings)
         {
             if (part.SelectedElementDefinition is null)
@@ -310,11 +291,23 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.UpdateSelectionFromMappedConfiguredThing(part, parameterOverride.Parameter, warnings);
         }
 
+        /// <summary>
+        /// Updates selection based on the current mapping to 10-25 elements
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/> to be updated</param>
+        /// <param name="ed">The <see cref="Option"/> to me selected</param>
+        /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, Option option, List<string> warnings)
         {
             part.SelectedOption = option;
         }
 
+        /// <summary>
+        /// Updates selection based on the current mapping to 10-25 elements
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/> to be updated</param>
+        /// <param name="ed">The <see cref="ActualFiniteState"/> to me selected</param>
+        /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ActualFiniteState state, List<string> warnings)
         {
             if (this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == state.Iid) is null)
@@ -327,7 +320,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
         }
 
-#endregion
+        #endregion
 
         #region Constructor
 
@@ -350,18 +343,19 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.InitializesCommandsAndObservableSubscriptions();
         }
 
-#endregion
+        #endregion
 
-#region Private Methods
+        #region Private Methods
 
         /// <summary>
-        /// Update this view model properties
+        /// Initialize view model properties which does not depend on selection
         /// </summary>
         private void InitializeAvailableProperties()
         {
+            // Note: the available ElementUsages are selected in function of ED/Option selection
+
             this.UpdateAvailableOptions();
             this.UpdateAvailableElementDefinitions();
-            //this.UpdateAvailableElementUsages(); // calculated when ED is selected
             this.UpdateAvailableActualFiniteStates();
         }
 
@@ -377,7 +371,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.ContinueCommand = ReactiveCommand.Create();
             this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
-
+            
             // UI triggers
             this.WhenAnyValue(x => x.SelectedThing.SelectedOption)
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -415,7 +409,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void UpdateAvailableOptions()
         {
-            //this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option.Where(x => this.AvailableOptions.All(o => o.Iid != x.Iid)));
             this.AvailableOptions.AddRange(this.hubController.OpenIteration.Option);
         }
 
@@ -439,7 +432,26 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             if (this.SelectedThing?.SelectedElementDefinition is { })
             {
+                var selectedElementUsages = new List<ElementUsage>(this.SelectedThing.SelectedElementUsages);
+
                 this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(this.SelectedThing.SelectedElementDefinition));
+
+                // The UI filters any existing ElementUsage not compatible with its source (AvailableElementUsages)
+                this.SelectedThing.SelectedElementUsages.AddRange(
+                    this.AvailableElementUsages.Where(x => selectedElementUsages.Any(s => s.Iid == x.Iid))
+                    );
+
+#if UPDATE_SELECT_ELEMENT_USAGES
+                this.SelectedThing.SelectedElementUsages.Clear();
+                foreach (var selectedEU in selectedElementUsages)
+                {
+                    Debug.WriteLine($"{selectedEU} [{selectedEU.ModelCode()}]");
+                    if (this.AvailableElementUsages.FirstOrDefault(x => x.Iid == selectedEU.Iid) is { } elementUsage)
+                    {
+                        this.SelectedThing.SelectedElementUsages.Add(elementUsage);
+                    }
+                }
+#endif
             }
         }
 
@@ -500,20 +512,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                         !u.ExcludeOption.Contains(option)).Select(x => x.Clone(true))
                     );
             }
-
-            //usages.RemoveAll(u => u.ExcludeOption.Contains(option));
-
-            //foreach (var element in this.AvailableElementDefinitions)
-            //{
-            //    foreach (var containedEU in element.ContainedElement)
-            //    {
-            //        if (containedEU.ElementDefinition.Iid == ed.Iid)
-            //        {
-            //            // taken from cloned ED containedEU.Clone(true)
-            //            usages.Add(containedEU);
-            //        }
-            //    }
-            //}
 
             return usages;
         }
@@ -617,6 +615,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             return true;
         }
 
-#endregion
+        #endregion
     }
 }
