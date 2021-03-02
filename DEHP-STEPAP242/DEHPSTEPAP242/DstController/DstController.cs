@@ -21,7 +21,7 @@
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-
+#define DEBUG_EXTERNAL_IDENTITIER_MAP
 namespace DEHPSTEPAP242.DstController
 {
     using System;
@@ -62,7 +62,7 @@ namespace DEHPSTEPAP242.DstController
     /// </summary>
     public class DstController : ReactiveObject, IDstController
     {
-        #region Private Members
+#region Private Members
 
         /// <summary>
         /// The <see cref="IHubController"/>
@@ -94,9 +94,9 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        #endregion
+#endregion
 
-        #region IDstController interface
+#region IDstController interface
 
         /// <summary>
         /// Gets this running tool name
@@ -277,11 +277,11 @@ namespace DEHPSTEPAP242.DstController
         /// Helper method for debugging in console the content of <see cref="IdCorrespondence"/>
         /// </summary>
         /// <param name="correspondences">The <see cref="IEnumerable{IdCorrespondence}"/> of correspondances</param>
-        public void ShowCorrespondances(IEnumerable<IdCorrespondence> correspondences)
+        public void ShowCorrespondences(IEnumerable<IdCorrespondence> correspondences)
         {
             foreach (var c in correspondences)
             {
-                this.ShowCorrespondance(c);
+                this.ShowCorrespondence(c);
             }
         }
 
@@ -289,7 +289,7 @@ namespace DEHPSTEPAP242.DstController
         /// Helper method for debugging in console the content of <see cref="IdCorrespondence"/>
         /// </summary>
         /// <param name="correspondences">The <see cref="IdCorrespondence"/> of correspondances</param>
-        public void ShowCorrespondance(IdCorrespondence correspondence)
+        public void ShowCorrespondence(IdCorrespondence correspondence)
         {
             string thingType = "UNKNOWN";
 
@@ -320,17 +320,17 @@ namespace DEHPSTEPAP242.DstController
 
 #if DEBUG_EXTERNAL_IDENTITIER_MAP
             Debug.WriteLine("\nUpdateExternalIdentifierMap IdCorrespondances");
-            this.ShowCorrespondances(this.IdCorrespondences);
+            this.ShowCorrespondences(this.IdCorrespondences);
 
             Debug.WriteLine("\nUpdateExternalIdentifierMap UsedIdCorrespondances");
-            this.ShowCorrespondances(this.UsedIdCorrespondences);
+            this.ShowCorrespondences(this.UsedIdCorrespondences);
 
 
             Debug.WriteLine("\nUpdateExternalIdentifierMap previousCorrespondances");
-            this.ShowCorrespondances(previousCorrespondances);
+            this.ShowCorrespondences(previousCorrespondances);
 
             Debug.WriteLine("\nUpdateExternalIdentifierMap unusedCorrespondances");
-            this.ShowCorrespondances(unusedCorrespondances);
+            this.ShowCorrespondences(unusedCorrespondances);
 #endif
 
             foreach (var unused in unusedCorrespondances)
@@ -348,7 +348,7 @@ namespace DEHPSTEPAP242.DstController
 
 #if DEBUG_EXTERNAL_IDENTITIER_MAP
                 Debug.WriteLine($"no Adding clonedCorrespondance {clonedCorrespondance}");
-                this.ShowCorrespondance(clonedCorrespondance);
+                this.ShowCorrespondence(clonedCorrespondance);
 #endif
             }
 
@@ -410,9 +410,9 @@ namespace DEHPSTEPAP242.DstController
             }
         }
 
-        #endregion
+#endregion
 
-        #region Constructor
+#region Constructor
 
         /// <summary>
         /// Initializes a new <see cref="DstController"/>
@@ -432,9 +432,9 @@ namespace DEHPSTEPAP242.DstController
             this.statusBar = statusBar;
         }
 
-        #endregion
+#endregion
 
-        #region Private Transfer Methods
+#region Private Transfer Methods
 
         /// <summary>
         /// Initializes a new <see cref="IThingTransaction"/> based on the current open <see cref="Iteration"/>

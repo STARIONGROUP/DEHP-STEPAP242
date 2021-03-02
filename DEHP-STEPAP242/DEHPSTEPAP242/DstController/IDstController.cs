@@ -102,13 +102,13 @@ namespace DEHPSTEPAP242.DstController
         /// Helper method for debugging in console the content of <see cref="IdCorrespondence"/>
         /// </summary>
         /// <param name="correspondences">The <see cref="IEnumerable{IdCorrespondence}"/> of correspondances</param>
-        void ShowCorrespondances(IEnumerable<IdCorrespondence> correspondences);
+        void ShowCorrespondences(IEnumerable<IdCorrespondence> correspondences);
 
         /// <summary>
         /// Helper method for debugging in console the content of <see cref="IdCorrespondence"/>
         /// </summary>
         /// <param name="correspondences">The <see cref="IdCorrespondence"/> of correspondances</param>
-        void ShowCorrespondance(IdCorrespondence correspondence);
+        void ShowCorrespondence(IdCorrespondence correspondence);
 
         /// <summary>
         /// Updates the configured mapping

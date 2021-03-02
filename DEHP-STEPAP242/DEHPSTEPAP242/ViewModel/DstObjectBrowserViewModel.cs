@@ -1,18 +1,20 @@
 ﻿
-#define USE_CANMAP_OBSERVABLE
-
 namespace DEHPSTEPAP242.ViewModel
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Reactive.Linq;
     using System.Threading.Tasks;
+    using System.Windows;
 
     using Autofac;
     using ReactiveUI;
 
+    using CDP4Dal;
     using CDP4Common.CommonData;
+    using CDP4Common.EngineeringModelData;
     using DEHPCommon;
     using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
@@ -21,20 +23,16 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.UserInterfaces.ViewModels;
 
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.ViewModel.Dialogs;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Views.Dialogs;
-    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.Events;
 
     using STEP3DAdapter;
-    using System.Reactive.Linq;
-    using System.Windows;
-    using DEHPSTEPAP242.ViewModel.Dialogs;
-    using CDP4Dal;
-    using DEHPSTEPAP242.Events;
-    using CDP4Common.EngineeringModelData;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -51,7 +49,7 @@ namespace DEHPSTEPAP242.ViewModel
     /// </summary>
     public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel, IHaveContextMenuViewModel
     {
-        #region Private Interface References
+#region Private Interface References
 
         /// <summary>
         /// The <see cref="IHubController"/>
@@ -68,9 +66,9 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private readonly INavigationService navigationService;
         
-        #endregion Private Interface References
+#endregion Private Interface References
 
-        #region IDstObjectBrowserViewModel interface
+#region IDstObjectBrowserViewModel interface
 
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
@@ -151,9 +149,9 @@ namespace DEHPSTEPAP242.ViewModel
             }
         }
 
-        #endregion
+#endregion
 
-        #region IHaveContextMenuViewModel interface
+#region IHaveContextMenuViewModel interface
 
         /// <summary>
         /// Gets the Context Menu for this browser
@@ -195,9 +193,9 @@ namespace DEHPSTEPAP242.ViewModel
                 );
         }
 
-        #endregion
+#endregion
 
-        #region Constructor
+#region Constructor
 
         /// <summary>
         /// Initializes a new <see cref="DstObjectBrowserViewModel"/>
@@ -238,9 +236,9 @@ namespace DEHPSTEPAP242.ViewModel
             InitializeCommands();
         }
 
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
 
         /// <summary>
         /// Checks if general mapping is possible
@@ -378,12 +376,12 @@ namespace DEHPSTEPAP242.ViewModel
         {
             Debug.WriteLine($"MappingConfigurations for: {part.Description}");
             Debug.WriteLine($"  Status: {part.MappingStatusMessage}");
-            this.dstController.ShowCorrespondances(part.MappingConfigurations);
+            this.dstController.ShowCorrespondences(part.MappingConfigurations);
 
             Debug.WriteLine("");
         }
 #endif
 
-        #endregion
+#endregion
     }
 }
