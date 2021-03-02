@@ -156,6 +156,102 @@ namespace DEHPSTEPAP242.Tests.DstController
             Assert.IsFalse(this.controller.IsLoading);
         }
 
+        [Test]
+        public void VerifyCreateExternalIdentifierMap()
+        {
+            var newExternalIdentifierMap = this.controller.CreateExternalIdentifierMap("Name");
+            this.controller.ExternalIdentifierMap = newExternalIdentifierMap;
+            Assert.AreEqual("Name", this.controller.ExternalIdentifierMap.Name);
+            Assert.AreEqual("Name", this.controller.ExternalIdentifierMap.ExternalModelName);
+            Assert.AreEqual(this.controller.ThisToolName, this.controller.ExternalIdentifierMap.ExternalToolName);
+        }
+
+        [Test]
+        public void VerifyAddToExternalIdentifierMap()
+        {
+            this.controller.ExternalIdentifierMap = this.controller.CreateExternalIdentifierMap("test");
+            var internalId = Guid.NewGuid();
+            this.controller.AddToExternalIdentifierMap(internalId, string.Empty);
+            Assert.IsNotEmpty(this.controller.IdCorrespondences);
+            this.controller.AddToExternalIdentifierMap(internalId, string.Empty);
+            this.controller.AddToExternalIdentifierMap(Guid.NewGuid(), string.Empty);
+            Assert.AreEqual(2, this.controller.IdCorrespondences.Count);
+        }
+
+        [Test]
+        public void VerifyUpdateExternalIdentifierMap()
+        {
+            const string oldCorrespondenceExternalId = "old";
+
+            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap()
+            {
+                Correspondence =
+                {
+                    new IdCorrespondence() { ExternalId = oldCorrespondenceExternalId },
+                    new IdCorrespondence() { ExternalId = "-1" },
+                },
+                Container = this.iteration
+            };
+
+            this.controller.IdCorrespondences.AddRange(new[]
+            {
+                new IdCorrespondence() { ExternalId = "0"}, 
+                new IdCorrespondence() { ExternalId = "1" },
+                new IdCorrespondence() { ExternalId = "-1" }
+            });
+
+            Assert.DoesNotThrow(() => this.controller.UpdateExternalIdentifierMap());
+
+            Assert.AreEqual(5, this.controller.ExternalIdentifierMap.Correspondence.Count());
+            Assert.IsNotNull(this.controller.ExternalIdentifierMap.Correspondence.SingleOrDefault(x => x.ExternalId == oldCorrespondenceExternalId));
+            Assert.AreEqual(2, this.controller.ExternalIdentifierMap.Correspondence.Count(x => x.ExternalId == "-1"));
+
+            Assert.IsEmpty(this.controller.IdCorrespondences);
+            Assert.IsEmpty(this.controller.UsedIdCorrespondences);
+            Assert.IsEmpty(this.controller.PreviousIdCorrespondences);
+        }
+
+        [Test]
+        public void VerifyUpdateExternalIdentifierMap_RemoveUnused()
+        {
+            var correspondanceA = new IdCorrespondence() { ExternalId = "A" };
+            var correspondanceB = new IdCorrespondence() { ExternalId = "B" };
+
+            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap()
+            {
+                Correspondence =
+                {
+                    new IdCorrespondence() { ExternalId = "-1" },
+                    correspondanceA,
+                    correspondanceB,
+                },
+                Container = this.iteration
+            };
+
+            this.controller.PreviousIdCorrespondences.AddRange(new[]
+            {
+                correspondanceA,
+                correspondanceB
+            });
+
+            this.controller.UsedIdCorrespondences.AddRange(new[]
+            {
+                correspondanceB
+            });
+
+            Assert.DoesNotThrow(() => this.controller.UpdateExternalIdentifierMap());
+
+            Assert.AreEqual(2, this.controller.ExternalIdentifierMap.Correspondence.Count());
+
+            Assert.IsFalse(this.controller.ExternalIdentifierMap.Correspondence.Contains(correspondanceA));
+            Assert.IsTrue(this.controller.ExternalIdentifierMap.Correspondence.Contains(correspondanceB));
+            Assert.IsNull(this.controller.ExternalIdentifierMap.Correspondence.SingleOrDefault(x => x.ExternalId == "A"));
+            Assert.IsNotNull(this.controller.ExternalIdentifierMap.Correspondence.SingleOrDefault(x => x.ExternalId == "B"));
+
+            Assert.IsEmpty(this.controller.IdCorrespondences);
+            Assert.IsEmpty(this.controller.UsedIdCorrespondences);
+            Assert.IsEmpty(this.controller.PreviousIdCorrespondences);
+        }
 
         [Test]
         public void VerifyUpdateValueSets()
