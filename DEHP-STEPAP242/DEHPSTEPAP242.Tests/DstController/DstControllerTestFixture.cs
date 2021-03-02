@@ -153,6 +153,7 @@ namespace DEHPSTEPAP242.Tests.DstController
             Assert.DoesNotThrowAsync(async () => await this.controller.LoadAsync(MyParts_path));
             Assert.IsTrue(this.controller.IsFileOpen);
             Assert.IsNotNull(this.controller.Step3DFile);
+            Assert.IsFalse(this.controller.IsLoading);
         }
 
 

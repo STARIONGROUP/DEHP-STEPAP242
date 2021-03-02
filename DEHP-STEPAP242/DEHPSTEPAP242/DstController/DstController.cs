@@ -21,7 +21,7 @@
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-#define DEBUG_EXTERNAL_IDENTITIER_MAP
+
 namespace DEHPSTEPAP242.DstController
 {
     using System;
@@ -30,7 +30,9 @@ namespace DEHPSTEPAP242.DstController
     using System.Linq;
     using System.Threading.Tasks;
     using System.Windows;
-    
+    using System.Runtime.ExceptionServices;
+    using System.Diagnostics.CodeAnalysis;
+
     using ReactiveUI;
     using NLog;
 
@@ -44,17 +46,17 @@ namespace DEHPSTEPAP242.DstController
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.MappingEngine;
     using DEHPCommon.Events;
+    using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPCommon.UserInterfaces.Views;
+    using DEHPCommon.Services.NavigationService;
 
+    using DEHPSTEPAP242.MappingRules;
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Services.DstHubService;
-    using DEHPSTEPAP242.MappingRules;
 
     using STEP3DAdapter;
-    using DEHPCommon.UserInterfaces.ViewModels;
-    using DEHPCommon.Services.NavigationService;
-    using DEHPCommon.UserInterfaces.Views;
-    using System.Runtime.ExceptionServices;
+
 
     /// <summary>
     /// The <see cref="DstController"/> takes care of retrieving data 
@@ -62,7 +64,7 @@ namespace DEHPSTEPAP242.DstController
     /// </summary>
     public class DstController : ReactiveObject, IDstController
     {
-#region Private Members
+        #region Private Members
 
         /// <summary>
         /// The <see cref="IHubController"/>
@@ -94,9 +96,9 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-#endregion
+        #endregion
 
-#region IDstController interface
+        #region IDstController interface
 
         /// <summary>
         /// Gets this running tool name
@@ -277,6 +279,7 @@ namespace DEHPSTEPAP242.DstController
         /// Helper method for debugging in console the content of <see cref="IdCorrespondence"/>
         /// </summary>
         /// <param name="correspondences">The <see cref="IEnumerable{IdCorrespondence}"/> of correspondances</param>
+        [ExcludeFromCodeCoverage]
         public void ShowCorrespondences(IEnumerable<IdCorrespondence> correspondences)
         {
             foreach (var c in correspondences)
@@ -289,6 +292,7 @@ namespace DEHPSTEPAP242.DstController
         /// Helper method for debugging in console the content of <see cref="IdCorrespondence"/>
         /// </summary>
         /// <param name="correspondences">The <see cref="IdCorrespondence"/> of correspondances</param>
+        [ExcludeFromCodeCoverage]
         public void ShowCorrespondence(IdCorrespondence correspondence)
         {
             string thingType = "UNKNOWN";
@@ -410,9 +414,9 @@ namespace DEHPSTEPAP242.DstController
             }
         }
 
-#endregion
+        #endregion
 
-#region Constructor
+        #region Constructor
 
         /// <summary>
         /// Initializes a new <see cref="DstController"/>
@@ -432,9 +436,9 @@ namespace DEHPSTEPAP242.DstController
             this.statusBar = statusBar;
         }
 
-#endregion
+        #endregion
 
-#region Private Transfer Methods
+        #region Private Transfer Methods
 
         /// <summary>
         /// Initializes a new <see cref="IThingTransaction"/> based on the current open <see cref="Iteration"/>
@@ -731,6 +735,6 @@ namespace DEHPSTEPAP242.DstController
             return true;
         }
 
-#endregion
+        #endregion
     }
 }
