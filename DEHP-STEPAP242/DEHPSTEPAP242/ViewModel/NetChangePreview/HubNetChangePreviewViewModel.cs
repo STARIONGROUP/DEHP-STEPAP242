@@ -45,23 +45,13 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         {
             this.dstController = dstController;
 
-#if new_net_change
-#else
-            CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(x => this.UpdateTree(x.Reset));
-#endif
         }
 
         /// <summary>
         /// Updates the tree
         /// </summary>
         /// <param name="shouldReset">A value indicating whether the tree should remove the element in preview</param>
-#if new_net_change
         public override void UpdateTree(bool shouldReset)
-#else
-        public void UpdateTree(bool shouldReset)
-#endif
         {
             if (shouldReset)
             {
