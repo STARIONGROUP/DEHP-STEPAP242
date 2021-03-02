@@ -20,15 +20,20 @@
         <dxg:GridControl Grid.Row="1" AutoGenerateColumns="AddNew" 
                      EnableSmartColumnsGeneration="True" 
                      ItemsSource="{Binding HubFiles}"
-                     SelectedItem="{Binding CurrentHubFile}">
+                     SelectedItem="{Binding CurrentHubFile}"
+                     ToolTip="List of available STEP files stored in the Hub">
             <dxg:GridControl.View>
                 <dxg:TableView ShowGroupPanel="False" />
             </dxg:GridControl.View>
         </dxg:GridControl>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,8" HorizontalAlignment="Center">
-            <Button Content="Download As..." Margin="0,0,2,0" Command="{Binding DownloadFileAsCommand}"/>
-            <Button Content="Load" Margin="2,0,0,0" Command="{Binding LoadFileCommand}"/>
+            <Button Content="Download As..." Margin="0,0,2,0"
+                    Command="{Binding DownloadFileAsCommand}"
+                    ToolTip="Download file from Hub and save as..."/>
+            <Button Content="Open" Margin="2,0,0,0" 
+                    Command="{Binding LoadFileCommand}"
+                    ToolTip="Open file from the Hub using the external default application"/>
         </StackPanel>
         
     </Grid>

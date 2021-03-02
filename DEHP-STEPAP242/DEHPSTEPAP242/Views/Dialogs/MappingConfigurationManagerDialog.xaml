@@ -64,14 +64,23 @@
                 <dxlc:LayoutItemLabel Grid.Row="0" Grid.Column="0" Margin="5" Style="{StaticResource WhenNotNewMappingStyle}" Content="Selected Configuration" FontSize="12" />
                 
                 <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource WhenNotNewMappingStyle}" Name="ModelBoxEdit"  DisplayMember="ExternalModelName" ShowNullTextForEmptyValue="True"
-                                      Height="Auto" Margin="5" FontSize="12" SelectedItem="{Binding SelectedExternalIdentifierMap}"
-                                      ItemsSource="{Binding AvailableExternalIdentifierMap}" IncrementalFiltering="True" NullValueButtonPlacement="EditBox" NullText="No Mapping Configuration Selected"/>
+                                  Height="Auto" Margin="5" FontSize="12" 
+                                  SelectedItem="{Binding SelectedExternalIdentifierMap}"
+                                  ItemsSource="{Binding AvailableExternalIdentifierMap}" 
+                                  IncrementalFiltering="True" NullValueButtonPlacement="EditBox" 
+                                  NullText="No Mapping Configuration Selected"
+                                  ToolTip="Existing Mapping Configurations in the Hub"/>
 
-                <CheckBox Grid.Row="1" Grid.Column="0" Margin="5" Content="New Configuration" IsChecked="{Binding CreateNewMappingConfigurationChecked}"></CheckBox>
-                <dxe:TextEdit Grid.Column="1" Style="{StaticResource WhenNewMappingStyle}" Grid.Row="1" Height="Auto" Margin="5" FontSize="12" ShowNullTextForEmptyValue="True"
-                                  ToolTip="This will identify the mapping configuration to be saved" NullText="Enter A Name That Will Identify The Configuration"
-                                  Text="{Binding Path=NewExternalIdentifierMapName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
+                <CheckBox Grid.Row="1" Grid.Column="0" Margin="5" Content="New Configuration" 
+                          IsChecked="{Binding CreateNewMappingConfigurationChecked}"
+                          ToolTip="Check it to create a new Mapping Configuration instead using an existing one"/>
+                
+                <dxe:TextEdit Grid.Column="1" Style="{StaticResource WhenNewMappingStyle}" 
+                              Grid.Row="1" Height="Auto" Margin="5" FontSize="12" 
+                              Text="{Binding Path=NewExternalIdentifierMapName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              ShowNullTextForEmptyValue="True"
+                              NullText="Enter A Name That Will Identify The Configuration"
+                              ToolTip="This will identify the mapping configuration to be saved"/>
             </Grid>
 
             <Grid Grid.Row="2" Name="buttonGrid">
@@ -80,8 +89,10 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="ApplyButton" Grid.Column="2" Height="Auto" MinWidth="100" Margin="5" HorizontalAlignment="Right" 
-                        Command="{Binding ApplyCommand}" Width="117" >
+                <Button x:Name="ApplyButton" Grid.Column="2" Height="Auto" MinWidth="100" Width="117" Margin="5"
+                        HorizontalAlignment="Right" 
+                        Command="{Binding ApplyCommand}"
+                        ToolTip="Select or Create New Mapping Configuration and &#x0a;apply it to the current STEP file">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Apply" />
                         <Image Height="24" Width="24" Stretch="Uniform" Source="{dx:DXImage Images/Actions/Apply_32x32.png}" />

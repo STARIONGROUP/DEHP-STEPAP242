@@ -22,7 +22,8 @@
         <dxg:TreeListControl Name="treeList" 
                              ItemsSource="{Binding Step3DHLR}"
                              SelectedItem="{Binding SelectedPart}"
-                             SelectionMode="Row">
+                             SelectionMode="Row"
+                             ToolTip="High Level Representation">
 
             <dxmvvm:Interaction.Behaviors>
                 <behaviors:ContextMenuBehavior/>

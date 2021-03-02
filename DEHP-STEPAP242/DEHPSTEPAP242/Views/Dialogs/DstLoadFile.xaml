@@ -24,7 +24,8 @@
             </Grid.RowDefinitions>
 
             <!-- Header section -->
-            <RibbonTwoLineText VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="{Binding MainLabel}" HorizontalAlignment="Left" FontSize="18" />
+            <RibbonTwoLineText Grid.Row="0" Grid.Column="0" Text="{Binding MainLabel}"
+                               VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="18" />
 
             <!-- File Path section -->
             <Grid Grid.Row="1" Name="selectFileGrid">
@@ -48,14 +49,14 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBox x:Name="FilePath" Margin="5,5,0,5" Text="{Binding FilePath, BindsDirectlyToSource=True, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox x:Name="FilePath" Margin="5,5,0,5" 
+                             Text="{Binding FilePath, BindsDirectlyToSource=True, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="File to be loaded" />
 
                     <Button Grid.Column="1"
-                        MinWidth="40"
-                        Height="Auto"
-                        MaxWidth="40"
-                        Margin="5"
-                        FontSize="12"
+                        MinWidth="40" MaxWidth="40"
+                        Height="Auto" Margin="5" FontSize="12"
+                        ToolTip="Browse to a file..."
                         Command="{Binding SelectFileCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{dx:DXImage Image=LoadFrom_16x16.png}" Stretch="Uniform" />
@@ -65,7 +66,9 @@
                 
                 <!-- Recent Files row -->
                 <dxlc:LayoutItemLabel Grid.Row="1" Grid.Column="0" Height="Auto" Margin="5" Content="Recent Files:" FontSize="12" />
-                <ListBox x:Name="RecentFilesListBox" Grid.Row="2" Grid.Column="1" Margin="5" ItemsSource="{Binding RecentFiles}" SelectedItem="{Binding FilePath}">
+                <ListBox x:Name="RecentFilesListBox" Grid.Row="2" Grid.Column="1" Margin="5" 
+                         ItemsSource="{Binding RecentFiles}" SelectedItem="{Binding FilePath}"
+                         ToolTip="List of recent opened files&#x0a;Click on an item to select as the current one to be loaded">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <UserControl>
@@ -91,7 +94,8 @@
                 </Grid.ColumnDefinitions>
                 
                 <Button x:Name="LoadButton" Grid.Column="2" Height="Auto" MinWidth="100" Margin="5" HorizontalAlignment="Right" 
-                        Command="{Binding LoadFileCommand}" Width="117" >
+                        Command="{Binding LoadFileCommand}" Width="117"
+                        ToolTip="Open selected file into the adaptor">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Open" />
                         <Image Height="24" Width="24" Source="{dx:DXImage Image=Open2_32x32.png}" Stretch="Uniform" />

@@ -33,13 +33,18 @@
             <dxdo:DockLayoutManager Grid.Row="0" AutoHideMode="Inline" FloatingMode="Desktop">
                 <dxdo:LayoutGroup AllowSplitters="True" Orientation="Vertical">
                     <dxdo:LayoutGroup x:Name="LayoutGroup" ItemHeight="7*" Orientation="Horizontal">
+                        
+                        <!-- Dst Data Source panel / High Level Representation -->
                         <dxdo:LayoutPanel Name="DstPanel" MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="STEP-AP242">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"></RowDefinition>
                                     <RowDefinition></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <Button Width="150" Height="40" HorizontalAlignment="Center" Content="{Binding DstSourceViewModel.LoadButtonText}" Command="{Binding DstSourceViewModel.LoadFileCommand}"/>
+                                <Button Width="150" Height="40" HorizontalAlignment="Center" 
+                                        Content="{Binding DstSourceViewModel.LoadButtonText}" 
+                                        Command="{Binding DstSourceViewModel.LoadFileCommand}"
+                                        ToolTip="Loads a local STEP-AP242 file"/>
                                 <Grid Grid.Row="1" Background="AliceBlue">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -51,6 +56,8 @@
                                 </Grid>
                             </Grid>
                         </dxdo:LayoutPanel>
+
+                        <!-- NetChange Preview panel -->
                         <dxdo:LayoutPanel MinWidth="200" VerticalAlignment="Stretch" dxdo:AutoHideGroup.AutoHideType="Left" AllowClose="False" AllowDrag="False" AllowFloat="False" AllowMove="False" Caption="Impact">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -83,8 +90,14 @@
                                 </Grid.RowDefinitions>
                                 <!-- Hub Connect section -->
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Width="150" Height="40" HorizontalAlignment="Center" Content="{Binding HubDataSourceViewModel.ConnectButtonText}" Command="{Binding HubDataSourceViewModel.ConnectCommand}"/>
-                                <Button Height="40" HorizontalAlignment="Center" Content="Refresh" Command="{Binding HubDataSourceViewModel.RefreshCommand}" Margin="20,0,0,0"/>
+                                <Button Width="150" Height="40" HorizontalAlignment="Center" 
+                                        Content="{Binding HubDataSourceViewModel.ConnectButtonText}" 
+                                        Command="{Binding HubDataSourceViewModel.ConnectCommand}"
+                                        ToolTip="Connect/Disconnect a E-TM-10-25 data source"/>
+                                    <Button Height="40" HorizontalAlignment="Center" Margin="20,0,0,0"
+                                        Content="Refresh" 
+                                        Command="{Binding HubDataSourceViewModel.RefreshCommand}"
+                                        ToolTip="Refresh Hub content"/>
                                 </StackPanel>
                                 <!-- Hub Content section -->
                                 <!-- BorderThickness="0,0,0,1" -->
