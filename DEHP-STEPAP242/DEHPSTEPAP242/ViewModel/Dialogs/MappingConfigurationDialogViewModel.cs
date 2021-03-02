@@ -341,6 +341,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             this.InitializeAvailableProperties();
             this.InitializesCommandsAndObservableSubscriptions();
+
+            this.CheckExternalMappingPersistance();
         }
 
         #endregion
@@ -391,6 +393,15 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             this.WhenAnyValue(x => x.SelectedThing.SelectedParameter)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.UpdateAvailableFields(this.UpdateAvailableActualFiniteStates));
+        }
+
+        private void CheckExternalMappingPersistance()
+        {
+            if (this.dstController.ExternalIdentifierMap is null)
+            {
+                MessageBox.Show("There is no Mapping Configuration selected!\n\nThe mapping values will not be remembered,\nyou will need to select the parameters each time.",
+                    "Mapping Configuration", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
         }
 
         /// <summary>
