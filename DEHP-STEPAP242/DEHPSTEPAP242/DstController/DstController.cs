@@ -319,6 +319,15 @@ namespace DEHPSTEPAP242.DstController
         /// </remarks>
         public void UpdateExternalIdentifierMap()
         {
+            if (this.ExternalIdentifierMap is null)
+            {
+                this.IdCorrespondences.Clear();
+                this.UsedIdCorrespondences.Clear();
+                this.PreviousIdCorrespondences.Clear();
+
+                return;
+            }
+
             var previousCorrespondances = this.PreviousIdCorrespondences.Distinct();
             var unusedCorrespondances = previousCorrespondances.Where(x => !this.UsedIdCorrespondences.Contains(x));
 
@@ -384,6 +393,11 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="externalId">The external thing that <see cref="internalId"/> corresponds to</param>
         public void AddToExternalIdentifierMap(Guid internalId, string externalId)
         {
+            if (this.ExternalIdentifierMap is null)
+            {
+                return;
+            }
+
             if (internalId == Guid.Empty)
             {
                 return;
@@ -683,6 +697,11 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="iterationClone">The <see cref="Iteration"/> clone</param>
         private void PersistExternalIdentifierMap(IThingTransaction transaction, Iteration iterationClone)
         {
+            if (this.ExternalIdentifierMap is null)
+            {
+                return;
+            }
+
 #if DEBUG_SHOW_CORRESPONDENCES
             this.ShowCorrespondances(this.ExternalIdentifierMap.Correspondence);
 #endif
