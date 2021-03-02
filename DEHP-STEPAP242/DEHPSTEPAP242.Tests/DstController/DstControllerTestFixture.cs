@@ -64,7 +64,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         public void Setup()
         {
             cwd = System.IO.Path.GetDirectoryName(new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-            examplesDir = cwd + "/../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
+            examplesDir = cwd + "/../../../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
             examplesDir = System.IO.Path.GetFullPath(examplesDir);
             MyParts_path = System.IO.Path.Combine(examplesDir, "MyParts.step");
 
