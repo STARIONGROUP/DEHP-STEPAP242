@@ -228,11 +228,11 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Adds mapping configurations used to detect the not used ones in the mapping process
         /// </summary>
-        /// <param name="part">The <see cref="Step3DRowViewModel"/> from which store the current mapping</param>
-        private void AddPreviousIdCorrespondances(Step3DRowViewModel part)
+        /// <param name="correspondences">The <see cref="IEnumerable{IdCorrespondence}"/> from which store the current mapping</param>
+        public void AddPreviousIdCorrespondances(IEnumerable<IdCorrespondence> correspondences)
         {
             this.PreviousIdCorrespondences.Clear();
-            PreviousIdCorrespondences.AddRange(part.MappingConfigurations);
+            PreviousIdCorrespondences.AddRange(correspondences);
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace DEHPSTEPAP242.DstController
         {
             var parts = new List<Step3DRowViewModel> { part };
 
-            this.AddPreviousIdCorrespondances(part);
+            this.AddPreviousIdCorrespondances(part.MappingConfigurations);
 
             var (elements, sources) = ((List<ElementBase>, List<Step3DTargetSourceParameter>))
                 this.mappingEngine.Map(parts);

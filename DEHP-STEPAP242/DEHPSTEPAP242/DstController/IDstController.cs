@@ -131,6 +131,12 @@ namespace DEHPSTEPAP242.DstController
         void AddToExternalIdentifierMap(Guid internalId, string externalId);
 
         /// <summary>
+        /// Adds mapping configurations used to detect the not used ones in the mapping process
+        /// </summary>
+        /// <param name="correspondences">The <see cref="IEnumerable{IdCorrespondence}"/> from which store the current mapping</param>
+        public void AddPreviousIdCorrespondances(IEnumerable<IdCorrespondence> correspondences);
+
+        /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
         /// <param name="dst3DPart">The <see cref="Step3DRowViewModel"/> data</param>
