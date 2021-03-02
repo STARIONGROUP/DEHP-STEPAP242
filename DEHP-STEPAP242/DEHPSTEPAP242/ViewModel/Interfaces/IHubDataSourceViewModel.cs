@@ -27,6 +27,7 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
     using ReactiveUI;
+    using System.Reactive;
 
     /// <summary>
     /// Definition of methods and properties of <see cref="HubDataSourceViewModel"/>
@@ -66,6 +67,6 @@ namespace DEHPSTEPAP242.ViewModel.Interfaces
         /// <summary>
         /// <see cref="ReactiveCommand{T}"/> to refresh the data source
         /// </summary>
-        ReactiveCommand<object> RefreshCommand { get; set; }
+        ReactiveCommand<Unit> RefreshCommand { get; set; }
     }
 }

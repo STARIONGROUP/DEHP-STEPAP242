@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:dataTemplate="clr-namespace:DEHPSTEPAP242.Views.Rows"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
         xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
@@ -90,14 +91,15 @@
                                 </Grid.RowDefinitions>
                                 <!-- Hub Connect section -->
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Width="150" Height="40" HorizontalAlignment="Center" 
+                                    <Button Width="150" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0"
                                         Content="{Binding HubDataSourceViewModel.ConnectButtonText}" 
                                         Command="{Binding HubDataSourceViewModel.ConnectCommand}"
-                                        ToolTip="Connect/Disconnect a E-TM-10-25 data source"/>
-                                    <Button Height="40" HorizontalAlignment="Center" Margin="20,0,0,0"
-                                        Content="Refresh" 
-                                        Command="{Binding HubDataSourceViewModel.RefreshCommand}"
-                                        ToolTip="Refresh Hub content"/>
+                                        ToolTip="Connect or Disconnect from a Hub data source"/>
+                                    <Button Width="40" Height="40" HorizontalAlignment="Left"
+                                            Command="{Binding HubDataSourceViewModel.RefreshCommand}"
+                                            ToolTip="Refresh the session">
+                                        <Image Source="{dx:DXImage 'Images/Actions/Refresh2_32x32.png'}"></Image>
+                                    </Button>
                                 </StackPanel>
                                 <!-- Hub Content section -->
                                 <!-- BorderThickness="0,0,0,1" -->

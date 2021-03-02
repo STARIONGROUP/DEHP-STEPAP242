@@ -48,6 +48,7 @@ namespace DEHPSTEPAP242.ViewModel
     using CDP4Dal;
     using DEHPCommon.Events;
     using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
+    using System.Reactive.Linq;
 
     /// <summary>
     /// View model that represents a data source panel which holds a tree like browser, a informational header and
@@ -129,13 +130,24 @@ namespace DEHPSTEPAP242.ViewModel
             this.ConnectCommand = ReactiveCommand.Create();
             this.ConnectCommand.Subscribe(_ => this.ConnectCommandExecute());
 
-            // Activate Refresh when an Iteration is open
-            var canRefresh = this.WhenAny(
-                vm => vm.hubController.OpenIteration,
-                (iteration) => iteration.Value != null);
+            var isConnected = this.WhenAny(
+                x => x.hubController.OpenIteration,
+                x => x.hubController.IsSessionOpen,
+                (i, o) => i.Value != null && o.Value)
+                .ObserveOn(RxApp.MainThreadScheduler);
 
-            this.RefreshCommand = ReactiveCommand.Create(canRefresh);
-            this.RefreshCommand.Subscribe(_ => this.RefreshCommandExecute());
+            isConnected.Subscribe(this.UpdateConnectButtonText);
+
+            isConnected.Subscribe(_ =>
+            {
+                if (this.hubController.OpenIteration is { })
+                {
+                    this.dstHubService.CheckHubDependencies();
+                }
+            });
+
+            this.RefreshCommand = ReactiveCommand.CreateAsyncTask(isConnected,
+                async _ => await this.RefreshCommandExecute(), RxApp.MainThreadScheduler);
         }
 
         /// <summary>
@@ -170,7 +182,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// <see cref="ReactiveCommand{T}"/> to refresh the data source
         /// </summary>
-        public ReactiveCommand<object> RefreshCommand { get; set; }
+        public ReactiveCommand<Unit> RefreshCommand { get; set; }
 
         /// <summary>
         /// Executes the <see cref="HubDataSourceViewModel.ConnectCommand"/>
@@ -185,13 +197,6 @@ namespace DEHPSTEPAP242.ViewModel
             {
                 this.NavigationService.ShowDialog<Login>();
             }
-
-            this.UpdateConnectButtonText(this.hubController.IsSessionOpen);
-
-            if (hubController.IsSessionOpen)
-            {
-                this.dstHubService.CheckHubDependencies();
-            }
         }
 
         /// <summary>
@@ -204,12 +209,11 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /// <summary>
-        /// Refreshes the <see cref="IHubController"/> cache
+        /// Executes the <see cref="RefreshCommand"/>
         /// </summary>
-        private void RefreshCommandExecute()
+        private async Task RefreshCommandExecute()
         {
-            this.hubController.Refresh();
-            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+            await this.hubController.Refresh();
         }
 
         /// <summary>
