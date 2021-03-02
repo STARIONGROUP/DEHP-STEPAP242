@@ -27,6 +27,7 @@ namespace DEHPSTEPAP242.Tests.DstController
 
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.MappingRules;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Rows;
 
@@ -59,6 +60,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         private string cwd;
         private string examplesDir;
         private string MyParts_path;
+        private string NotStep3DFile_path;
 
         [SetUp]
         public void Setup()
@@ -67,7 +69,7 @@ namespace DEHPSTEPAP242.Tests.DstController
             examplesDir = cwd + "/../../../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
             examplesDir = System.IO.Path.GetFullPath(examplesDir);
             MyParts_path = System.IO.Path.Combine(examplesDir, "MyParts.step");
-
+            NotStep3DFile_path = System.IO.Path.Combine(examplesDir, "NotStepFileFormat.step");
 
             this.hubController = new Mock<IHubController>();
 
@@ -157,6 +159,15 @@ namespace DEHPSTEPAP242.Tests.DstController
         }
 
         [Test]
+        public void VerifyLoad_BadFormat()
+        {
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await this.controller.LoadAsync(NotStep3DFile_path));
+            Assert.IsFalse(this.controller.IsFileOpen);
+            Assert.IsNull(this.controller.Step3DFile);
+            Assert.IsFalse(this.controller.IsLoading);
+        }
+
+        [Test]
         public void VerifyCreateExternalIdentifierMap()
         {
             var newExternalIdentifierMap = this.controller.CreateExternalIdentifierMap("Name");
@@ -170,12 +181,17 @@ namespace DEHPSTEPAP242.Tests.DstController
         public void VerifyAddToExternalIdentifierMap()
         {
             this.controller.ExternalIdentifierMap = this.controller.CreateExternalIdentifierMap("test");
+
             var internalId = Guid.NewGuid();
             this.controller.AddToExternalIdentifierMap(internalId, string.Empty);
             Assert.IsNotEmpty(this.controller.IdCorrespondences);
+
             this.controller.AddToExternalIdentifierMap(internalId, string.Empty);
             this.controller.AddToExternalIdentifierMap(Guid.NewGuid(), string.Empty);
+            this.controller.AddToExternalIdentifierMap(Guid.Empty, "ignored");
             Assert.AreEqual(2, this.controller.IdCorrespondences.Count);
+
+            Assert.AreEqual(2, this.controller.UsedIdCorrespondences.Distinct().Count());
         }
 
         [Test]
@@ -251,6 +267,115 @@ namespace DEHPSTEPAP242.Tests.DstController
             Assert.IsEmpty(this.controller.IdCorrespondences);
             Assert.IsEmpty(this.controller.UsedIdCorrespondences);
             Assert.IsEmpty(this.controller.PreviousIdCorrespondences);
+        }
+
+        [Test]
+        public void VerifyAddPreviousIdCorrespondances()
+        {
+            var correspondances = new List<IdCorrespondence>()
+            {
+                new IdCorrespondence() { ExternalId = "A" },
+                new IdCorrespondence() { ExternalId = "B" },
+                new IdCorrespondence() { ExternalId = "C" },
+            };
+
+            this.controller.AddPreviousIdCorrespondances(correspondances);
+
+            Assert.AreEqual(3, this.controller.PreviousIdCorrespondences.Count());
+
+            this.controller.AddPreviousIdCorrespondances(new List<IdCorrespondence>()
+            {
+                new IdCorrespondence() { ExternalId = "new" }
+            }
+            );
+
+            Assert.AreEqual(1, this.controller.PreviousIdCorrespondences.Count());
+        }
+
+        [Test]
+        public void VerifyMap()
+        {
+            this.mappingEngine.Setup(x => x.Map(It.IsAny<object>()))
+                .Returns((new List<ElementBase>(), new List<Step3DTargetSourceParameter>()));
+
+            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap()
+            {
+                Container = this.iteration
+            };
+
+            Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation())));
+
+            this.mappingEngine.Setup(x => x.Map(It.IsAny<object>())).Throws<InvalidOperationException>();
+            Assert.Throws<NullReferenceException>(() => this.controller.Map(default(Step3DRowViewModel)));
+
+            this.mappingEngine.Verify(x => x.Map(It.IsAny<object>()), Times.Once);
+        }
+
+        [Test]
+        public void VerifyTransferToHub()
+        {
+            this.navigationService.Setup(
+                x => x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
+                It.IsAny<CreateLogEntryDialogViewModel>())).Returns(true);
+
+            var aFile = new File();
+            aFile.FileRevision.Add(new FileRevision(Guid.NewGuid(), null, null));
+
+            this.dstHubService.Setup(x => x.FindFile(It.IsAny<string>())).Returns(aFile);
+
+            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap(Guid.NewGuid(), null, null)
+            {
+                Container = new ModelReferenceDataLibrary(Guid.NewGuid(), this.assembler.Cache, null)
+                {
+                    Container = new SiteDirectory(Guid.NewGuid(), this.assembler.Cache, null)
+                }
+            };
+
+            this.controller.Load(MyParts_path);
+
+            Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
+
+            this.controller.MapResult.Add(new ElementDefinition());
+
+            Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
+
+            Assert.IsEmpty(this.controller.MapResult);
+
+            this.controller.MapResult.Add(new ElementUsage());
+
+            this.navigationService.Setup(
+                x => x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
+                    It.IsAny<CreateLogEntryDialogViewModel>())).Returns(false);
+
+            Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
+
+            this.navigationService.Setup(
+                x => x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
+                    It.IsAny<CreateLogEntryDialogViewModel>())).Returns(default(bool?));
+
+            Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
+
+            this.navigationService.Setup(
+                x => x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
+                    It.IsAny<CreateLogEntryDialogViewModel>())).Returns(true);
+
+            Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
+
+            Assert.IsEmpty(this.controller.MapResult);
+
+            Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
+
+            this.navigationService.Verify(
+                x =>
+                    x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
+                        It.IsAny<CreateLogEntryDialogViewModel>())
+                , Times.Exactly(4));
+
+            this.hubController.Verify(
+                x => x.Write(It.IsAny<ThingTransaction>()), Times.Exactly(4));
+
+            this.hubController.Verify(
+                x => x.Refresh(), Times.Exactly(2));
         }
 
         [Test]
