@@ -10,7 +10,7 @@
         xmlns:local="clr-namespace:DEHPSTEPAP242.Views"
         xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
         mc:Ignorable="d"
-        Title="STEP-AP242 to Hub Mapping Configuration" Height="324" Width="660">
+        Title="STEP-AP242 to Hub Mapping Configuration" Height="324" Width="660" Topmost="True">
     <dxmvvm:Interaction.Behaviors>
         <behaviors:CloseWindowBehavior/>
     </dxmvvm:Interaction.Behaviors>
