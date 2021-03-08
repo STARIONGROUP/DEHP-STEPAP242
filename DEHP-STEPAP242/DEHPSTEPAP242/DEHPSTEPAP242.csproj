@@ -20,15 +20,14 @@
     <RepositoryType>Git</RepositoryType>
     <Authors>Open Engineering S.A.</Authors>
     <Version>1.1.0</Version>
+    <ApplicationIcon>Resources\cdplogo_48x48.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\OpcClient.Config.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Autofac" Version="6.1.0" />
-    <PackageReference Include="DEHPCommon" Version="1.0.183" />
+    <PackageReference Include="DEHPCommon" Version="1.0.188" />
+    <PackageReference Include="NLog" Version="4.6.8" />
+    <PackageReference Include="NLog.Schema" Version="4.6.8" />
     <PackageReference Include="DevExpress.WindowsDesktop.Wpf.Layout" Version="20.1.8" />
     <PackageReference Include="DevExpress.Wpf.Core" Version="20.1.8" />
     <PackageReference Include="DevExpress.Wpf.Grid" Version="20.1.8" />
@@ -57,13 +56,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="NLog.config">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+    
+  <ItemGroup>
     <Page Update="Views\DstBrowserHeader.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <Resource Include="Resources\cdplogo3d_48x48.png" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

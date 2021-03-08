@@ -24,8 +24,10 @@
 
 namespace DEHPSTEPAP242
 {
-    using System.Windows;
+    using System;
     using System.Reflection;
+    using System.Windows;
+    using System.Windows.Threading;
 
     using Autofac;
 
@@ -49,6 +51,8 @@ namespace DEHPSTEPAP242
 
     using DevExpress.Xpf.Core;
 
+    using NLog;
+
     using DXSplashScreenViewModel = DevExpress.Mvvm.DXSplashScreenViewModel;
     using SplashScreen = DEHPCommon.UserInterfaces.Views.SplashScreen;
 
@@ -58,17 +62,72 @@ namespace DEHPSTEPAP242
     public partial class App
     {
         /// <summary>
+        /// The <see cref="NLog"/> logger
+        /// </summary>
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        /// <summary>
         /// Initializes a new <see cref="App"/>
         /// </summary>
         /// <param name="containerBuilder">An optional <see cref="Container"/></param>
         public App(ContainerBuilder containerBuilder = null)
         {
-            var splashScreenViewModel = new DXSplashScreenViewModel() { Title = "DEHP STEP-AP242 Adapter"};
+            this.LogAppStart();
+
+            this.Exit += this.OnExit;
+            AppDomain.CurrentDomain.UnhandledException += this.CurrentDomainUnhandledException;
+
+            var splashScreenViewModel = new DXSplashScreenViewModel() { Title = "DEHP STEP-AP242 Adapter", Logo = new Uri("pack://application:,,,/Resources/cdplogo3d_48x48.png") };
             SplashScreenManager.Create(() => new SplashScreen(), splashScreenViewModel).ShowOnStartup();
             containerBuilder ??= new ContainerBuilder();
             RegisterTypes(containerBuilder);
             RegisterViewModels(containerBuilder);
             AppContainer.BuildContainer(containerBuilder);
+        }
+
+        /// <summary>
+        /// Writes stating log message
+        /// </summary>
+        private void LogAppStart()
+        {
+            this.logger.Info("--------------------------------------------------------");
+            this.logger.Info($"Starting STEP-AP242 Adapter {Assembly.GetExecutingAssembly().GetName().Version}");
+            this.logger.Info("--------------------------------------------------------");
+        }
+
+        /// <summary>
+        /// Handles dispatcher unhandled exception
+        /// </summary>
+        /// <param name="sender">The <see cref="object"/> sender</param>
+        /// <param name="e">The <see cref="UnhandledExceptionEventArgs"/></param>
+        public void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            this.logger.Error(e.Exception);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Warn when an exception is thrown and log it 
+        /// </summary>
+        /// <param name="sender">The <see cref="object"/> sender</param>
+        /// <param name="e">The <see cref="UnhandledExceptionEventArgs"/></param>
+        private void CurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var errorMessage = $"{sender} has thrown {e.ExceptionObject.GetType()} \n\r {(e.ExceptionObject as Exception)?.Message}";
+            MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            this.logger.Error(e.ExceptionObject);
+        }
+
+        /// <summary>
+        /// Occurs when the app closes, it makes sure any opc connection are properly closed
+        /// </summary>
+        /// <param name="sender">The <see cref="object"/> sender</param>
+        /// <param name="e">The <see cref="ExitEventArgs"/></param>
+        private void OnExit(object sender, ExitEventArgs e)
+        {
+            this.logger.Info("--------------------------------------------------------");
+            this.logger.Info("Leaving application");
+            this.logger.Info("--------------------------------------------------------");
         }
 
         /// <summary>
