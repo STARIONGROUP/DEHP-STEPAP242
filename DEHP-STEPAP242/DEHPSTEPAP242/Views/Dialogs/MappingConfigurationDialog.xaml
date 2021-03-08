@@ -11,7 +11,7 @@
         xmlns:behaviors="clr-namespace:DEHPCommon.UserInterfaces.Behaviors;assembly=DEHPCommon"
         xmlns:partmapper="clr-namespace:DEHPSTEPAP242.Views.Dialogs"
         mc:Ignorable="d"
-        Title="STEP-AP242 to Hub Mapping Configuration" Height="340" Width="800" Topmost="True">
+        Title="STEP-AP242 to Hub Mapping Configuration" Height="340" Width="800">
     <Window.Resources>
         <ResourceDictionary>
             <dx:NullableToVisibilityConverter x:Key="NullToVisibilityConverter"></dx:NullableToVisibilityConverter>
