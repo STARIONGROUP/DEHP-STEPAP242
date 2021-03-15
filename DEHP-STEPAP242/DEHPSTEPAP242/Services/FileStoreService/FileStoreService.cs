@@ -1,9 +1,6 @@
 ﻿
 namespace DEHPSTEPAP242.Services.FileStoreService
 {
-    using System;
-    using System.Collections.Specialized;
-    using System.Configuration;
     using System.IO;
     using System.Reflection;
 
@@ -11,8 +8,18 @@ namespace DEHPSTEPAP242.Services.FileStoreService
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.Settings;
 
+
+    /// <summary>
+    /// Helper service to cache files from the Hub data source.
+    /// 
+    /// Provides a mechanism to store a <see cref="FileRevision"/> using a unique name,
+    /// keeping track of what was donwloaded to reduce the traffic with the server.
+    /// </summary>
     public class FileStoreService : IFileStoreService
     {
+        /// <summary>
+        /// Default storage directory name
+        /// </summary>
         private const string storageDefaultName = "HubFileStorage";
 
         /// <summary>
@@ -33,7 +40,7 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         {
             this.userPreferenceService = userPreferenceService;
 
-            InitializeStorage();
+            this.InitializeStorage();
         }
 
         /// <summary>
@@ -43,7 +50,7 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// <param name="fileContent"></param>
         public void Add(FileRevision fileRevision, byte[] fileContent)
         {
-            var destinationPath = GetPath(fileRevision);
+            var destinationPath = this.GetPath(fileRevision);
             System.IO.File.WriteAllBytes(destinationPath, fileContent);
         }
 
@@ -54,7 +61,8 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// <returns>A <see cref="System.IO.FileStream"/> where perform the write operations</returns>
         public FileStream AddFileStream(FileRevision fileRevision)
         {
-            return new System.IO.FileStream(GetPath(fileRevision), System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite);
+            var destinationPath = this.GetPath(fileRevision);
+            return new System.IO.FileStream(destinationPath, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite);
         }
 
         /// <summary>
@@ -62,7 +70,7 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// </summary>
         public void Clean()
         {
-            DirectoryInfo sdi = new DirectoryInfo(StorageDirectoryPath);
+            DirectoryInfo sdi = new DirectoryInfo(this.StorageDirectoryPath);
 
             foreach (FileInfo file in sdi.EnumerateFiles())
             {
@@ -82,8 +90,8 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// <returns>True if a file exists</returns>
         public bool Exists(FileRevision fileRevision)
         {
-            var path = GetPath(fileRevision);
-            return System.IO.File.Exists(path);
+            var destinationPath = this.GetPath(fileRevision);
+            return System.IO.File.Exists(destinationPath);
         }
 
         /// <summary>
@@ -108,10 +116,10 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// <returns>Full file path with pattern [StorageDirectoryPath]\\[name]_rev[RevisionNumber][extension]</returns>
         public string GetPath(FileRevision fileRevision)
         {
-            var storageName = GetName(fileRevision);
-            var path = Path.Combine(StorageDirectoryPath, storageName);
+            var storageName = this.GetName(fileRevision);
+            var destinationPath = Path.Combine(StorageDirectoryPath, storageName);
 
-            return path;
+            return destinationPath;
         }
 
         /// <summary>
@@ -121,22 +129,25 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         {
             string appExecutePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location);
 
-            userPreferenceService.Read();
-            string dirName = userPreferenceService.UserPreferenceSettings.FileStoreDirectoryName;
-            bool doClean = userPreferenceService.UserPreferenceSettings.FileStoreCleanOnInit;
+            this.userPreferenceService.Read();
+            string dirName = this.userPreferenceService.UserPreferenceSettings.FileStoreDirectoryName;
+            bool doClean = this.userPreferenceService.UserPreferenceSettings.FileStoreCleanOnInit;
 
             if (string.IsNullOrEmpty(dirName))
             {
-                StorageDirectoryPath = Path.Combine(appExecutePath, storageDefaultName);
+                this.StorageDirectoryPath = Path.Combine(appExecutePath, storageDefaultName);
             }
             else
             {
-                StorageDirectoryPath = Path.Combine(appExecutePath, dirName);
+                this.StorageDirectoryPath = Path.Combine(appExecutePath, dirName);
             }
 
-            CheckStorageDirectory();
+            this.CheckStorageDirectory();
 
-            if (doClean) Clean();
+            if (doClean)
+            {
+                this.Clean();
+            }
         }
 
         /// <summary>
@@ -144,9 +155,9 @@ namespace DEHPSTEPAP242.Services.FileStoreService
         /// </summary>
         private void CheckStorageDirectory()
         {
-            if (!Directory.Exists(StorageDirectoryPath))
+            if (!Directory.Exists(this.StorageDirectoryPath))
             {
-                Directory.CreateDirectory(StorageDirectoryPath);
+                Directory.CreateDirectory(this.StorageDirectoryPath);
             }
         }
     }

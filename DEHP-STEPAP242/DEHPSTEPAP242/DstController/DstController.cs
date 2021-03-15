@@ -148,6 +148,8 @@ namespace DEHPSTEPAP242.DstController
         {
             IsLoading = true;
 
+            logger.Info($"Loading STEP file: { filename }");
+
             var step = new STEP3DFile(filename);
 
             if (step.HasFailed)
@@ -302,10 +304,10 @@ namespace DEHPSTEPAP242.DstController
                 thingType = $"{thing}";
             }
 
-            Debug.WriteLine($"  CorrespondanceId = {correspondence.Iid}");
-            Debug.WriteLine($"  ExternalId       = {correspondence.ExternalId}");
-            Debug.WriteLine($"  InternalThing    = {correspondence.InternalThing} --> {thingType}");
-            Debug.WriteLine($"  IsCached         = {correspondence.IsCached()}");
+            this.logger.Debug($"  CorrespondanceId = {correspondence.Iid}");
+            this.logger.Debug($"  ExternalId       = {correspondence.ExternalId}");
+            this.logger.Debug($"  InternalThing    = {correspondence.InternalThing} --> {thingType}");
+            this.logger.Debug($"  IsCached         = {correspondence.IsCached()}");
         }
 
         /// <summary>
@@ -332,24 +334,24 @@ namespace DEHPSTEPAP242.DstController
             var unusedCorrespondances = previousCorrespondances.Where(x => !this.UsedIdCorrespondences.Contains(x));
 
 #if DEBUG_EXTERNAL_IDENTITIER_MAP
-            Debug.WriteLine("\nUpdateExternalIdentifierMap IdCorrespondances");
+            this.logger.Debug("UpdateExternalIdentifierMap IdCorrespondances");
             this.ShowCorrespondences(this.IdCorrespondences);
 
-            Debug.WriteLine("\nUpdateExternalIdentifierMap UsedIdCorrespondances");
+            this.logger.Debug("UpdateExternalIdentifierMap UsedIdCorrespondances");
             this.ShowCorrespondences(this.UsedIdCorrespondences);
 
 
-            Debug.WriteLine("\nUpdateExternalIdentifierMap previousCorrespondances");
+            this.logger.Debug("UpdateExternalIdentifierMap previousCorrespondances");
             this.ShowCorrespondences(previousCorrespondances);
 
-            Debug.WriteLine("\nUpdateExternalIdentifierMap unusedCorrespondances");
+            this.logger.Debug("UpdateExternalIdentifierMap unusedCorrespondances");
             this.ShowCorrespondences(unusedCorrespondances);
 #endif
 
             foreach (var unused in unusedCorrespondances)
             {
 #if DEBUG_EXTERNAL_IDENTITIER_MAP
-                Debug.WriteLine($"Removing unusedCorrespondance {unused}");
+                this.logger.Debug($"Removing unusedCorrespondance {unused}");
 #endif
                 this.ExternalIdentifierMap.Correspondence.Remove(unused);
             }
@@ -360,7 +362,7 @@ namespace DEHPSTEPAP242.DstController
                 this.ExternalIdentifierMap.Correspondence.Add(clonedCorrespondance);
 
 #if DEBUG_EXTERNAL_IDENTITIER_MAP
-                Debug.WriteLine($"no Adding clonedCorrespondance {clonedCorrespondance}");
+                this.logger.Debug($"Adding clonedCorrespondance {clonedCorrespondance}");
                 this.ShowCorrespondence(clonedCorrespondance);
 #endif
             }

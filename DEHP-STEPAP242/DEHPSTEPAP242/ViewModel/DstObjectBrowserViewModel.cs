@@ -33,6 +33,7 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPSTEPAP242.Events;
 
     using STEP3DAdapter;
+    using NLog;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -49,7 +50,7 @@ namespace DEHPSTEPAP242.ViewModel
     /// </summary>
     public class DstObjectBrowserViewModel : ReactiveObject, IDstObjectBrowserViewModel, IHaveContextMenuViewModel
     {
-#region Private Interface References
+        #region Private Interface References
 
         /// <summary>
         /// The <see cref="IHubController"/>
@@ -65,10 +66,17 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="INavigationService"/>
         /// </summary>
         private readonly INavigationService navigationService;
-        
-#endregion Private Interface References
 
-#region IDstObjectBrowserViewModel interface
+#if DEBUG_DST_OBJECT_BROWSER
+        /// <summary>
+        /// The current class <see cref="NLog.Logger"/>
+        /// </summary>
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
+#endif
+
+        #endregion Private Interface References
+
+        #region IDstObjectBrowserViewModel interface
 
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
@@ -149,9 +157,9 @@ namespace DEHPSTEPAP242.ViewModel
             }
         }
 
-#endregion
+        #endregion
 
-#region IHaveContextMenuViewModel interface
+        #region IHaveContextMenuViewModel interface
 
         /// <summary>
         /// Gets the Context Menu for this browser
@@ -193,9 +201,9 @@ namespace DEHPSTEPAP242.ViewModel
                 );
         }
 
-#endregion
+        #endregion
 
-#region Constructor
+        #region Constructor
 
         /// <summary>
         /// Initializes a new <see cref="DstObjectBrowserViewModel"/>
@@ -236,9 +244,9 @@ namespace DEHPSTEPAP242.ViewModel
             InitializeCommands();
         }
 
-#endregion
+        #endregion
 
-#region Private Methods
+        #region Private Methods
 
         /// <summary>
         /// Checks if general mapping is possible
@@ -374,14 +382,12 @@ namespace DEHPSTEPAP242.ViewModel
 #if DEBUG_DST_OBJECT_BROWSER
         private void ShowMappingConfigurations(Step3DRowViewModel part)
         {
-            Debug.WriteLine($"MappingConfigurations for: {part.Description}");
-            Debug.WriteLine($"  Status: {part.MappingStatusMessage}");
+            this.logger.Debug($"MappingConfigurations for: {part.Description}");
+            this.logger.Debug($"  Status: {part.MappingStatusMessage}");
             this.dstController.ShowCorrespondences(part.MappingConfigurations);
-
-            Debug.WriteLine("");
         }
 #endif
 
-#endregion
+        #endregion
     }
 }

@@ -25,6 +25,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPCommon.Enumerators;
     using System.Diagnostics;
+    using NLog;
 
 
     /// <summary>
@@ -51,6 +52,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// The <see cref="IStatusBarControlViewModel"/> instance
         /// </summary>
         private readonly IStatusBarControlViewModel statusBar;
+
+        /// <summary>
+        /// The current class <see cref="NLog.Logger"/>
+        /// </summary>
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Gets or sets the <see cref="ICloseWindowBehavior"/> instance
@@ -137,7 +143,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             part.CleanSelections();
 
 #if DEBUG_MAPPING_CONFIGURATION
-            Debug.WriteLine($"UpdatePropertiesBasedOnMappingConfiguration: {part.Description}");
+            this.logger.Debug($"UpdatePropertiesBasedOnMappingConfiguration: {part.Description}");
 #endif
 
             // First: check ED before processing other things
@@ -159,7 +165,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
                 {
 #if DEBUG_MAPPING_CONFIGURATION
-                    Debug.WriteLine($"Correspondance Thing = {thing}");
+                    this.logger.Debug($"Correspondance Thing = {thing}");
 #endif
                     switch (thing)
                     {
@@ -456,7 +462,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 this.SelectedThing.SelectedElementUsages.Clear();
                 foreach (var selectedEU in selectedElementUsages)
                 {
-                    Debug.WriteLine($"{selectedEU} [{selectedEU.ModelCode()}]");
+                    this.logger.Debug($"{selectedEU} [{selectedEU.ModelCode()}]");
                     if (this.AvailableElementUsages.FirstOrDefault(x => x.Iid == selectedEU.Iid) is { } elementUsage)
                     {
                         this.SelectedThing.SelectedElementUsages.Add(elementUsage);

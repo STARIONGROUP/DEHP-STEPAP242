@@ -4,7 +4,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
     using System.Collections.Generic;
     
     using DEHPSTEPAP242.ViewModel.Rows;
-
+    using NLog;
     using STEP3DAdapter;
 
     /// <summary>
@@ -56,6 +56,11 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         private readonly HashSet<int> relatingParts = new HashSet<int>();
 
         /// <summary>
+        /// The current class <see cref="NLog.Logger"/>
+        /// </summary>
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        /// <summary>
         /// Creates the High Level Representation (HLR) View Model for STEP AP242 file
         /// </summary>
         /// <remarks>
@@ -78,10 +83,12 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         {
             if (step3d is null)
             {
+                this.logger.Debug("Creating empty HLR for null STEP3DFile");
                 InitializeAuxiliaryData(new STEP3D_Part[0], new STEP3D_PartRelation[0]);
             }
             else
             {
+                this.logger.Debug($"Creating HLR for {step3d.FileName}");
                 InitializeAuxiliaryData(step3d.Parts, step3d.Relations);
             }
 

@@ -74,7 +74,7 @@ namespace DEHPSTEPAP242.ViewModel
         private void InitializesCommandsAndObservableSubscriptions()
         {
             this.MapCommand = ReactiveCommand.Create();
-            this.MapCommand.Subscribe(_ => Debug.WriteLine($"Download File Revision {this.fileRevisionId}"));
+            this.MapCommand.Subscribe(_ => Logger.Debug("No Mapping from Hub to Dst"));
 
             this.DownloadGuidCommand = ReactiveCommand.Create();
             this.DownloadGuidCommand.Subscribe(_ => CDPMessageBus.Current.SendMessage(new DownloadFileRevisionEvent(this.fileRevisionId)));

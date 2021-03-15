@@ -67,8 +67,8 @@ namespace DEHPSTEPAP242.Services.DstHubService
         {
             if (this.hubController.OpenIteration is null) return;
 
-            await CheckFileTypes();
-            await CheckParameterTypes();
+            await this.CheckFileTypes();
+            await this.CheckParameterTypes();
         }
 
         /// <summary>
@@ -148,14 +148,14 @@ namespace DEHPSTEPAP242.Services.DstHubService
             }
 
             var currentDomainOfExpertise = hubController.CurrentDomainOfExpertise;
-            logger.Debug($"Domain of Expertise: { currentDomainOfExpertise.Name }");
+            this.logger.Debug($"Domain of Expertise: { currentDomainOfExpertise.Name }");
 
             var dfStore = hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
-            logger.Debug($"DomainFileStore: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
+            this.logger.Debug($"Domain File Store: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
 
             var revisions = new List<FileRevision>();
 
-            logger.Debug($"Files Count: {dfStore.File.Count}");
+            this.logger.Debug($"Files Count: {dfStore.File.Count}");
             foreach (var f in dfStore.File)
             {
                 var cfrev = f.CurrentFileRevision;
@@ -257,7 +257,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         /// </summary>
         private async Task CheckFileTypes()
         {
-            var rdl = GetReferenceDataLibrary();
+            var rdl = this.GetReferenceDataLibrary();
 
             var missingExtensions = new List<string>();
 
@@ -284,12 +284,16 @@ namespace DEHPSTEPAP242.Services.DstHubService
                         Container = rdl
                     };
 
-                    logger.Debug($"Adding missing STEP FileType {APPLICATION_STEP_NAME} for .{extension}");
+                    this.logger.Info($"Adding missing STEP FileType {APPLICATION_STEP_NAME} for .{extension}");
 
                     thingsToWrite.Add(fileType);
                 }
 
-                await hubController.CreateOrUpdate<ReferenceDataLibrary, FileType>(thingsToWrite, (r, t) => r.FileType.Add(t));
+                await this.hubController.CreateOrUpdate<ReferenceDataLibrary, FileType>(thingsToWrite, (r, t) => r.FileType.Add(t));
+            }
+            else
+            {
+                this.logger.Info($"All STEP FileType already available");
             }
         }
 
@@ -390,7 +394,8 @@ namespace DEHPSTEPAP242.Services.DstHubService
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                this.logger.Error(e);
+                this.logger.Error($"Parameter(s) creation failed: {e.Message}");
                 throw;
             }
         }
@@ -411,7 +416,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 ShortName = shortName,
             };
 
-            logger.Info($"Adding Unit: {newUnit.Name} [{newUnit.ShortName}]");
+            this.logger.Info($"Adding Unit: {newUnit.Name} [{newUnit.ShortName}]");
             rdlClone.Unit.Add(newUnit);
             transaction.CreateOrUpdate(newUnit);
 
@@ -439,7 +444,8 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 IsMinimumInclusive = true, // 0 indicates not known value
             };
 
-            logger.Info($"Adding Scale: {theScale.Name} [{theScale.ShortName}] Unit={theScale.Unit.Name}");
+            this.logger.Info($"Adding Scale: {theScale.Name} [{theScale.ShortName}] Unit={theScale.Unit.Name}");
+
             rdlClone.Scale.Add(theScale);
             transaction.CreateOrUpdate(theScale);
 
@@ -466,7 +472,8 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 PossibleScale = new List<MeasurementScale> { scale },
             };
 
-            logger.Info($"Adding Parameter: {theParameter.Name} [{theParameter.ShortName}]");
+            this.logger.Info($"Adding Parameter: {theParameter.Name} [{theParameter.ShortName}]");
+
             rdlClone.ParameterType.Add(theParameter);
             transaction.CreateOrUpdate(theParameter);
 
@@ -490,7 +497,8 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 Symbol = "-",
             };
 
-            logger.Info($"Adding Parameter: {theParameter.Name} [{theParameter.ShortName}]");
+            this.logger.Info($"Adding Parameter: {theParameter.Name} [{theParameter.ShortName}]");
+
             rdlClone.ParameterType.Add(theParameter);
             transaction.CreateOrUpdate(theParameter);
 
@@ -526,7 +534,8 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 transaction.CreateOrUpdate(component);
             }
 
-            logger.Info($"Adding CompoundParameter: {theParameter.Name} [{theParameter.ShortName}]");
+            this.logger.Info($"Adding CompoundParameter: {theParameter.Name} [{theParameter.ShortName}]");
+
             rdlClone.ParameterType.Add(theParameter); 
             transaction.CreateOrUpdate(theParameter);
         }

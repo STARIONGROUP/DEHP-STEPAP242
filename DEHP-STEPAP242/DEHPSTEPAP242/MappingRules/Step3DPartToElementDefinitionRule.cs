@@ -73,9 +73,9 @@ namespace DEHPSTEPAP242.MappingRules
     public class Step3DPartToElementDefinitionRule : MappingRule<List<Step3DRowViewModel>, (List<ElementBase>, List<Step3DTargetSourceParameter>)>
     {
         /// <summary>
-        /// The current class logger
+        /// The current class <see cref="NLog.Logger"/>
         /// </summary>
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// The <see cref="IDstController"/>
@@ -146,6 +146,8 @@ namespace DEHPSTEPAP242.MappingRules
                     //
 
 
+                    this.logger.Info($"Processing MappingRule for: {part.Description}");
+
                     // Default values
                     this.dstElementName = part.ElementName;
                     this.dstParameterName = part.ParameterName;
@@ -186,7 +188,8 @@ namespace DEHPSTEPAP242.MappingRules
             }
             catch (Exception exception)
             {
-                Logger.Error(exception);
+                this.logger.Error(exception);
+                this.logger.Error($"Mapping Step3DRowViewModel failed: {exception.Message}");
                 ExceptionDispatchInfo.Capture(exception).Throw();
                 throw;
             }
@@ -275,7 +278,8 @@ namespace DEHPSTEPAP242.MappingRules
                 return elementDefinition;
             }
 
-            // Create a new one
+            this.logger.Info($"Creating new ElementDefinition '{this.dstElementName}'");
+
             return this.Bake<ElementDefinition>(x =>
             {
                 x.Name = this.dstElementName;
@@ -297,6 +301,8 @@ namespace DEHPSTEPAP242.MappingRules
                 {
                     part.SelectedParameterType = this.GetStep3dGeometryParameterType();
                 }
+
+                this.logger.Info($"Creating new Parameter of type '{part.SelectedParameterType.Name}' into ElementDefinition '{part.SelectedElementDefinition.Name}'");
 
                 part.SelectedParameter = this.Bake<Parameter>(x =>
                 {
@@ -329,6 +335,8 @@ namespace DEHPSTEPAP242.MappingRules
             if (parameterType is null)
             {
                 // NOTE: this should not happen, the DST creates required types at connection time
+                this.logger.Warn("STEP Geometry parameter not found, creating a new one!");
+
                 parameterType = this.CreateCompoundParameterTypeForSte3DGeometry();
             }
 
@@ -342,6 +350,8 @@ namespace DEHPSTEPAP242.MappingRules
         /// <remarks>This method will not be called because all was created at connection time</remarks>
         private CompoundParameterType CreateCompoundParameterTypeForSte3DGeometry()
         {
+            this.logger.Warn("STEP Geometry compound parameter should be created by HubDstService instance at Connect time");
+
             return this.Bake<CompoundParameterType>(x =>
             {
                 //string STEP_ID_UNIT_NAME = "step id";
@@ -421,6 +431,8 @@ namespace DEHPSTEPAP242.MappingRules
                     // New parameter does not contain ValueArray with the expected dimmension,
                     // they are filled by the server side, then it is necessary to create the
                     // expected content here.
+
+                    this.logger.Debug($"Computed ValueArray is empty (expected on new parameters) --> initializing to CompoundParameterType.NumberOfValues={p.NumberOfValues}");
 
                     var values = new List<string>(p.NumberOfValues);
                     foreach (var i in System.Linq.Enumerable.Range(0, p.NumberOfValues))
