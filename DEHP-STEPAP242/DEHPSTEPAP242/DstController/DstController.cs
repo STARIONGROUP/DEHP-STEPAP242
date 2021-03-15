@@ -146,26 +146,29 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="filename">Full path to a STEP-AP242 file</param>
         public void Load(string filename)
         {
-            IsLoading = true;
+            this.IsLoading = true;
 
-            logger.Info($"Loading STEP file: { filename }");
+            this.logger.Info($"Loading STEP file: { filename }");
 
             var step = new STEP3DFile(filename);
 
             if (step.HasFailed)
             {
-                IsLoading = false;
+                this.IsLoading = false;
 
                 // In case of error the current Step3DFile is not updated (keep previous)
-                logger.Error($"Error loading STEP file: { step.ErrorMessage }");
+                this.logger.Error($"Error loading STEP file: { step.ErrorMessage }");
 
                 throw new InvalidOperationException($"Error loading STEP file: { step.ErrorMessage }");
             }
 
-            // Update the new instance only when a load success
-            Step3DFile = step;
+            // Reset mapping (pending)
+            this.ResetMappingInformation();
 
-            IsLoading = false;
+            // Update the new instance only when a load success
+            this.Step3DFile = step;
+
+            this.IsLoading = false;
         }
 
         /// <summary>
@@ -262,11 +265,18 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
+        /// Time (milliseconds) consumed by the last succesull transfer
+        /// </summary>
+        public long TransferTime { get; private set; } = 0;
+
+        /// <summary>
         /// Transfers the mapped parts to the Hub data source
         /// </summary>
         /// <returns>A <see cref="Task"/></returns>
         public async Task Transfer()
         {
+            this.TransferTime = 0;
+
             if (this.MappingDirection == MappingDirection.FromDstToHub)
             {
                 await this.TransferMappedThingsToHub();
@@ -480,6 +490,9 @@ namespace DEHPSTEPAP242.DstController
         {
             try
             {
+                var timer = new Stopwatch();
+                timer.Start();
+
                 var iterationClone = this.hubController.OpenIteration.Clone(false);
                 var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone);
 
@@ -492,21 +505,21 @@ namespace DEHPSTEPAP242.DstController
                 string filePath = Step3DFile.FileName;
                 var file = this.dstHubService.FindFile(filePath);
 
-                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Uploading STEP file to Hub: {filePath}"));
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Uploading STEP file to Hub: {filePath}"));
                 await this.hubController.Upload(filePath, file);
 
                 // Step 2: update Step3dParameter.source with FileRevision from uploaded file
                 file = this.dstHubService.FindFile(filePath);
                 var fileRevision = file.CurrentFileRevision;
 
-                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
                 foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
                 {
                     sourceFieldToUpdate.UpdateSource(fileRevision);
                 }
 
                 // Step 3: create/update things
-                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering {this.MapResult.Count} ElementDefinitions..."));
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Processing {this.MapResult.Count} mapping data..."));
                 foreach (var elementBase in this.MapResult)
                 {
                     if (elementBase is ElementDefinition elementDefinition)
@@ -533,32 +546,38 @@ namespace DEHPSTEPAP242.DstController
 
                 transaction.CreateOrUpdate(iterationClone);
 
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering changes..."));
                 await this.hubController.Write(transaction);
 
                 // Update ValueSet after the commit.
                 // The ValueArray are constructed with the correct size
                 // in the last HubController.Write(transaction) call.
 
-                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
                 await this.UpdateParametersValueSets();
+
+                timer.Stop();
+                this.TransferTime = timer.ElapsedMilliseconds;
 
                 foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
                 {
                     sourceFieldToUpdate.part.SetTransferedStatus();
                 }
 
-                //Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub done"));
+                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfers to Hub done, updating data source..."));
                 await this.hubController.Refresh();
-                CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+
+                this.hubController.GetThingById(this.ExternalIdentifierMap.Iid, this.hubController.OpenIteration, out ExternalIdentifierMap map);
+                this.ExternalIdentifierMap = map.Clone(true);
 
                 this.MapResult.Clear();
                 this.TargetSourceParametersDstStep3dMaps.Clear();
+
+                CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
             }
             catch (Exception e)
             {
                 this.logger.Error(e);
-                ExceptionDispatchInfo.Capture(e).Throw();
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfer to Hub failed: {e.Message}"));
                 throw;
             }
         }
@@ -733,7 +752,6 @@ namespace DEHPSTEPAP242.DstController
             }
 
             transaction.CreateOrUpdate(this.ExternalIdentifierMap);
-            this.statusBar.Append("Mapping configuration processed");
         }
 
         /// <summary>
@@ -754,6 +772,22 @@ namespace DEHPSTEPAP242.DstController
 
             this.hubController.RegisterNewLogEntryToTransaction(vm.LogEntryContent, transaction);
             return true;
+        }
+
+        /// <summary>
+        /// Remove existing mapping information
+        /// </summary>
+        private void ResetMappingInformation()
+        {
+            this.MapResult.Clear();
+            this.TargetSourceParametersDstStep3dMaps.Clear();
+
+            this.ExternalIdentifierMap = null;
+            this.IdCorrespondences.Clear();
+            this.UsedIdCorrespondences.Clear();
+            this.PreviousIdCorrespondences.Clear();
+
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
         }
 
         #endregion

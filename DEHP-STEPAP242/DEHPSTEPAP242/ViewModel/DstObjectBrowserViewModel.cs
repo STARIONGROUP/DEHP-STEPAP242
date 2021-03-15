@@ -241,6 +241,11 @@ namespace DEHPSTEPAP242.ViewModel
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.AssignMappingsToAllParts());
 
+            // Update mapping under request, triggered by Transfer Cancelled
+            CDPMessageBus.Current.Listen<UpdateHighLevelRepresentationTreeEvent>()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => this.AssignMappingsToAllParts(x.Reset));
+
             InitializeCommands();
         }
 
@@ -356,17 +361,24 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /// <summary>
-        /// Assings a mapping configuration associated to the selected part
+        /// Assings a mapping configuration associated to the selected part ignoring mapped ones
         /// </summary>
-        private void AssignMappingsToAllParts()
+        private void AssignMappingsToAllParts(bool reset = false)
         {
             foreach (var part in this.Step3DHLR)
             {
-                // Note: a change in the Mapping Configuration will not affect current Mapped parts,
-                //       they remains until transfer action is performed.
-                if (part.MappingStatus != Step3DRowViewModel.MappingStatusType.Mapped)
+                if (reset)
                 {
                     part.ResetMappingStatus();
+                }
+                else
+                {
+                    // Note: a change in the Mapping Configuration will not affect current Mapped parts,
+                    //       they remains until transfer action is performed.
+                    if (part.MappingStatus != Step3DRowViewModel.MappingStatusType.Mapped)
+                    {
+                        part.ResetMappingStatus();
+                    }
                 }
 
                 part.MappingConfigurations.Clear();

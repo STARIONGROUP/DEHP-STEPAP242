@@ -144,6 +144,11 @@ namespace DEHPSTEPAP242.DstController
         void Map(Step3DRowViewModel dst3DPart);
 
         /// <summary>
+        /// Time (milliseconds) consumed by the last succesull transfer
+        /// </summary>
+        long TransferTime { get; }
+
+        /// <summary>
         /// Transfers the mapped parts to the Hub data source
         /// </summary>
         /// <returns>A <see cref="Task"/></returns>

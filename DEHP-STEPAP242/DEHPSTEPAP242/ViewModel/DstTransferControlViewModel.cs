@@ -14,6 +14,9 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.UserInterfaces.ViewModels;
 
     using DEHPSTEPAP242.DstController;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPCommon.Enumerators;
+    using DEHPSTEPAP242.Events;
 
 
     /// <summary>
@@ -26,6 +29,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IDstController"/>
         /// </summary>
         private readonly IDstController dstController;
+
+        /// <summary>
+        /// The <see cref="IStatusBarControlViewModel"/>
+        /// </summary>
+        private readonly IStatusBarControlViewModel statusBar;
 
         /// <summary>
         /// Backing field for <see cref="AreThereAnyTransferInProgress"/>
@@ -42,29 +50,73 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         /// <summary>
+        /// Backing field for <see cref="CanTransfer"/>
+        /// </summary>
+        private bool canTransfer;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether there is any awaiting transfer
+        /// </summary>
+        public bool CanTransfer
+        {
+            get => this.canTransfer;
+            set => this.RaiseAndSetIfChanged(ref this.canTransfer, value);
+        }
+
+        /// <summary>
         /// Initializes a new <see cref="DstTransferControlViewModel"/>
         /// </summary>
         /// <param name="dstController">The <see cref="IDstController"/></param>
-        public DstTransferControlViewModel(IDstController dstController)
+        /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
+        public DstTransferControlViewModel(IDstController dstController, IStatusBarControlViewModel statusBar)
         {
             this.dstController = dstController;
+            this.statusBar = statusBar;
 
             var canTransfert = CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
-                .Select(x => !x.Reset).ObserveOn(RxApp.MainThreadScheduler);
-            
-            this.TransferCommand = ReactiveCommand.CreateAsyncTask(canTransfert, async _ => await this.TransferCommandExecute());
+                .Select(x => !x.Reset).ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(this.UpdateCanTransfer);
+
+            this.dstController.MapResult.CountChanged.Subscribe(x => this.UpdateCanTransfer(x > 0));
+
+            this.TransferCommand = ReactiveCommand.CreateAsyncTask(
+                this.WhenAnyValue(x => x.CanTransfer),
+                async _ => await this.TransferCommandExecute(),
+                RxApp.MainThreadScheduler);
+
+            this.TransferCommand.ThrownExceptions
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(e => this.statusBar.Append($"{e.Message}", StatusBarMessageSeverity.Error));
 
             var canCancel = this.WhenAnyValue(x => x.AreThereAnyTransferInProgress);
-            this.CancelCommand = ReactiveCommand.CreateAsyncTask(canCancel, async _ => await this.CancelTransfer());
+
+            this.CancelCommand = ReactiveCommand.CreateAsyncTask(canCancel,
+                async _ => await this.CancelTransfer(),
+                RxApp.MainThreadScheduler);
+        }
+
+        /// <summary>
+        /// Updates the <see cref="CanTransfer"/>
+        /// </summary>
+        private void UpdateCanTransfer(bool value)
+        {
+            this.CanTransfer = value;
         }
 
         /// <summary>
         /// Cancels the transfer in progress
         /// </summary>
         /// <returns>A <see cref="Task"/><returns>
-        private Task CancelTransfer()
+        private async Task CancelTransfer()
         {
-            throw new NotImplementedException();
+            this.dstController.MapResult.Clear();
+            await Task.Delay(1);
+
+            CDPMessageBus.Current.SendMessage(new UpdateHighLevelRepresentationTreeEvent(true));
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+
+            this.AreThereAnyTransferInProgress = false;
+            this.IsIndeterminate = false;
         }
 
         /// <summary>
@@ -74,7 +126,21 @@ namespace DEHPSTEPAP242.ViewModel
         private async Task TransferCommandExecute()
         {
             this.AreThereAnyTransferInProgress = true;
+            this.IsIndeterminate = true;
+            this.statusBar.Append($"Transfers in progress");
+
             await this.dstController.Transfer();
+
+            if (this.dstController.TransferTime > 1000)
+            {
+                this.statusBar.Append($"Transfers completed in {this.dstController.TransferTime / 1000.0} seconds");
+            }
+            else
+            {
+                this.statusBar.Append($"Transfers completed in {this.dstController.TransferTime} ms");
+            }
+
+            this.IsIndeterminate = false;
             this.AreThereAnyTransferInProgress = false;
         }
     }

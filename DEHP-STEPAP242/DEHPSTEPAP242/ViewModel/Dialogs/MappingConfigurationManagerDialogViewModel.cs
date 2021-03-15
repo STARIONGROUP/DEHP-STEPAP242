@@ -194,7 +194,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
             else
             {
-                this.dstController.ExternalIdentifierMap = this.SelectedExternalIdentifierMap.Clone(false);
+                this.dstController.ExternalIdentifierMap = this.SelectedExternalIdentifierMap.Clone(true);
             }
         }
 
