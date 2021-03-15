@@ -49,6 +49,8 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.Events;
     using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
     using System.Reactive.Linq;
+    using DEHPSTEPAP242.DstController;
+    using System.Windows;
 
     /// <summary>
     /// View model that represents a data source panel which holds a tree like browser, a informational header and
@@ -65,6 +67,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IHubController"/>
         /// </summary>
         private readonly IHubController hubController;
+
+        /// <summary>
+        /// The <see cref="IDstController"/>
+        /// </summary>
+        private readonly IDstController dstController;
 
         /// <summary>
         /// The <see cref="IObjectBrowserTreeSelectorService"/>
@@ -95,6 +102,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// Initializes a new <see cref="HubDataSourceViewModel"/>
         /// </summary>
         /// <param name="hubController">The <see cref="IHubController"/></param>
+        /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="hubBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         /// <param name="objectBrowser">The <see cref="IHubObjectBrowserViewModel"/></param>
         /// <param name="publicationBrowser">The <see cref="IPublicationBrowserViewModel"/></param>
@@ -104,6 +112,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="hubFileBrowser">The <see cref="IHubFileStoreBrowserViewModel "/></param>
         public HubDataSourceViewModel(
             IHubController hubController,
+            IDstController dstController,
             IHubBrowserHeaderViewModel hubBrowserHeader, 
             IHubObjectBrowserViewModel objectBrowser,
             IPublicationBrowserViewModel publicationBrowser,
@@ -113,6 +122,7 @@ namespace DEHPSTEPAP242.ViewModel
             IHubFileStoreBrowserViewModel hubFileBrowser) : base(navigationService)
         {
             this.hubController = hubController;
+            this.dstController = dstController;
             this.HubBrowserHeader = hubBrowserHeader;
             this.ObjectBrowser = objectBrowser;
             this.PublicationBrowser = publicationBrowser;
@@ -191,6 +201,19 @@ namespace DEHPSTEPAP242.ViewModel
         {
             if (this.hubController.IsSessionOpen)
             {
+                if (this.dstController.MapResult.Any())
+                {
+                    var result = MessageBox.Show(
+                        "You have pending transfers.\nBy continuing, these transfers will be lost.",
+                        "Disconnect confirmation",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                    if (result != MessageBoxResult.OK)
+                    {
+                        return;
+                    }
+                }
+
                 this.hubController.Close();
             }
             else

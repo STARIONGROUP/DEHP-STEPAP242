@@ -37,6 +37,8 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon;
     using DEHPSTEPAP242.Services.DstHubService;
+    using System.Linq;
+    using System.Windows;
 
     /// <summary>
     /// The <see cref="DstDataSourceViewModel"/> is the view model for the panel that will display controls and data relative to EcosimPro
@@ -127,6 +129,19 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         protected override void LoadFileCommandExecute()
         {
+            if (this.dstController.MapResult.Any())
+            {
+                var result = MessageBox.Show(
+                    "You have pending transfers.\nBy continuing, these transfers will be lost.",
+                    "Load file confirmation",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.OK)
+                {
+                    return;
+                }
+            }
+
             this.NavigationService.ShowDialog<DstLoadFile>();
         }
 
