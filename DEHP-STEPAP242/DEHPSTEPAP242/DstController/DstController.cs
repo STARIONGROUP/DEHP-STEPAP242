@@ -779,6 +779,11 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private void ResetMappingInformation()
         {
+            if (this.MapResult.Count == 0)
+            {
+                return;
+            }
+
             this.MapResult.Clear();
             this.TargetSourceParametersDstStep3dMaps.Clear();
 
