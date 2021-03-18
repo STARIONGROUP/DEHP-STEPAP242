@@ -166,18 +166,19 @@ namespace DEHPSTEPAP242
         {
             containerBuilder.RegisterType<MainWindowViewModel>().As<IMainWindowViewModel>().SingleInstance();
             // Hub
-            containerBuilder.RegisterType<HubDataSourceViewModel>().As<IHubDataSourceViewModel>();
-            containerBuilder.RegisterType<HubObjectBrowserViewModel>().As<IHubObjectBrowserViewModel>();
-            containerBuilder.RegisterType<HubFileStoreBrowserViewModel>().As<IHubFileStoreBrowserViewModel>();
-            containerBuilder.RegisterType<HubNetChangePreviewViewModel>().As<IHubNetChangePreviewViewModel>();
+            containerBuilder.RegisterType<HubDataSourceViewModel>().As<IHubDataSourceViewModel>().SingleInstance();
+            containerBuilder.RegisterType<HubObjectBrowserViewModel>().As<IHubObjectBrowserViewModel>().SingleInstance();
+            containerBuilder.RegisterType<HubFileStoreBrowserViewModel>().As<IHubFileStoreBrowserViewModel>().SingleInstance();
+            containerBuilder.RegisterType<HubNetChangePreviewViewModel>().As<IHubNetChangePreviewViewModel>().SingleInstance();
             // Dst
-            containerBuilder.RegisterType<DstBrowserHeaderViewModel>().As<IDstBrowserHeaderViewModel>();
-            containerBuilder.RegisterType<DstObjectBrowserViewModel>().As<IDstObjectBrowserViewModel>();
-            containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>();
+            containerBuilder.RegisterType<DstBrowserHeaderViewModel>().As<IDstBrowserHeaderViewModel>().SingleInstance();
+            containerBuilder.RegisterType<DstObjectBrowserViewModel>().As<IDstObjectBrowserViewModel>().SingleInstance();
+            containerBuilder.RegisterType<DstDataSourceViewModel>().As<IDstDataSourceViewModel>().SingleInstance();
             containerBuilder.RegisterType<DstLoadFileViewModel>().As<IDstLoadFileViewModel>();
             containerBuilder.RegisterType<MappingConfigurationDialogViewModel>().As<IMappingConfigurationDialogViewModel>();
             containerBuilder.RegisterType<MappingConfigurationManagerDialogViewModel>().As<IMappingConfigurationManagerDialogViewModel>();
-            containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>();
+            containerBuilder.RegisterType<MappingViewModel>().As<IMappingViewModel>().SingleInstance();
+            containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>().SingleInstance();
         }
     }
 }

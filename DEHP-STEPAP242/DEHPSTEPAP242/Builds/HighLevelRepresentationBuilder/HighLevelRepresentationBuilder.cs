@@ -204,7 +204,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
                 var child = cr.Item1;
                 var relation = cr.Item2;
 
-                var node = new Step3DRowViewModel(child, relation)
+                var node = new Step3DRowViewModel(child, relation, parent.InstancePath)
                 {
                     ID = nextID++,
                     ParentID = parent.ID

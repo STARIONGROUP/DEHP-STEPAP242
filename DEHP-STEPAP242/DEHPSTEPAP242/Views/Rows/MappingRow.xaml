@@ -4,34 +4,58 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:DEHPCommon.Converters;assembly=DEHPCommon"
-             xmlns:common="clr-namespace:DEHPCommon.UserInterfaces.Views.Rows;assembly=DEHPCommon"
-             xmlns:local="clr-namespace:DEHPSTEPAP242.Views.Rows"
              mc:Ignorable="d" HorizontalAlignment="Stretch"
-             d:DesignHeight="100" d:DesignWidth="1325">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <converters:MappingDirectionToRotationFactorConverter x:Key="MappingDirectionToRotationFactorConverter" />
-        </ResourceDictionary>
-    </UserControl.Resources>
+             d:DesignHeight="50" d:DesignWidth="300">
     <Grid HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-
-        <local:MappingStep3dThing DataContext="{Binding ThingStep3d}"></local:MappingStep3dThing>
-
-        <Path Grid.Column="1" Stretch="Fill" Fill="DarkGray" 
-              Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z"
-              HorizontalAlignment="Stretch" MaxHeight="30"
-              RenderTransformOrigin=".5,.5">
+        
+        <Border Grid.Column="{Binding HubThing.GridColumnIndex}" BorderBrush="DarkGray" BorderThickness="1">
+            <Grid  Background="AliceBlue">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Normal" Text="Element: " />
+                <TextBlock Grid.Row="0" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" TextTrimming="CharacterEllipsis" Text="{Binding HubThing.Name}"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Value: " />
+                <TextBlock Grid.Row="1" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="{Binding  HubThing.Value}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </Border>
+        
+        <Path Grid.Column="1" Stretch="Fill" Fill="SlateGray"
+                                  Data="M 0,110 110,110 110,90 120,120 110,150 110,130 0,130 Z"
+                                  HorizontalAlignment="Stretch" MaxHeight="15"
+                                  RenderTransformOrigin=".5,.5">
             <Path.RenderTransform>
-                <RotateTransform Angle="{Binding MappingDirection, Converter={StaticResource MappingDirectionToRotationFactorConverter}}" />
+                <RotateTransform Angle="{Binding ArrowDirection}" />
             </Path.RenderTransform>
         </Path>
 
-        <common:Mapping1025ThingControl DataContext="{Binding Thing1025}" Grid.Column="2"></common:Mapping1025ThingControl>
-
+        <Border Grid.Column="{Binding DstThing.GridColumnIndex}" BorderBrush="DarkGray" BorderThickness="1">
+            <Grid Background="AliceBlue">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <TextBlock Height="Auto" Margin="3" FontSize="10" FontWeight="Normal" Text="Element: " />
+                <TextBlock Grid.Row="0" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" Text="{Binding DstThing.Name}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="0" Grid.Row="1"  Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="Value: " />
+                <TextBlock Grid.Row="1" Grid.Column="1" Height="Auto" Margin="3" FontSize="10" FontWeight="Bold" Text="{Binding DstThing.Value}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

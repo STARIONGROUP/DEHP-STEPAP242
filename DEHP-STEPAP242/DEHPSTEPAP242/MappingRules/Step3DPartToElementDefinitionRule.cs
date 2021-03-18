@@ -70,7 +70,7 @@ namespace DEHPSTEPAP242.MappingRules
     /// That takes a <see cref="List{T}"/> of <see cref="Step3DRowViewModel"/> as input 
     /// and outputs a E-TM-10-25 <see cref="ElementDefinition"/>.
     /// </summary>
-    public class Step3DPartToElementDefinitionRule : MappingRule<List<Step3DRowViewModel>, (List<ElementBase>, List<Step3DTargetSourceParameter>)>
+    public class Step3DPartToElementDefinitionRule : MappingRule<List<Step3DRowViewModel>, (Dictionary<ParameterOrOverrideBase, MappedParameterValue>, List<ElementBase>)>
     {
         /// <summary>
         /// The current class <see cref="NLog.Logger"/>
@@ -96,13 +96,12 @@ namespace DEHPSTEPAP242.MappingRules
         /// The <see cref="List{ElementBase}>"/> that needs to be updated 
         /// before the transfer to the Hub.
         /// </summary>
-        private List<ElementBase> targetSourceElementBase;
+        private readonly List<ElementBase> targetSourceElementBase = new List<ElementBase>();
 
         /// <summary>
-        /// The <see cref="List{Step3dTargetSourceParameter}>"/> that needs to be updated 
-        /// before the transfer to the Hub.
+        /// Holds a <see cref="Dictionary{TKey,TValue}"/> of <see cref="ParameterOrOverrideBase"/> and <see cref="NodeId.Identifier"/>
         /// </summary>
-        private List<Step3DTargetSourceParameter> targetSourceParameters;
+        private readonly Dictionary<ParameterOrOverrideBase, MappedParameterValue> parametersMappingInfo = new Dictionary<ParameterOrOverrideBase, MappedParameterValue>();
 
         /// <summary>
         /// The current <see cref="DomainOfExpertise"/>
@@ -124,14 +123,16 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         /// <param name="input">The <see cref="List{T}"/> of <see cref="Step3DRowViewModel"/> to transform</param>
         /// <returns>An <see cref="List{ElementDefinition}"/> as the top level <see cref="Thing"/> with changes</returns>
-        public override (List<ElementBase>, List<Step3DTargetSourceParameter>) Transform (List<Step3DRowViewModel> input)
+        public override (Dictionary<ParameterOrOverrideBase, MappedParameterValue>, List<ElementBase>) Transform (List<Step3DRowViewModel> input)
         {
             try
             {
                 this.dstController = AppContainer.Container.Resolve<IDstController>();
-                
-                this.targetSourceParameters = new List<Step3DTargetSourceParameter>();
-                this.targetSourceElementBase = new List<ElementBase>();
+
+                this.targetSourceElementBase.Clear();
+                this.parametersMappingInfo.Clear();
+                //this.mappedParameterValues = new List<MappedParameterValue>();
+                //this.targetSourceElementBase = new List<ElementBase>();
 
                 this.owner = this.hubController.CurrentDomainOfExpertise;
 
@@ -144,8 +145,6 @@ namespace DEHPSTEPAP242.MappingRules
                     //   + Assembly Usage, or Relation (label, id)
                     //   + Uuid of the file in the DomainFileStore (known only at Transfer time)
                     //
-
-
                     this.logger.Info($"Processing MappingRule for: {part.Description}");
 
                     // Default values
@@ -183,13 +182,19 @@ namespace DEHPSTEPAP242.MappingRules
                 // When changes can be also performed in other things
                 // (i.e. EU, Parameters, etc.) only the top thing in the 
                 // hierarchy is returned, the update will call
-                // CreateOrUpdate for all its related things.
-                return (this.targetSourceElementBase, this.targetSourceParameters);
+                // CreateOrUpdate for all its related things. Then ElementBase
+                // is the only required thing to return.
+                //
+                // The parametersMappingInfo is the related information to the 
+                // target parameter, we need this to remember what whas changed and
+                // who produces it. In addition, this DST requires to know the 
+                // FileRevision of the uploaded STEP file.
+                return (this.parametersMappingInfo, this.targetSourceElementBase);
             }
             catch (Exception exception)
             {
                 this.logger.Error(exception);
-                this.logger.Error($"Mapping Step3DRowViewModel failed: {exception.Message}");
+                this.logger.Error($"Mapping Rule for Step3DRowViewModel failed: {exception.Message}");
                 ExceptionDispatchInfo.Capture(exception).Throw();
                 throw;
             }
@@ -435,7 +440,7 @@ namespace DEHPSTEPAP242.MappingRules
                     this.logger.Debug($"Computed ValueArray is empty (expected on new parameters) --> initializing to CompoundParameterType.NumberOfValues={p.NumberOfValues}");
 
                     var values = new List<string>(p.NumberOfValues);
-                    foreach (var i in System.Linq.Enumerable.Range(0, p.NumberOfValues))
+                    foreach (var _ in System.Linq.Enumerable.Range(0, p.NumberOfValues))
                     {
                         values.Add("-");
                     }
@@ -502,7 +507,7 @@ namespace DEHPSTEPAP242.MappingRules
                         // NOTE: FileRevision.Iid will be known at Transfer time
                         //       store the current index to know which possition corresponds
                         //       to the source (avoid searching it again)
-                        this.targetSourceParameters.Add(new Step3DTargetSourceParameter(part, valuearray, index));
+                        this.parametersMappingInfo[part.SelectedParameter] = new MappedParameterValue(part, valuearray, index);
                         valuearray[index++] = "";
                     }
                     break;

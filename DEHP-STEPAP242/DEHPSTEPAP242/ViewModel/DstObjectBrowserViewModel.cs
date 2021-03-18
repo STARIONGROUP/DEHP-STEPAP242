@@ -382,12 +382,16 @@ namespace DEHPSTEPAP242.ViewModel
                 }
 
                 part.MappingConfigurations.Clear();
-                part.MappingConfigurations.AddRange(
-                    this.dstController.ExternalIdentifierMap.Correspondence.Where(
-                        x => x.ExternalId == part.ElementName ||
-                             x.ExternalId == part.ParameterName));
 
-                part.UpdateMappingStatus();
+                if (this.dstController.ExternalIdentifierMap is { })
+                {
+                    part.MappingConfigurations.AddRange(
+                        this.dstController.ExternalIdentifierMap.Correspondence.Where(
+                            x => x.ExternalId == part.ElementName ||
+                                 x.ExternalId == part.ParameterName));
+
+                    part.UpdateMappingStatus();
+                }
             }
         }
 

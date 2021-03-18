@@ -563,10 +563,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
                 this.CloseWindowBehavior?.Close();
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
                 this.statusBar.Append($"Mapping of {SelectedThing.Description} failed", StatusBarMessageSeverity.Error);
-                MessageBox.Show($"{e.Message}");
+                this.logger.Error(exception);
+                MessageBox.Show($"{exception.Message}");
             }
             finally
             {

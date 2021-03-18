@@ -73,11 +73,23 @@ namespace DEHPSTEPAP242.ViewModel
             this.dstController = dstController;
             this.statusBar = statusBar;
 
+            this.InitializeCommandsAndObservables();
+        }
+
+        /// <summary>
+        /// Initializes the commands and observables
+        /// </summary>
+        private void InitializeCommandsAndObservables()
+        {
             var canTransfert = CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
                 .Select(x => !x.Reset).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(this.UpdateCanTransfer);
 
             this.dstController.MapResult.CountChanged.Subscribe(x => this.UpdateCanTransfer(x > 0));
+
+            this.WhenAnyValue(vm => vm.dstController.IsLoading)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => this.UpdateCanTransfer(false));
 
             this.TransferCommand = ReactiveCommand.CreateAsyncTask(
                 this.WhenAnyValue(x => x.CanTransfer),
@@ -109,11 +121,9 @@ namespace DEHPSTEPAP242.ViewModel
         /// <returns>A <see cref="Task"/><returns>
         private async Task CancelTransfer()
         {
-            this.dstController.MapResult.Clear();
             await Task.Delay(1);
 
-            CDPMessageBus.Current.SendMessage(new UpdateHighLevelRepresentationTreeEvent(true));
-            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+            this.dstController.CleanCurrentMapping();
 
             this.AreThereAnyTransferInProgress = false;
             this.IsIndeterminate = false;

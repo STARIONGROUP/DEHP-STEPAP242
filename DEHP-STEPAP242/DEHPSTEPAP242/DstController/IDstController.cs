@@ -35,6 +35,64 @@ namespace DEHPSTEPAP242.DstController
 
     using DEHPSTEPAP242.ViewModel.Rows;
     using STEP3DAdapter;
+    using CDP4Common.Types;
+
+    /*
+    /// <summary>
+    /// Container for the <see cref="IDstController.ParameterNodeIds"/> Value field.
+    /// </summary>
+    public struct MappedParameterValue
+    {
+        /// <summary>
+        /// The source <see cref="Step3DRowViewModel"/> initiating the mapping
+        /// </summary>
+        public int Part;
+
+        /// <summary>
+        /// The <see cref="ValueSet"/> where the "source" field must be updated with the <see cref="FileRevision"/> after the upload.
+        /// </summary>
+        public ValueArray<string> Fields;
+    }
+    */
+
+    /// <summary>
+    /// Helper class which keeps a reference to the <see cref="ValueArray{string}"/> 
+    /// that needs to me updated with the new <see cref="FileRevision"/> of the source
+    /// STEP 3D file in the Hub.
+    /// </summary>
+    public class MappedParameterValue
+    {
+        /// <summary>
+        /// The <see cref="Step3DRowViewModel"/> originating the change
+        /// </summary>
+        public readonly Step3DRowViewModel Part;
+
+        /// <summary>
+        /// The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest (fields of the compound parameter)
+        /// </summary>
+        private readonly ValueArray<string> Fields;
+
+        /// <summary>
+        /// The index in the <see cref="ValueArray{string}"/> for the <see cref="ParameterTypeComponent"/> corresponding to the "source" field
+        /// </summary>
+        private readonly int componentIndex;
+
+        public MappedParameterValue(Step3DRowViewModel part, ValueArray<string> values, int componentIndex)
+        {
+            this.Part = part;
+            this.Fields = values;
+            this.componentIndex = componentIndex;
+        }
+
+        /// <summary>
+        /// Updates the <see cref="ValueArray{string}"/> associated to the source parameter
+        /// </summary>
+        /// <param name="fileRevision"></param>
+        public void UpdateSource(FileRevision fileRevision)
+        {
+            this.Fields[componentIndex] = fileRevision.Iid.ToString();
+        }
+    }
 
     /// <summary>
     /// Interface definition for <see cref="DstController"/>
@@ -89,6 +147,11 @@ namespace DEHPSTEPAP242.DstController
         ReactiveList<ElementBase> MapResult { get; }
 
         /// <summary>
+        /// Gets a <see cref="Dictionary{TKey, TValue}"/> of all mapped parameter and the associate <see cref="Step3DRowViewModel.ID"/>
+        /// </summary>
+        Dictionary<ParameterOrOverrideBase, MappedParameterValue> ParameterNodeIds { get; }
+
+        /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
         /// </summary>
         ExternalIdentifierMap ExternalIdentifierMap { get; set; }
@@ -135,6 +198,16 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="correspondences">The <see cref="IEnumerable{IdCorrespondence}"/> from which store the current mapping</param>
         public void AddPreviousIdCorrespondances(IEnumerable<IdCorrespondence> correspondences);
+
+        /// <summary>
+        /// Remove existing mapping information
+        /// </summary>
+        void CleanCurrentMapping();
+
+        /// <summary>
+        /// Remove existing <see cref="ExternalIdentifierMap"/> and <see cref="IdCorrespondences"/> data
+        /// </summary>
+        void ResetExternalMappingIdentifier();
 
         /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>

@@ -73,6 +73,11 @@ namespace DEHPSTEPAP242.ViewModel
         public ITransferControlViewModel TransferControlViewModel { get; }
 
         /// <summary>
+        /// Gets the <see cref="IMappingViewModel"/>
+        /// </summary>
+        public IMappingViewModel MappingViewModel { get; }
+
+        /// <summary>
         /// Gets or sets the <see cref="ISwitchLayoutPanelOrderBehavior"/>
         /// </summary>
         public ISwitchLayoutPanelOrderBehavior SwitchPanelBehavior { get; set; }
@@ -92,21 +97,25 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="hubHubDataSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
         /// <param name="dstSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
-        /// <param name="statusBarControlViewModel">The <see cref="IStatusBarControlViewModel"/></param>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="hubNetChangePreviewViewModel">The <see cref="IHubNetChangePreviewViewModel"/></param>
+        /// <param name="mappingViewModel">The <see cref="IMappingViewModel"/></param>
         /// <param name="transferControlViewModel">The <see cref="ITransferControlViewModel"/></param>
+        /// <param name="statusBarControlViewModel">The <see cref="IStatusBarControlViewModel"/></param>
         public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel, 
             IDstDataSourceViewModel dstSourceViewModelViewModel, 
-            IStatusBarControlViewModel statusBarControlViewModel,
             IDstController dstController,
             IHubNetChangePreviewViewModel hubNetChangePreviewViewModel,
-            ITransferControlViewModel transferControlViewModel)
+            ITransferControlViewModel transferControlViewModel,
+            IMappingViewModel mappingViewModel,
+            IStatusBarControlViewModel statusBarControlViewModel
+            )
         {
             this.dstController = dstController;
             this.HubDataSourceViewModel = hubHubDataSourceViewModelViewModel;
             this.DstSourceViewModel = dstSourceViewModelViewModel;
             this.HubNetChangePreviewViewModel = hubNetChangePreviewViewModel;
+            this.MappingViewModel = mappingViewModel;
             this.TransferControlViewModel = transferControlViewModel;
             this.StatusBarControlViewModel = statusBarControlViewModel;
 

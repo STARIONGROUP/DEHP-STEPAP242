@@ -103,36 +103,39 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="dstController">The <see cref="IDstController"/></param>
-        /// <param name="hubBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
+        /// <param name="browserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         /// <param name="objectBrowser">The <see cref="IHubObjectBrowserViewModel"/></param>
         /// <param name="publicationBrowser">The <see cref="IPublicationBrowserViewModel"/></param>
-        /// <param name="navigationService">The <see cref="INavigationService"/></param>
+        /// <param name="hubFileBrowser">The <see cref="IHubFileStoreBrowserViewModel "/></param>
         /// <param name="treeSelectorService">The <see cref="IObjectBrowserTreeSelectorService"/></param>
         /// <param name="dstHubService">The <see cref="IDstHubService "/></param>
-        /// <param name="hubFileBrowser">The <see cref="IHubFileStoreBrowserViewModel "/></param>
+        /// <param name="navigationService">The <see cref="INavigationService"/></param>
         public HubDataSourceViewModel(
             IHubController hubController,
             IDstController dstController,
-            IHubBrowserHeaderViewModel hubBrowserHeader, 
+            IHubBrowserHeaderViewModel browserHeader, 
             IHubObjectBrowserViewModel objectBrowser,
             IPublicationBrowserViewModel publicationBrowser,
-            INavigationService navigationService,
+            IHubFileStoreBrowserViewModel hubFileBrowser,
             IObjectBrowserTreeSelectorService treeSelectorService,
             IDstHubService dstHubService,
-            IHubFileStoreBrowserViewModel hubFileBrowser) : base(navigationService)
+            INavigationService navigationService) : base(navigationService)
         {
             this.hubController = hubController;
             this.dstController = dstController;
-            this.HubBrowserHeader = hubBrowserHeader;
+            this.HubBrowserHeader = browserHeader;
             this.ObjectBrowser = objectBrowser;
             this.PublicationBrowser = publicationBrowser;
+            this.HubFileStoreBrowser = hubFileBrowser;
             this.treeSelectorService = treeSelectorService;
             this.dstHubService = dstHubService;
-            this.HubFileStoreBrowser = hubFileBrowser;
 
             InitializeCommands();
         }
 
+        /// <summary>
+        /// Initializes the commands
+        /// </summary>
         protected override void InitializeCommands()
         {
             base.InitializeCommands();

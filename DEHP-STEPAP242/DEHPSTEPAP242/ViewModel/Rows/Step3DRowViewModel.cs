@@ -27,6 +27,9 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// <summary>
         /// Auxiliary index for tree control.
         /// </summary>
+        /// <remarks>
+        /// It is an unique value in the <see cref="Builds.HighLevelRepresentationBuilder.HighLevelRepresentationBuilder"/> context.
+        /// </remarks>
         public int ID { get; set; }
 
         /// <summary>
@@ -37,6 +40,20 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         #endregion
 
         #region Part Fields
+
+        /// <summary>
+        /// Gets the part instance name
+        /// </summary>
+        /// <remarks>
+        /// The instance is the part name and the usage id <see cref="STEP3D_PartRelation.id"/>
+        /// representing a unique string for the part.
+        /// </remarks>
+        public string InstanceName { get; }
+
+        /// <summary>
+        /// Get full path of compised part instance names
+        /// </summary>
+        public string InstancePath { get; private set; }
 
         /// <summary>
         /// Get Part name.
@@ -79,7 +96,6 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// <summary>
         /// Gets the Get STEP entity file Id of the relation (NAUO)
         /// </summary>
-        /// </remarks>
         public string RelationId { get => $"{relation?.stepId}"; }
 
         #endregion
@@ -331,10 +347,13 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         /// <param name="part">Reference to <see cref="STEP3D_Part"/> entity in the <see cref="STEP3DFile"/></param>
         /// <param name="relation">Reference to <see cref="STEP3D_Part"/> entity in the <see cref="STEP3DFile"/></param>
-        public Step3DRowViewModel(STEP3D_Part part, STEP3D_PartRelation relation)
+        public Step3DRowViewModel(STEP3D_Part part, STEP3D_PartRelation relation, string parentPath = "")
         {
             this.part = part;
             this.relation = relation;
+
+            this.InstanceName = string.IsNullOrWhiteSpace(this.RelationLabel) ? this.Name : $"{this.Name} ({this.RelationLabel})";
+            this.InstancePath = string.IsNullOrWhiteSpace(parentPath) ? this.InstanceName : $"{parentPath}.{this.InstanceName}";
 
             this.ResetMappingStatus();
 

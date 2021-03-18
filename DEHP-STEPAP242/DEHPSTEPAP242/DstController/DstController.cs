@@ -56,6 +56,7 @@ namespace DEHPSTEPAP242.DstController
     using DEHPSTEPAP242.Services.DstHubService;
 
     using STEP3DAdapter;
+    using DEHPSTEPAP242.Events;
 
 
     /// <summary>
@@ -148,6 +149,9 @@ namespace DEHPSTEPAP242.DstController
         {
             this.IsLoading = true;
 
+            var timer = new Stopwatch();
+            timer.Start();
+
             this.logger.Info($"Loading STEP file: { filename }");
 
             var step = new STEP3DFile(filename);
@@ -162,8 +166,12 @@ namespace DEHPSTEPAP242.DstController
                 throw new InvalidOperationException($"Error loading STEP file: { step.ErrorMessage }");
             }
 
-            // Reset mapping (pending)
-            this.ResetMappingInformation();
+            timer.Stop();
+            this.logger.Info($"STEP file loaded on { timer.ElapsedMilliseconds } ms");
+
+            // Clean pending mapping information
+            this.ResetExternalMappingIdentifier();
+            this.CleanCurrentMapping();
 
             // Update the new instance only when a load success
             this.Step3DFile = step;
@@ -211,6 +219,11 @@ namespace DEHPSTEPAP242.DstController
         public List<Step3DTargetSourceParameter> TargetSourceParametersDstStep3dMaps { get; private set; } = new List<Step3DTargetSourceParameter>();
 
         /// <summary>
+        /// Gets a <see cref="Dictionary{TKey, TValue}"/> of all mapped parameter and the associate <see cref="Step3DRowViewModel.ID"/>
+        /// </summary>
+        public Dictionary<ParameterOrOverrideBase, MappedParameterValue> ParameterNodeIds { get; } = new Dictionary<ParameterOrOverrideBase, MappedParameterValue>();
+
+        /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
         /// </summary>
         public ExternalIdentifierMap ExternalIdentifierMap { get; set; }
@@ -241,6 +254,36 @@ namespace DEHPSTEPAP242.DstController
         }
 
         /// <summary>
+        /// Remove current mapping information
+        /// </summary>
+        public void CleanCurrentMapping()
+        {
+            if (this.MapResult.Count == 0)
+            {
+                return;
+            }
+
+            this.MapResult.Clear();
+            this.TargetSourceParametersDstStep3dMaps.Clear();
+            this.ParameterNodeIds.Clear();
+
+            // Current NetChange preview must be cleaned (Impact and Object Browser)
+            CDPMessageBus.Current.SendMessage(new UpdateHighLevelRepresentationTreeEvent(true));
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+        }
+
+        /// <summary>
+        /// Remove existing <see cref="ExternalIdentifierMap"/> and <see cref="IdCorrespondences"/> data
+        /// </summary>
+        public void ResetExternalMappingIdentifier()
+        {
+            this.ExternalIdentifierMap = null;
+            this.IdCorrespondences.Clear();
+            this.UsedIdCorrespondences.Clear();
+            this.PreviousIdCorrespondences.Clear();
+        }
+
+        /// <summary>
         /// Map the provided object using the corresponding rule in the assembly and the <see cref="MappingEngine"/>
         /// </summary>
         /// <param name="part">The <see cref="Step3DRowViewModel"/> data</param>
@@ -251,16 +294,36 @@ namespace DEHPSTEPAP242.DstController
 
             this.AddPreviousIdCorrespondances(part.MappingConfigurations);
 
-            var (elements, sources) = ((List<ElementBase>, List<Step3DTargetSourceParameter>))
-                this.mappingEngine.Map(parts);
-
-            if (elements.Any())
+            if (this.mappingEngine.Map(parts) is (Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo, List<ElementBase> elements) && elements.Any())
             {
+                //this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
+                foreach(var e in elements)
+                {
+                    this.logger.Debug($"Adding Map ElementBase {e.Name}");
+                }
+
+                this.UpdateParmeterNodeId(parameterMappingInfo);
                 this.MapResult.AddRange(elements);
-                this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
 
                 this.UpdateExternalIdentifierMap();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
+            }
+        }
+
+        /// <summary>
+        /// Updates <see cref="ParameterNodeIds"/> by adding or replacing values
+        /// </summary>
+        /// <param name="parameterNodeIds">The  </param>
+        private void UpdateParmeterNodeId(Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo)
+        {
+            foreach (var entry in parameterMappingInfo)
+            {
+                if (this.ParameterNodeIds.ContainsKey(entry.Key))
+                    this.logger.Debug($"Updating ParameterNodeIds[{entry.Key.ModelCode()}] = {entry.Value.Part.Description} ...");
+                else
+                    this.logger.Debug($"Adding ParameterNodeIds[{entry.Key.ModelCode()}] = {entry.Value.Part.Description} ...");
+
+                this.ParameterNodeIds[entry.Key] = entry.Value;
             }
         }
 
@@ -513,9 +576,14 @@ namespace DEHPSTEPAP242.DstController
                 var fileRevision = file.CurrentFileRevision;
 
                 Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
-                foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
+                //foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
+                //{
+                //    sourceFieldToUpdate.UpdateSource(fileRevision);
+                //}
+
+                foreach (var item in this.ParameterNodeIds)
                 {
-                    sourceFieldToUpdate.UpdateSource(fileRevision);
+                    item.Value.UpdateSource(fileRevision);
                 }
 
                 // Step 3: create/update things
@@ -772,27 +840,6 @@ namespace DEHPSTEPAP242.DstController
 
             this.hubController.RegisterNewLogEntryToTransaction(vm.LogEntryContent, transaction);
             return true;
-        }
-
-        /// <summary>
-        /// Remove existing mapping information
-        /// </summary>
-        private void ResetMappingInformation()
-        {
-            if (this.MapResult.Count == 0)
-            {
-                return;
-            }
-
-            this.MapResult.Clear();
-            this.TargetSourceParametersDstStep3dMaps.Clear();
-
-            this.ExternalIdentifierMap = null;
-            this.IdCorrespondences.Clear();
-            this.UsedIdCorrespondences.Clear();
-            this.PreviousIdCorrespondences.Clear();
-
-            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
         }
 
         #endregion
