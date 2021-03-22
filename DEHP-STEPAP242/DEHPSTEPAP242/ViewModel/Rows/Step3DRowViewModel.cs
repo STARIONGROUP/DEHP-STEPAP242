@@ -263,25 +263,14 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         {
             this.MappingStatus = mappingStatusType;
 
-            switch (this.MappingStatus)
+            this.MappingStatusMessage = this.MappingStatus switch
             {
-                case MappingStatusType.Nothing:
-                    this.MappingStatusMessage = string.Empty;
-                    break;
-                case MappingStatusType.Configured:
-                    this.MappingStatusMessage = "Configured";
-                    break;
-                case MappingStatusType.Mapped:
-                    this.MappingStatusMessage = "Mapped";
-                    break;
-                case MappingStatusType.Transfered:
-                    this.MappingStatusMessage = "Transfered";
-                    break;
-                default:
-                    // Not expected
-                    this.MappingStatusMessage = string.Empty;
-                break;
-            }
+                MappingStatusType.Nothing => string.Empty,
+                MappingStatusType.Configured => "Configured",
+                MappingStatusType.Mapped => "Mapped",
+                MappingStatusType.Transfered => "Transfered",
+                _ => string.Empty,// Not expected
+            };
         }
 
         /// <summary>
