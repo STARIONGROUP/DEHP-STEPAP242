@@ -672,9 +672,10 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (result ?? false && !string.IsNullOrWhiteSpace(vm.Text))
             {
                 // Check that the Name is valid according to the rules for Name
-                // a) Start with letter
-                // b) Does not contain parenthesis
-                // c) does not end with space
+                // a) does not end with space
+                // b) Start with letter
+                // c) Does not contain parenthesis
+                // d) Does not exists an ED in the system or pending of transerf
 
                 var name = vm.Text.Trim();
 
@@ -687,6 +688,18 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 if (!Regex.IsMatch(name, "^[a-zA-Z]"))
                 {
                     this.statusBar.Append($"The '{name}' cannot be used as name for a new ElementDefinition, it should start with a letter", StatusBarMessageSeverity.Warning);
+                    return false;
+                }
+
+                if (this.hubController.OpenIteration.Element.Any(x => x.Name == name))
+                {
+                    this.statusBar.Append($"The '{name}' cannot be used as name for a new ElementDefinition, it already exists in the curent model", StatusBarMessageSeverity.Warning);
+                    return false;
+                }
+
+                if (this.dstController.MapResult.Any(x => x is ElementDefinition && x.Name == name))
+                {
+                    this.statusBar.Append($"The '{name}' cannot be used as name for a new ElementDefinition, it already exists in pending mapping creation", StatusBarMessageSeverity.Warning);
                     return false;
                 }
 
