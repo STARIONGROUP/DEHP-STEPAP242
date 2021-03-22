@@ -23,45 +23,7 @@ namespace DEHPSTEPAP242.MappingRules
     using DEHPSTEPAP242.ViewModel.Rows;
 
     using NLog;
-
-    /// <summary>
-    /// Helper class which keeps a reference to the <see cref="ValueArray{string}"/> 
-    /// that needs to me updated with the new <see cref="FileRevision"/> of the source
-    /// STEP 3D file in the Hub.
-    /// </summary>
-    public class Step3DTargetSourceParameter
-    {
-        /// <summary>
-        /// The <see cref="Step3DRowViewModel"/> originating the change
-        /// </summary>
-        public readonly Step3DRowViewModel part;
-
-        /// <summary>
-        /// The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest
-        /// </summary>
-        private readonly ValueArray<string> values;
-
-        /// <summary>
-        /// The index in the <see cref="ValueArray{string}"/> for the <see cref="ParameterTypeComponent"/> corresponding to the "source" field
-        /// </summary>
-        private readonly int componentIndex;
-
-        public Step3DTargetSourceParameter(Step3DRowViewModel part, ValueArray<string> values, int componentIndex)
-        {
-            this.part = part;
-            this.values = values;
-            this.componentIndex = componentIndex;
-        }
-
-        /// <summary>
-        /// Updates the <see cref="ValueArray{string}"/> associated to the source parameter
-        /// </summary>
-        /// <param name="fileRevision"></param>
-        public void UpdateSource(FileRevision fileRevision)
-        {
-            this.values[componentIndex] = fileRevision.Iid.ToString();
-        }
-    }
+    
 
     /// <summary>
     /// The <see cref="Step3DPartToElementDefinitionRule"/> is a <see cref="IMappingRule"/> 
@@ -136,8 +98,6 @@ namespace DEHPSTEPAP242.MappingRules
 
                 this.targetSourceElementBase.Clear();
                 this.parametersMappingInfo.Clear();
-                //this.mappedParameterValues = new List<MappedParameterValue>();
-                //this.targetSourceElementBase = new List<ElementBase>();
 
                 this.owner = this.hubController.CurrentDomainOfExpertise;
 
