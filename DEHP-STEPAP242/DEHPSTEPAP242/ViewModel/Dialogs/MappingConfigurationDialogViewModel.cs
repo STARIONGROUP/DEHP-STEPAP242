@@ -26,6 +26,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using DEHPCommon.Enumerators;
     using System.Diagnostics;
     using NLog;
+    using DEHPSTEPAP242.Views.Dialogs;
+    using DEHPCommon.Services.NavigationService;
+    using DEHPCommon;
+    using Autofac;
+    using System.Text.RegularExpressions;
 
 
     /// <summary>
@@ -553,6 +558,16 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                     return;
                 }
 
+                if (this.SelectedThing.SelectedElementDefinition is null)
+                {
+                    // When ElementDefinition is not selected, a new one will created
+                    // to store the selected geometry.
+                    if (!this.SelectNewElementDefinitionName())
+                    {
+                        return;
+                    }
+                }
+
                 this.IsBusy = true;
 
                 this.statusBar.Append($"Mapping in progress of {SelectedThing.Description}...");
@@ -590,11 +605,13 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                     MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created,\nthe selected option \"{this.SelectedThing.SelectedOption.Name}\" will not be used in the mapping",
                         "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else
-                {
-                    MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created",
-                        "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                //else
+                //{
+                //    MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created",
+                //        "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
+                //}
+                //
+                //string elementName = this.SelectedThing.ElementName;
 
                 return true;
             }
@@ -631,6 +648,53 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the name for the new <see cref="ElementDefinition"/> to be created
+        /// </summary>
+        /// <returns>True if a new valid name was selected</returns>
+        private bool SelectNewElementDefinitionName()
+        {
+            string elementName = string.IsNullOrWhiteSpace(this.selectedThing.NewElementDefinitionName) ? this.SelectedThing.ElementName : this.selectedThing.NewElementDefinitionName;
+
+            var vm = new InputDialogViewModel("Mapping information",
+                "A new ElementDefinition will be created\n\nDefine the name to be used:",
+                elementName, "<New name>");
+
+            var dlg = new InputDialog()
+            {
+                DataContext = vm
+            };
+
+            bool? result = dlg.ShowDialog();
+
+            if (result ?? false && !string.IsNullOrWhiteSpace(vm.Text))
+            {
+                // Check that the Name is valid according to the rules for Name
+                // a) Start with letter
+                // b) Does not contain parenthesis
+                // c) does not end with space
+
+                var name = vm.Text.Trim();
+
+                if (Regex.IsMatch(name, "[\\(\\)]"))
+                {
+                    this.statusBar.Append($"The '{name}' cannot be used as name for a new ElementDefinition, parenthesis are not valid", StatusBarMessageSeverity.Warning);
+                    return false;
+                }
+
+                if (!Regex.IsMatch(name, "^[a-zA-Z]"))
+                {
+                    this.statusBar.Append($"The '{name}' cannot be used as name for a new ElementDefinition, it should start with a letter", StatusBarMessageSeverity.Warning);
+                    return false;
+                }
+
+                this.selectedThing.NewElementDefinitionName = name;
+                return true;
+            }
+
+            return false;
         }
 
         #endregion

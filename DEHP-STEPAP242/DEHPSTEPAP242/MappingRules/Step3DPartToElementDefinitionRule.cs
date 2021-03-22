@@ -109,6 +109,11 @@ namespace DEHPSTEPAP242.MappingRules
         private DomainOfExpertise owner;
 
         /// <summary>
+        /// Holds the current processing <see cref="Step3DRowViewModel"/> new element name
+        /// </summary>
+        private string dstNewElementDefinitionName;
+
+        /// <summary>
         /// Holds the current processing <see cref="Step3DRowViewModel"/> element name
         /// </summary>
         private string dstElementName;
@@ -150,6 +155,7 @@ namespace DEHPSTEPAP242.MappingRules
                     // Default values
                     this.dstElementName = part.ElementName;
                     this.dstParameterName = part.ParameterName;
+                    this.dstNewElementDefinitionName = part.NewElementDefinitionName;
 
                     if (part.SelectedElementUsages.Any())
                     {
@@ -276,19 +282,21 @@ namespace DEHPSTEPAP242.MappingRules
         /// <returns>An <see cref="ElementDefinition"/>. New <see cref="ElementDefinition"/> is identified as <see cref="Guid.Empty"/></returns>
         private ElementDefinition GetElementDefinition()
         {
-            // Check if already exists in the hub
+            // Check if already exists in the hub (owned by owned by the current domain of expertise)
             if (this.hubController.OpenIteration.Element
-                .FirstOrDefault(x => x.Name == this.dstElementName) is { } elementDefinition)
+                .Where(x => x.Owner.Iid == this.owner.Iid)
+                .FirstOrDefault(x => x.Name == this.dstNewElementDefinitionName) is { } elementDefinition)
             {
+                this.logger.Info($"Creating new ElementDefinition '{this.dstNewElementDefinitionName}' found that an element already exists");
                 return elementDefinition;
             }
 
-            this.logger.Info($"Creating new ElementDefinition '{this.dstElementName}'");
+            this.logger.Info($"Creating new ElementDefinition '{this.dstNewElementDefinitionName}'");
 
             return this.Bake<ElementDefinition>(x =>
             {
-                x.Name = this.dstElementName;
-                x.ShortName = this.dstElementName.Replace(" ", String.Empty);
+                x.Name = this.dstNewElementDefinitionName;
+                x.ShortName = this.dstNewElementDefinitionName.Replace(" ", String.Empty);
                 x.Owner = this.owner;
                 x.Container = this.hubController.OpenIteration;
             });

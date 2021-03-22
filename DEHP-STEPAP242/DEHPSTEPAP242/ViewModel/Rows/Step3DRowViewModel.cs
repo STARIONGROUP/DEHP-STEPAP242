@@ -196,6 +196,11 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         }
 
         /// <summary>
+        /// Gets or sets the name when creating a new <see cref="ElementDefinition"/>
+        /// </summary>
+        public string NewElementDefinitionName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets this represented ElementName
         /// </summary>
         public string ElementName => this.Name;

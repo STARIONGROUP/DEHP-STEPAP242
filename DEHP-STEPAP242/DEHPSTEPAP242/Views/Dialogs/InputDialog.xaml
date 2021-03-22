@@ -1,0 +1,27 @@
+﻿<dx:DXDialogWindow x:Class="DEHPSTEPAP242.Views.Dialogs.InputDialog"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                   xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   mc:Ignorable="d"
+                   Title="Information requested" Height="225.099" Width="390" WindowStartupLocation="CenterOwner">
+    <Border BorderThickness="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Content="{Binding Label}" Margin="0,0,0,8"></Label>
+
+            <dxe:TextEdit Grid.Row="1" Text="{Binding Text}" NullText="{Binding NullText}"/>
+        </Grid>
+    </Border>
+
+    <dx:DXDialogWindow.FooterButtons>
+        <dx:DialogButton ToolTip="Proceed with logout and cancel pending transfert" Content="OK" MinWidth="65" DialogResult="OK"/>
+        <dx:DialogButton ToolTip="Cancel logout" IsDefault="True" Content="Cancel" IsCancel="True" MinWidth="65" DialogResult="Cancel"/>
+    </dx:DXDialogWindow.FooterButtons>
+</dx:DXDialogWindow>
