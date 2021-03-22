@@ -64,11 +64,6 @@ namespace DEHPSTEPAP242.ViewModel
         private readonly IHubController hubController;
 
         /// <summary>
-        /// The <see cref="IDstObjectBrowserViewModel"/>
-        /// </summary>
-        private readonly IDstObjectBrowserViewModel dstStep3DControlViewModel;
-
-        /// <summary>
         /// Gets or sets the collection of <see cref="MappingRows"/>
         /// </summary>
         public ReactiveList<MappingRowViewModel> MappingRows { get; set; } = new ReactiveList<MappingRowViewModel>();
@@ -78,13 +73,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="hubController">The <see cref="IHubController"/>"/></param>
-        /// <param name="dstVariablesControlViewModel">The <see cref="IDstObjectBrowserViewModel"/></param>
         public MappingViewModel(IDstController dstController, IHubController hubController,
             IDstObjectBrowserViewModel dstVariablesControlViewModel)
         {
             this.dstController = dstController;
             this.hubController = hubController;
-            this.dstStep3DControlViewModel = dstVariablesControlViewModel;
 
             this.InitializeObservables();
         }
@@ -133,10 +126,10 @@ namespace DEHPSTEPAP242.ViewModel
 
             foreach (var parameter in parametersMappingInfo)
             {
+                this.logger.Debug($"Adding MappingRowViewModel({parameter.parameter}, {parameter.info.Part.InstancePath}");
+
                 this.MappingRows.Add(new MappingRowViewModel(this.dstController.MappingDirection,
-                    parameter.parameter, parameter.info.Part));
-                //this.MappingRows.Add(new MappingRowViewModel(this.dstController.MappingDirection, parameter.parameter,
-                //    this.dstStep3DControlViewModel.Step3DHLR.FirstOrDefault(x => x.ID == parameter.info.Part.ID)));
+                    parameter.parameter, parameter.info));
             }
         }
 
@@ -150,18 +143,9 @@ namespace DEHPSTEPAP242.ViewModel
             var result = new List<(ParameterOrOverrideBase, MappedParameterValue)>();
 
             var modified = this.dstController.ParameterNodeIds.Where(
-                x => x.Key.GetContainerOfType<ElementDefinition>().Iid == element.Iid).ToList();
+                    x => x.Key.GetContainerOfType<ElementDefinition>() == element).FirstOrDefault();
 
-            var originals = this.hubController.OpenIteration.Element
-                .FirstOrDefault(x => x.Iid == element.Iid)?
-                .Parameter.Where(x => modified
-                    .Select(o => o.Key)
-                    .Any(p => p.Iid == x.Iid)) ?? modified.Select(x => x.Key);
-
-            foreach (var parameterOverride in originals)
-            {
-                result.Add((parameterOverride, modified.FirstOrDefault(p => p.Key.Iid == parameterOverride.Iid).Value));
-            }
+            result.Add((modified.Key, modified.Value));
 
             return result;
         }
@@ -176,16 +160,11 @@ namespace DEHPSTEPAP242.ViewModel
             var result = new List<(ParameterOrOverrideBase, MappedParameterValue)>();
 
             var modified = this.dstController.ParameterNodeIds.Where(
-                x => x.Key.GetContainerOfType<ElementUsage>().Iid == element.Iid).ToList();
-
-            var originals = this.hubController.OpenIteration.Element
-                .FirstOrDefault(x => x.Iid == element.ElementDefinition.Iid)?
-                .ReferencingElementUsages().FirstOrDefault(x => x.Iid == element.Iid)?.ParameterOverride
-                .Where(p => modified.Any(x => p.Iid == x.Key.Iid)) ?? new List<ParameterOverride>();
-
-            foreach (var parameterOverride in originals)
+                x => x.Key.GetContainerOfType<ElementUsage>() == element).ToList();
+            
+            foreach (var entry in modified)
             {
-                result.Add((parameterOverride, modified.FirstOrDefault(p => p.Key.Iid == parameterOverride.Iid).Value));
+                result.Add((entry.Key, entry.Value));
             }
 
             return result;

@@ -214,11 +214,6 @@ namespace DEHPSTEPAP242.DstController
         public ReactiveList<ElementBase> MapResult { get; private set; } = new ReactiveList<ElementBase>();
 
         /// <summary>
-        /// Gets the colection of mapped <see cref="Step3DTargetSourceParameter"/> which needs to be updated in the transfer operation
-        /// </summary>
-        public List<Step3DTargetSourceParameter> TargetSourceParametersDstStep3dMaps { get; private set; } = new List<Step3DTargetSourceParameter>();
-
-        /// <summary>
         /// Gets a <see cref="Dictionary{TKey, TValue}"/> of all mapped parameter and the associate <see cref="Step3DRowViewModel.ID"/>
         /// </summary>
         public Dictionary<ParameterOrOverrideBase, MappedParameterValue> ParameterNodeIds { get; } = new Dictionary<ParameterOrOverrideBase, MappedParameterValue>();
@@ -264,11 +259,40 @@ namespace DEHPSTEPAP242.DstController
             }
 
             this.MapResult.Clear();
-            this.TargetSourceParametersDstStep3dMaps.Clear();
+            this.ParameterNodeIds.Clear();
+
+            // Mapping status is reset to default
+            CDPMessageBus.Current.SendMessage(new UpdateHighLevelRepresentationTreeEvent(true));
+
+            // Current NetChange preview must be cleaned (Impact and Object Browser)
+            CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+        }
+
+        /// <summary>
+        /// Updates mapped parts to <see cref="Step3DRowViewModel.MappingStatusType.Transfered"/>
+        /// </summary>
+        private void SetMappedToTransferStatus()
+        {
+            foreach (var item in this.ParameterNodeIds)
+            {
+                item.Value.Part.SetTransferedStatus();
+            }
+        }
+
+        /// <summary>
+        /// Remove current mapping information preserving the status of transfered mappings
+        /// </summary>
+        private void CleanCurrentMappingOnTransfer()
+        {
+            foreach (var item in this.ParameterNodeIds)
+            {
+                item.Value.Part.SetTransferedStatus();
+            }
+
+            this.MapResult.Clear();
             this.ParameterNodeIds.Clear();
 
             // Current NetChange preview must be cleaned (Impact and Object Browser)
-            CDPMessageBus.Current.SendMessage(new UpdateHighLevelRepresentationTreeEvent(true));
             CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
         }
 
@@ -296,7 +320,6 @@ namespace DEHPSTEPAP242.DstController
 
             if (this.mappingEngine.Map(parts) is (Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo, List<ElementBase> elements) && elements.Any())
             {
-                //this.TargetSourceParametersDstStep3dMaps.AddRange(sources);
                 foreach(var e in elements)
                 {
                     this.logger.Debug($"Adding Map ElementBase {e.Name}");
@@ -576,10 +599,6 @@ namespace DEHPSTEPAP242.DstController
                 var fileRevision = file.CurrentFileRevision;
 
                 Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
-                //foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
-                //{
-                //    sourceFieldToUpdate.UpdateSource(fileRevision);
-                //}
 
                 foreach (var item in this.ParameterNodeIds)
                 {
@@ -627,21 +646,19 @@ namespace DEHPSTEPAP242.DstController
                 timer.Stop();
                 this.TransferTime = timer.ElapsedMilliseconds;
 
-                foreach (var sourceFieldToUpdate in this.TargetSourceParametersDstStep3dMaps)
-                {
-                    sourceFieldToUpdate.part.SetTransferedStatus();
-                }
+                this.SetMappedToTransferStatus();
 
                 Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfers to Hub done, updating data source..."));
                 await this.hubController.Refresh();
 
-                this.hubController.GetThingById(this.ExternalIdentifierMap.Iid, this.hubController.OpenIteration, out ExternalIdentifierMap map);
-                this.ExternalIdentifierMap = map.Clone(true);
+                // Update ExternalIdentifierMap with current information from Hub
+                if (this.ExternalIdentifierMap is { })
+                {
+                    this.hubController.GetThingById(this.ExternalIdentifierMap.Iid, this.hubController.OpenIteration, out ExternalIdentifierMap map);
+                    this.ExternalIdentifierMap = map.Clone(true);
+                }
 
-                this.MapResult.Clear();
-                this.TargetSourceParametersDstStep3dMaps.Clear();
-
-                CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
+                this.CleanCurrentMappingOnTransfer();
             }
             catch (Exception e)
             {

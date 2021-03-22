@@ -31,29 +31,12 @@ namespace DEHPSTEPAP242.DstController
     using ReactiveUI;
 
     using CDP4Common.EngineeringModelData;
+    using CDP4Common.Types;
     using DEHPCommon.Enumerators;
 
     using DEHPSTEPAP242.ViewModel.Rows;
+
     using STEP3DAdapter;
-    using CDP4Common.Types;
-
-    /*
-    /// <summary>
-    /// Container for the <see cref="IDstController.ParameterNodeIds"/> Value field.
-    /// </summary>
-    public struct MappedParameterValue
-    {
-        /// <summary>
-        /// The source <see cref="Step3DRowViewModel"/> initiating the mapping
-        /// </summary>
-        public int Part;
-
-        /// <summary>
-        /// The <see cref="ValueSet"/> where the "source" field must be updated with the <see cref="FileRevision"/> after the upload.
-        /// </summary>
-        public ValueArray<string> Fields;
-    }
-    */
 
     /// <summary>
     /// Helper class which keeps a reference to the <see cref="ValueArray{string}"/> 
@@ -70,17 +53,23 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest (fields of the compound parameter)
         /// </summary>
-        private readonly ValueArray<string> Fields;
+        public readonly ValueArray<string> Fields;
 
         /// <summary>
         /// The index in the <see cref="ValueArray{string}"/> for the <see cref="ParameterTypeComponent"/> corresponding to the "source" field
         /// </summary>
         private readonly int componentIndex;
 
-        public MappedParameterValue(Step3DRowViewModel part, ValueArray<string> values, int componentIndex)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/></param>
+        /// <param name="fields">The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest to be updated</param>
+        /// <param name="componentIndex">The index corresponding to the source field</param>
+        public MappedParameterValue(Step3DRowViewModel part, ValueArray<string> fields, int componentIndex)
         {
             this.Part = part;
-            this.Fields = values;
+            this.Fields = fields;
             this.componentIndex = componentIndex;
         }
 

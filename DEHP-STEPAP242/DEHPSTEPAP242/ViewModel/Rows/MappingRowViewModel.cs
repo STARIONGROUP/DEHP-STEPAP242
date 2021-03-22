@@ -33,6 +33,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
 
     using DEHPCommon.Enumerators;
     using System;
+    using DEHPSTEPAP242.DstController;
 
     /// <summary>
     /// Represents a row of mapped <see cref="ParameterOrOverrideBase"/> and <see cref="Step3DRowViewModel"/>
@@ -93,8 +94,8 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             this.DstThing = new MappedThing() 
             {
                 Name = part.InstancePath, 
-                //Value = part.relation is null ? $"STEP entity {part.StepId}" : $"STEP entity {part.StepId} used at {part.RelationId}"
-                Value = $"STEP entity {part.Description}"
+                Value = string.IsNullOrEmpty(part.RelationLabel) ? $"STEP Entity {part.Description}" : $"STEP entity {part.Description} used at Relation {part.RelationLabel}"
+                //Value = $"STEP entity {part.Description}"
             };
 
             string value;
@@ -111,6 +112,39 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             {
                 value = "-";
             }
+
+            this.HubThing = new MappedThing()
+            {
+                Name = parameter.ModelCode(),
+                Value = value
+            };
+
+            this.UpdateDirection(currentMappingDirection);
+        }
+
+        public MappingRowViewModel(MappingDirection currentMappingDirection, ParameterBase parameter, MappedParameterValue mappInfo)
+        {
+            this.Direction = MappingDirection.FromDstToHub;
+
+            var part = mappInfo.Part;
+            var fields = mappInfo.Fields;
+
+            this.DstThing = new MappedThing()
+            {
+#if USE_DST_THING_NAME_DESCRIPTION
+                // Use NAME Description --> inform the relation where it is used
+                Name = part.Description,
+                Value = string.IsNullOrEmpty(part.RelationLabel) ? $"STEP Entity {part.Description}" : $"STEP entity {part.Description} used at Relation {part.RelationLabel}"
+#else
+                // Use NAME InstancePath
+                Name = part.InstancePath,
+                Value = $"STEP entity {part.Description}"
+#endif
+            };
+
+            // Step 3D geometry is a vector, fill with non-empty values
+            var valueSet = fields;
+            var value = $"[{string.Join(", ", valueSet.Where(x => !string.IsNullOrEmpty(x)))}]";
 
             this.HubThing = new MappedThing()
             {

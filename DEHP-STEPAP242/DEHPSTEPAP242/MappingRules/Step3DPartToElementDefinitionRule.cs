@@ -180,6 +180,8 @@ namespace DEHPSTEPAP242.MappingRules
 
                 if (part.SelectedParameter is { } parameter)
                 {
+                    this.logger.Debug($"SelectedParameter {parameter.Iid}");
+
                     if (elementUsage.ParameterOverride.FirstOrDefault(x => x.Parameter.Iid == parameter.Iid) is { } existingOverride)
                     {
                         parameterOverride = existingOverride;
@@ -228,7 +230,12 @@ namespace DEHPSTEPAP242.MappingRules
 
                 if (parameterOverride is { })
                 {
+                    this.logger.Debug($"parameterOverride {parameterOverride.Iid}");
                     this.UpdateValueSet(part, parameterOverride);
+                }
+                else
+                {
+                    this.logger.Error($"No parameterOverride defined --> UpdateValueSet() not called");
                 }
 
                 this.AddToExternalIdentifierMap(elementUsage.ElementDefinition.Iid, this.dstElementName);
@@ -377,7 +384,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         /// <param name="part">The <see cref="VariableRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Parameter"/></param>
-        private void UpdateValueSet(Step3DRowViewModel part, ParameterBase parameter)
+        private void UpdateValueSet(Step3DRowViewModel part, ParameterOrOverrideBase parameter)
         {
             var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(part.SelectedOption, part.SelectedActualFiniteState);
 
@@ -390,8 +397,10 @@ namespace DEHPSTEPAP242.MappingRules
         /// <param name="part">The <see cref="Step3DRowViewModel"/></param>
         /// <param name="parameter">The <see cref="Thing"/> <see cref="Parameter"/> or <see cref="ParameterOverride"/></param>
         /// <param name="valueSet">The <see cref="ParameterValueSetBase"/></param>
-        private void UpdateComputedValueSet(Step3DRowViewModel part, Thing parameter, ParameterValueSetBase valueSet)
+        private void UpdateComputedValueSet(Step3DRowViewModel part, ParameterOrOverrideBase parameter, ParameterValueSetBase valueSet)
         {
+            this.logger.Debug($"Updating parameter {parameter.Iid}");
+
             ParameterBase paramBase = (ParameterBase)parameter;
             var paramType = paramBase.ParameterType;
 
@@ -421,7 +430,7 @@ namespace DEHPSTEPAP242.MappingRules
                     valuearray = valueSet.Computed;
                 }
 
-                UpdateValueArrayForCompoundParameterType(part, p, valuearray);
+                UpdateValueArrayForCompoundParameterType(part, parameter, p, valuearray);
 
                 valueSet.ValueSwitch = ParameterSwitchKind.COMPUTED;
 
@@ -437,26 +446,30 @@ namespace DEHPSTEPAP242.MappingRules
                     this.AddToExternalIdentifierMap(part.SelectedActualFiniteState.Iid, this.dstParameterName);
                 }
             }
+            else
+            {
+                this.logger.Error($"Parameter is not of CompoundParameterType");
+            }
         }
 
         /// <summary>
         /// Update <see cref="CompoundParameterType"/> <see cref="ValueArray{string}"/>
         /// </summary>
         /// <param name="part">The <see cref="Step3DRowViewModel"/></param>
-        /// <param name="parameter">The <see cref="CompoundParameterType"/></param>
+        /// <param name="compoundParameter">The <see cref="CompoundParameterType"/></param>
         /// <param name="valuearray">The <see cref="ValueArray{string}"/></param>
         /// <remarks>
         /// Creates a <seealso cref="Step3DTargetSourceParameter"/> entry when a
-        /// <see cref="ParameterTypeComponent"/> named "source" is present in the <paramref name="parameter"/>.
+        /// <see cref="ParameterTypeComponent"/> named "source" is present in the <paramref name="compoundParameter"/>.
         /// </remarks>
-        private void UpdateValueArrayForCompoundParameterType(Step3DRowViewModel part, CompoundParameterType parameter, ValueArray<string> valuearray)
+        private void UpdateValueArrayForCompoundParameterType(Step3DRowViewModel part, ParameterOrOverrideBase parameter, CompoundParameterType compoundParameter, ValueArray<string> valuearray)
         {
             // Component is an OrderedItemList, and the order could be 
             // changed externally by modifyind the ParameterType definition,
             // then do the set the value based on component's name
 
             int index = 0;
-            foreach (ParameterTypeComponent component in parameter.Component)
+            foreach (ParameterTypeComponent component in compoundParameter.Component)
             {
                 switch (component.ShortName)
                 {
@@ -475,7 +488,10 @@ namespace DEHPSTEPAP242.MappingRules
                         // NOTE: FileRevision.Iid will be known at Transfer time
                         //       store the current index to know which possition corresponds
                         //       to the source (avoid searching it again)
-                        this.parametersMappingInfo[part.SelectedParameter] = new MappedParameterValue(part, valuearray, index);
+                        //this.parametersMappingInfo[part.SelectedParameter] = new MappedParameterValue(part, valuearray, index);
+
+                        this.logger.Debug($"Updating map parametersMappingInfo[{parameter.Iid}]");
+                        this.parametersMappingInfo[parameter] = new MappedParameterValue(part, valuearray, index);
                         valuearray[index++] = "";
                     }
                     break;
