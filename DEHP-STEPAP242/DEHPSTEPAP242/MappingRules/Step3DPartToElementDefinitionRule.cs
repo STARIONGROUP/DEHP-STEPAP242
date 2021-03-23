@@ -401,6 +401,10 @@ namespace DEHPSTEPAP242.MappingRules
         {
             var valueSet = (ParameterValueSetBase)parameter.QueryParameterBaseValueSet(part.SelectedOption, part.SelectedActualFiniteState);
 
+            var optionName = part.SelectedOption is null ? "null" : part.SelectedOption.Name;
+            var stateName = part.SelectedActualFiniteState is null ? "null" : part.SelectedActualFiniteState.Name;
+            this.logger.Debug($"ParameterValueSet {valueSet.Iid} for Option: {optionName}, State: {stateName}");
+
             this.UpdateComputedValueSet(part, parameter, valueSet);
         }
 
@@ -412,7 +416,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// <param name="valueSet">The <see cref="ParameterValueSetBase"/></param>
         private void UpdateComputedValueSet(Step3DRowViewModel part, ParameterOrOverrideBase parameter, ParameterValueSetBase valueSet)
         {
-            this.logger.Debug($"Updating parameter {parameter.Iid}");
+            this.logger.Debug($"Updating Parameter {parameter.Iid} for ValueSet {valueSet.Iid}");
 
             ParameterBase paramBase = (ParameterBase)parameter;
             var paramType = paramBase.ParameterType;
@@ -449,14 +453,14 @@ namespace DEHPSTEPAP242.MappingRules
 
                 this.AddToExternalIdentifierMap(parameter.Iid, this.dstParameterName);
 
-                if (part.SelectedOption is { })
+                if (part.SelectedOption is { } option)
                 {
-                    this.AddToExternalIdentifierMap(part.SelectedOption.Iid, this.dstParameterName);
+                    this.AddToExternalIdentifierMap(option.Iid, this.dstParameterName);
                 }
 
-                if (part.SelectedActualFiniteState is { })
+                if (part.SelectedActualFiniteState is { } state)
                 {
-                    this.AddToExternalIdentifierMap(part.SelectedActualFiniteState.Iid, this.dstParameterName);
+                    this.AddToExternalIdentifierMap(state.Iid, this.dstParameterName);
                 }
             }
             else
