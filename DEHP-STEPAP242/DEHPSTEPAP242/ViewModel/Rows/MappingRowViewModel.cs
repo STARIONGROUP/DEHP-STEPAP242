@@ -146,6 +146,17 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             var valueSet = fields;
             var value = $"[{string.Join(", ", valueSet.Where(x => !string.IsNullOrEmpty(x)))}]";
 
+            // Inform extra configuration parameters
+            if (part.SelectedOption is { } option)
+            {
+                value += $" Option: {option.Name}";
+            }
+
+            if (part.SelectedActualFiniteState is { } state)
+            {
+                value += $" State: {state.Name}";
+            }
+
             this.HubThing = new MappedThing()
             {
                 Name = parameter.ModelCode(),
