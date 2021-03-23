@@ -136,10 +136,7 @@ namespace DEHPSTEPAP242.MappingRules
                             }
                         }
 
-                        this.targetSourceElementBase.Add(part.SelectedElementDefinition);
-
-                        this.AddsValueSetToTheSelectectedParameter(part);
-                        this.AddToExternalIdentifierMap(part.SelectedElementDefinition.Iid, this.dstElementName);
+                        this.UpdateValueSetsFromElementDefinition(part);
                     }
 
                     part.SetMappedStatus();
@@ -174,6 +171,8 @@ namespace DEHPSTEPAP242.MappingRules
         {
             foreach (var elementUsage in part.SelectedElementUsages)
             {
+                this.logger.Info($"Processing MappingRule for ElementUsage: {elementUsage.Name} [{elementUsage.Iid}]");
+
                 this.targetSourceElementBase.Add(elementUsage);
 
                 ParameterOverride parameterOverride;
@@ -267,6 +266,20 @@ namespace DEHPSTEPAP242.MappingRules
                 x.Owner = this.owner;
                 x.Container = this.hubController.OpenIteration;
             });
+        }
+
+        /// <summary>
+        /// Updates the parameters overrides from the selected <see cref="ElementDefinition"/>s
+        /// </summary>
+        /// <param name="part">The current <see cref="Step3DRowViewModel"/></param>
+        private void UpdateValueSetsFromElementDefinition(Step3DRowViewModel part)
+        {
+            this.logger.Info($"Processing MappingRule for ElementDefinition: {part.SelectedElementDefinition.Name} [{part.SelectedElementDefinition.Iid}]");
+
+            this.targetSourceElementBase.Add(part.SelectedElementDefinition);
+
+            this.AddsValueSetToTheSelectectedParameter(part);
+            this.AddToExternalIdentifierMap(part.SelectedElementDefinition.Iid, this.dstElementName);
         }
 
         /// <summary>

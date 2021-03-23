@@ -576,6 +576,9 @@ namespace DEHPSTEPAP242.DstController
         {
             try
             {
+                this.logger.Info($"Begin Transfer of {this.MapResult.Count} elements...");
+                this.logger.Debug($"MapResult distinct elements = {this.MapResult.Distinct()}");
+
                 var timer = new Stopwatch();
                 timer.Start();
 
@@ -659,6 +662,8 @@ namespace DEHPSTEPAP242.DstController
                 }
 
                 this.CleanCurrentMappingOnTransfer();
+
+                this.logger.Info($"Transfer finished");
             }
             catch (Exception e)
             {

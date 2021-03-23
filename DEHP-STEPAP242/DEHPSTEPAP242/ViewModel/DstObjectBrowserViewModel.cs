@@ -1,4 +1,5 @@
-﻿
+﻿#define DEBUG_DST_OBJECT_BROWSER
+
 namespace DEHPSTEPAP242.ViewModel
 {
     using System;
@@ -304,17 +305,13 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <remarks>
         /// The mapping is performed only on the <see cref="SelectedPart"/> through
-        /// the <see cref="IMappingConfigurationDialogViewModel"/>
+        /// the <see cref="MappingConfigurationDialog"/>
         /// </remarks>
         private void MapCommandExecute()
         {
             var viewModel = AppContainer.Container.Resolve<IMappingConfigurationDialogViewModel>();
 
             this.AssignMapping();
-
-#if DEBUG_DST_OBJECT_BROWSER
-            this.ShowMappingConfigurations(this.SelectedPart);
-#endif
 
             viewModel.SetPart(this.SelectedPart);
 
@@ -354,6 +351,7 @@ namespace DEHPSTEPAP242.ViewModel
                          x.ExternalId == this.SelectedPart.ParameterName));
 
 #if DEBUG_DST_OBJECT_BROWSER
+            this.logger.Debug($"MappingConfigurations assigned");
             this.ShowMappingConfigurations(this.selectedPart);
 #endif
 
@@ -396,6 +394,10 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
 #if DEBUG_DST_OBJECT_BROWSER
+        /// <summary>
+        /// Shows the mapping configuration
+        /// </summary>
+        /// <param name="part">The <see cref="Step3DRowViewModel"/></param>
         private void ShowMappingConfigurations(Step3DRowViewModel part)
         {
             this.logger.Debug($"MappingConfigurations for: {part.Description}");
