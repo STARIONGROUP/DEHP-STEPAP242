@@ -5,32 +5,30 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
+    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Input;
 
-    using ReactiveUI;
-
     using DevExpress.Mvvm.Native;
+    using ReactiveUI;
+    using Autofac;
+    using NLog;
 
     using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
 
+    using DEHPCommon;
+    using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPCommon.Services.NavigationService;
 
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Rows;
-    using DEHPCommon.Enumerators;
-    using System.Diagnostics;
-    using NLog;
     using DEHPSTEPAP242.Views.Dialogs;
-    using DEHPCommon.Services.NavigationService;
-    using DEHPCommon;
-    using Autofac;
-    using System.Text.RegularExpressions;
+    using DEHPSTEPAP242.Services.DstHubService;
 
 
     /// <summary>
@@ -147,9 +145,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             part.CleanSelections();
 
-#if DEBUG_MAPPING_CONFIGURATION
-            this.logger.Debug($"UpdatePropertiesBasedOnMappingConfiguration: {part.Description}");
-#endif
+            this.logger.Debug($"Update Selections for: {part.Description}");
 
             // First: check ED before processing other things
             foreach (var idCorrespondence in part.MappingConfigurations)
@@ -169,9 +165,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             {
                 if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
                 {
-#if DEBUG_MAPPING_CONFIGURATION
-                    this.logger.Debug($"Correspondance Thing = {thing}");
-#endif
+                    this.logger.Debug($"Process Correspondance Thing = {thing} --> {thing.Iid}");
+
                     switch (thing)
                     {
                         case ElementDefinition elementDefinition:
@@ -210,6 +205,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 var text = string.Join(Environment.NewLine + Environment.NewLine, warnings);
                 MessageBox.Show(text, "Mapping Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+
+            this.logger.Debug($"Update Selections finished");
         }
 
         /// <summary>
@@ -224,10 +221,15 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             if (part.SelectedElementDefinition is null)
             {
-                warnings.Add($"The mapped ElementDefinition \"{ed.Name}\" [{ed.ModelCode()}] is not more available");
+                var msg = $"The mapped ElementDefinition \"{ed.Name}\" [{ed.ModelCode()}] is not more available";
+                warnings.Add(msg);
+
+                this.logger.Warn(msg);
             }
             else
             {
+                this.logger.Debug($"Select ElementDefinition \"{ed.Name}\" [{ed.ModelCode()}]");
+
                 // Update what can be selected before reading information from the mapping
                 this.UpdateAvailableElementUsages();
                 this.UpdateSelectedParameter();
@@ -257,6 +259,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             }
             else
             {
+                this.logger.Debug($"Add Selected ElementUsage \"{eu.Name}\" [{eu.ModelCode()}]");
                 part.SelectedElementUsages.Add(eu);
             }
         }
@@ -450,30 +453,44 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// </summary>
         private void UpdateAvailableElementUsages()
         {
+            this.logger.Debug("Clean previous elements");
             this.AvailableElementUsages.Clear();
 
             if (this.SelectedThing?.SelectedElementDefinition is { })
             {
-                var selectedElementUsages = new List<ElementUsage>(this.SelectedThing.SelectedElementUsages);
+                this.logger.Debug($"Current ElementDefinition: {this.SelectedThing.SelectedElementDefinition.Name} [{this.SelectedThing.SelectedElementDefinition.ModelCode()}]");
 
-                this.AvailableElementUsages.AddRange(this.GetElementUsagesFor(this.SelectedThing.SelectedElementDefinition));
+                var selectedElementUsages = this.SelectedThing.SelectedElementUsages.ToList();
+
+                foreach (var eu in selectedElementUsages)
+                {
+                    this.logger.Debug($"Selected ElementDefinition: \"{eu.Name}\" [{eu.ModelCode()}]");
+                }
+
+                var elementsUsages = this.GetElementUsagesFor(this.SelectedThing.SelectedElementDefinition);
+
+                foreach (var eu in elementsUsages)
+                {
+                    this.logger.Debug($"Available ElementUsage from selected ElementeDefinition: \"{eu.Name}\" [{eu.ModelCode()}]");
+                }
+
+                this.AvailableElementUsages.AddRange(elementsUsages);
+
+                foreach (var eu in this.SelectedThing.SelectedElementUsages)
+                {
+                    this.logger.Debug($"BEFORE Selected ElementUsage: \"{eu.Name}\" [{eu.ModelCode()}]");
+                }
 
                 // The UI filters any existing ElementUsage not compatible with its source (AvailableElementUsages)
+                this.SelectedThing.SelectedElementUsages.Clear();
                 this.SelectedThing.SelectedElementUsages.AddRange(
                     this.AvailableElementUsages.Where(x => selectedElementUsages.Any(s => s.Iid == x.Iid))
                     );
 
-#if UPDATE_SELECT_ELEMENT_USAGES
-                this.SelectedThing.SelectedElementUsages.Clear();
-                foreach (var selectedEU in selectedElementUsages)
+                foreach (var eu in this.SelectedThing.SelectedElementUsages)
                 {
-                    this.logger.Debug($"{selectedEU} [{selectedEU.ModelCode()}]");
-                    if (this.AvailableElementUsages.FirstOrDefault(x => x.Iid == selectedEU.Iid) is { } elementUsage)
-                    {
-                        this.SelectedThing.SelectedElementUsages.Add(elementUsage);
-                    }
+                    this.logger.Debug($"AFTER Selected ElementUsage: \"{eu.Name}\" [{eu.ModelCode()}]");
                 }
-#endif
             }
         }
 
