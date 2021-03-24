@@ -221,7 +221,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
         /// </summary>
-        public ExternalIdentifierMap ExternalIdentifierMap { get; set; }
+        public ExternalIdentifierMap ExternalIdentifierMap { get; private set; }
 
         /// <summary>
         /// Gets the collection of <see cref="IdCorrespondences"/>
@@ -328,7 +328,7 @@ namespace DEHPSTEPAP242.DstController
                 this.UpdateParmeterNodeId(parameterMappingInfo);
                 this.MapResult.AddRange(elements);
 
-                this.UpdateExternalIdentifierMap();
+                this.MergeExternalIdentifierMap();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
             }
         }
@@ -415,7 +415,7 @@ namespace DEHPSTEPAP242.DstController
         /// 
         /// All of those lists are cleaned at the end.
         /// </remarks>
-        public void UpdateExternalIdentifierMap()
+        public void MergeExternalIdentifierMap()
         {
             if (this.ExternalIdentifierMap is null)
             {
@@ -466,6 +466,15 @@ namespace DEHPSTEPAP242.DstController
             this.IdCorrespondences.Clear();
             this.UsedIdCorrespondences.Clear();
             this.PreviousIdCorrespondences.Clear();
+        }
+
+        /// <summary>
+        /// Updates the mappings of the current <see cref="ExternalIdentifierMap"/>
+        /// </summary>
+        /// <param name="externalIdentifierMap"></param>
+        public void SetExternalIdentifierMap(ExternalIdentifierMap externalIdentifierMap)
+        {
+            this.ExternalIdentifierMap = externalIdentifierMap;
         }
 
         /// <summary>
@@ -553,6 +562,21 @@ namespace DEHPSTEPAP242.DstController
         #region Private Transfer Methods
 
         /// <summary>
+        /// Send message to the status bar
+        /// </summary>
+        /// <param name="message">The message</param>
+        /// <param name="messageSeverity">The status severity</param>
+        private void SendStatusMessage(string message, StatusBarMessageSeverity messageSeverity = StatusBarMessageSeverity.Info)
+        {
+            if (Application.ResourceAssembly == null)
+            {
+                return;
+            }
+
+            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append(message, messageSeverity));
+        }
+
+        /// <summary>
         /// Initializes a new <see cref="IThingTransaction"/> based on the current open <see cref="Iteration"/>
         /// </summary>
         /// <returns>A <see cref="ValueTuple"/> Containing the <see cref="Iteration"/> clone and the <see cref="IThingTransaction"/></returns>
@@ -594,14 +618,14 @@ namespace DEHPSTEPAP242.DstController
                 string filePath = Step3DFile.FileName;
                 var file = this.dstHubService.FindFile(filePath);
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Uploading STEP file to Hub: {filePath}"));
+                this.SendStatusMessage($"Uploading STEP file to Hub: {filePath}");
                 await this.hubController.Upload(filePath, file);
 
                 // Step 2: update Step3dParameter.source with FileRevision from uploaded file
                 file = this.dstHubService.FindFile(filePath);
                 var fileRevision = file.CurrentFileRevision;
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Updating STEP file references Guid to: {fileRevision.Iid}"));
+                this.SendStatusMessage($"Updating STEP file references Guid to: {fileRevision.Iid}");
 
                 foreach (var item in this.ParameterNodeIds)
                 {
@@ -609,7 +633,8 @@ namespace DEHPSTEPAP242.DstController
                 }
 
                 // Step 3: create/update things
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Processing {this.MapResult.Count} mapping data..."));
+                this.SendStatusMessage($"Processing {this.MapResult.Count} mapping data...");
+
                 foreach (var elementBase in this.MapResult)
                 {
                     if (elementBase is ElementDefinition elementDefinition)
@@ -636,14 +661,14 @@ namespace DEHPSTEPAP242.DstController
 
                 transaction.CreateOrUpdate(iterationClone);
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering changes..."));
+                this.SendStatusMessage($"Transfering changes...");
                 await this.hubController.Write(transaction);
 
                 // Update ValueSet after the commit.
                 // The ValueArray are constructed with the correct size
                 // in the last HubController.Write(transaction) call.
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfering ValueSets..."));
+                this.SendStatusMessage($"Transfering ValueSets...");
                 await this.UpdateParametersValueSets();
 
                 timer.Stop();
@@ -651,7 +676,7 @@ namespace DEHPSTEPAP242.DstController
 
                 this.SetMappedToTransferStatus();
 
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Transfers to Hub done, updating data source..."));
+                this.SendStatusMessage($"Transfers to Hub done, updating data source...");
                 await this.hubController.Refresh();
 
                 // Update ExternalIdentifierMap with current information from Hub

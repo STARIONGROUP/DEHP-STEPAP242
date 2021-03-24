@@ -171,7 +171,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         public void VerifyCreateExternalIdentifierMap()
         {
             var newExternalIdentifierMap = this.controller.CreateExternalIdentifierMap("Name");
-            this.controller.ExternalIdentifierMap = newExternalIdentifierMap;
+            this.controller.SetExternalIdentifierMap(newExternalIdentifierMap);
             Assert.AreEqual("Name", this.controller.ExternalIdentifierMap.Name);
             Assert.AreEqual("Name", this.controller.ExternalIdentifierMap.ExternalModelName);
             Assert.AreEqual(this.controller.ThisToolName, this.controller.ExternalIdentifierMap.ExternalToolName);
@@ -180,7 +180,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         [Test]
         public void VerifyAddToExternalIdentifierMap()
         {
-            this.controller.ExternalIdentifierMap = this.controller.CreateExternalIdentifierMap("test");
+            this.controller.SetExternalIdentifierMap(this.controller.CreateExternalIdentifierMap("test"));
 
             var internalId = Guid.NewGuid();
             this.controller.AddToExternalIdentifierMap(internalId, string.Empty);
@@ -199,7 +199,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         {
             const string oldCorrespondenceExternalId = "old";
 
-            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap()
+            this.controller.SetExternalIdentifierMap(new ExternalIdentifierMap()
             {
                 Correspondence =
                 {
@@ -207,7 +207,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                     new IdCorrespondence() { ExternalId = "-1" },
                 },
                 Container = this.iteration
-            };
+            });
 
             this.controller.IdCorrespondences.AddRange(new[]
             {
@@ -216,7 +216,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                 new IdCorrespondence() { ExternalId = "-1" }
             });
 
-            Assert.DoesNotThrow(() => this.controller.UpdateExternalIdentifierMap());
+            Assert.DoesNotThrow(() => this.controller.MergeExternalIdentifierMap());
 
             Assert.AreEqual(5, this.controller.ExternalIdentifierMap.Correspondence.Count());
             Assert.IsNotNull(this.controller.ExternalIdentifierMap.Correspondence.SingleOrDefault(x => x.ExternalId == oldCorrespondenceExternalId));
@@ -233,7 +233,7 @@ namespace DEHPSTEPAP242.Tests.DstController
             var correspondanceA = new IdCorrespondence() { ExternalId = "A" };
             var correspondanceB = new IdCorrespondence() { ExternalId = "B" };
 
-            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap()
+            this.controller.SetExternalIdentifierMap(new ExternalIdentifierMap()
             {
                 Correspondence =
                 {
@@ -242,7 +242,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                     correspondanceB,
                 },
                 Container = this.iteration
-            };
+            });
 
             this.controller.PreviousIdCorrespondences.AddRange(new[]
             {
@@ -255,7 +255,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                 correspondanceB
             });
 
-            Assert.DoesNotThrow(() => this.controller.UpdateExternalIdentifierMap());
+            Assert.DoesNotThrow(() => this.controller.MergeExternalIdentifierMap());
 
             Assert.AreEqual(2, this.controller.ExternalIdentifierMap.Correspondence.Count());
 
@@ -286,8 +286,7 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.controller.AddPreviousIdCorrespondances(new List<IdCorrespondence>()
             {
                 new IdCorrespondence() { ExternalId = "new" }
-            }
-            );
+            });
 
             Assert.AreEqual(1, this.controller.PreviousIdCorrespondences.Count());
         }
@@ -298,10 +297,10 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.mappingEngine.Setup(x => x.Map(It.IsAny<object>()))
                 .Returns((new List<ElementBase>(), new List<Step3DTargetSourceParameter>()));
 
-            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap()
+            this.controller.SetExternalIdentifierMap(new ExternalIdentifierMap()
             {
                 Container = this.iteration
-            };
+            });
 
             Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation())));
 
@@ -310,7 +309,7 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             this.mappingEngine.Verify(x => x.Map(It.IsAny<object>()), Times.Once);
         }
-
+        
         [Test]
         public void VerifyTransferToHub()
         {
@@ -323,13 +322,13 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             this.dstHubService.Setup(x => x.FindFile(It.IsAny<string>())).Returns(aFile);
 
-            this.controller.ExternalIdentifierMap = new ExternalIdentifierMap(Guid.NewGuid(), null, null)
+            this.controller.SetExternalIdentifierMap(new ExternalIdentifierMap(Guid.NewGuid(), null, null)
             {
                 Container = new ModelReferenceDataLibrary(Guid.NewGuid(), this.assembler.Cache, null)
                 {
                     Container = new SiteDirectory(Guid.NewGuid(), this.assembler.Cache, null)
                 }
-            };
+            });
 
             this.controller.Load(MyParts_path);
 

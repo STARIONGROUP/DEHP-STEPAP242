@@ -143,7 +143,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Gets or sets the <see cref="ExternalIdentifierMap"/>
         /// </summary>
-        ExternalIdentifierMap ExternalIdentifierMap { get; set; }
+        ExternalIdentifierMap ExternalIdentifierMap { get; }
 
         /// <summary>
         /// Gets the collection of <see cref="IdCorrespondences"/>
@@ -166,7 +166,13 @@ namespace DEHPSTEPAP242.DstController
         /// Updates the configured mapping
         /// </summary>
         /// <returns>A <see cref="Task"/></returns>
-        void UpdateExternalIdentifierMap();
+        void MergeExternalIdentifierMap();
+
+        /// <summary>
+        /// Updates the mappings of the current <see cref="ExternalIdentifierMap"/>
+        /// </summary>
+        /// <param name="externalIdentifierMap">The <see cref="ExternalIdentifierMap"/></param>
+        void SetExternalIdentifierMap(ExternalIdentifierMap externalIdentifierMap);
 
         /// <summary>
         /// Creates and sets the <see cref="DstController.ExternalIdentifierMap"/>

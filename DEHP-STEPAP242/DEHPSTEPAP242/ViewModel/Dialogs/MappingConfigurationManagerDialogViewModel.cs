@@ -190,11 +190,11 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             if (this.CreateNewMappingConfigurationChecked)
             {
-                this.dstController.ExternalIdentifierMap = this.dstController.CreateExternalIdentifierMap(this.NewExternalIdentifierMapName);
+                this.dstController.SetExternalIdentifierMap(this.dstController.CreateExternalIdentifierMap(this.NewExternalIdentifierMapName));
             }
             else
             {
-                this.dstController.ExternalIdentifierMap = this.SelectedExternalIdentifierMap.Clone(true);
+                this.dstController.SetExternalIdentifierMap(this.SelectedExternalIdentifierMap.Clone(true));
             }
         }
 
