@@ -313,7 +313,16 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, Option option, List<string> warnings)
         {
-            part.SelectedOption = option;
+            var theOption = this.AvailableOptions.FirstOrDefault(x => x.Iid == option.Iid);
+
+            if (theOption is null)
+            {
+                warnings.Add($"The mapped Option \"{option.Name}\" [{option.ShortName}] is not more available");
+            }
+            else
+            {
+                part.SelectedOption = theOption;
+            }
         }
 
         /// <summary>
@@ -324,13 +333,15 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <param name="warnings">The container filled with warnings (if there are ones)</param>
         private void UpdateSelectionFromMappedConfiguredThing(Step3DRowViewModel part, ActualFiniteState state, List<string> warnings)
         {
-            if (this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == state.Iid) is null)
+            var theState = this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == state.Iid);
+
+            if (theState is null)
             {
                 warnings.Add($"The mapped ActualFiniteState \"{state.Name}\" [{state.ShortName}] is not more available");
             }
             else
             {
-                part.SelectedActualFiniteState = state;
+                part.SelectedActualFiniteState = theState;
             }
         }
 
@@ -504,7 +515,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing?.SelectedParameter is { } parameter && parameter.StateDependence is { } stateDependence)
             {
                 this.AvailableActualFiniteStates.AddRange(stateDependence.ActualState);
-                this.SelectedThing.SelectedActualFiniteState = this.AvailableActualFiniteStates.FirstOrDefault();
+
+                var currentStateDependence = this.SelectedThing.SelectedActualFiniteState;
+                this.SelectedThing.SelectedActualFiniteState = this.AvailableActualFiniteStates.FirstOrDefault(x => x.Iid == currentStateDependence?.Iid);
             }
         }
 
@@ -622,13 +635,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                     MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created,\nthe selected option \"{this.SelectedThing.SelectedOption.Name}\" will not be used in the mapping",
                         "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                //else
-                //{
-                //    MessageBox.Show($"A new ElementDefinition named \"{this.SelectedThing.ElementName}\" will be created",
-                //        "Mapping information", MessageBoxButton.OK, MessageBoxImage.Information);
-                //}
-                //
-                //string elementName = this.SelectedThing.ElementName;
 
                 return true;
             }
@@ -649,7 +655,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing.SelectedParameter.IsOptionDependent &&
                 this.SelectedThing.SelectedOption is null)
             {
-                MessageBox.Show($"The existing target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" is Option dependent,\nplease select one Option to apply the mapping",
+                MessageBox.Show($"The existing target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\"\nis Option dependent,\nplease select one Option to apply the mapping",
                     "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
                 return false;
@@ -658,7 +664,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             if (this.SelectedThing.SelectedParameter.StateDependence is { } &&
                 this.SelectedThing.SelectedActualFiniteState is null)
             {
-                MessageBox.Show($"The existing target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\" has a State Dependence,\nplease select one State Dependence to apply the mapping",
+                MessageBox.Show($"The existing target parameter \"{this.SelectedThing.SelectedParameter.ModelCode()}\"\nhas a State Dependence,\nplease select one State Dependence to apply the mapping",
                     "Mapping incomplete", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
                 return false;
