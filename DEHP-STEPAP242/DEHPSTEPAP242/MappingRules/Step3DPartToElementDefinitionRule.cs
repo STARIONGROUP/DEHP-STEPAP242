@@ -229,7 +229,7 @@ namespace DEHPSTEPAP242.MappingRules
 
                 if (parameterOverride is { })
                 {
-                    this.logger.Debug($"parameterOverride {parameterOverride.Iid}");
+                    this.logger.Debug($"parameterOverride {parameterOverride?.Iid}");
                     this.UpdateValueSet(part, parameterOverride);
                 }
                 else

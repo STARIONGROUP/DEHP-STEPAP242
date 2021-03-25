@@ -692,7 +692,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
             bool? result = dlg.ShowDialog();
 
-            if (result ?? false && !string.IsNullOrWhiteSpace(vm.Text))
+            if (result.GetValueOrDefault())
             {
                 // Check that the Name is valid according to the rules for Name
                 // a) does not end with space
@@ -701,6 +701,12 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 // d) Does not exists an ED in the system or pending of transerf
 
                 var name = vm.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(vm.Text))
+                {
+                    this.statusBar.Append($"The name for a new ElementDefinition cannot be empty", StatusBarMessageSeverity.Warning);
+                    return false;
+                }
 
                 if (Regex.IsMatch(name, "[\\(\\)]"))
                 {
