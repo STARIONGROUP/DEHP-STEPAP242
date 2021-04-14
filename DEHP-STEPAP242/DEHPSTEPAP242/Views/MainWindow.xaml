@@ -142,7 +142,7 @@
                                 <ListView x:Name="Mapping" Grid.Column="0" HorizontalContentAlignment="Stretch"
                                           ItemsSource="{Binding MappingViewModel.MappingRows}"
                                           ItemTemplate="{StaticResource MappedThingRowDataTemplate}" />
-                                <Button Grid.Column="1" Margin="10" Background="Transparent" BorderBrush="Transparent" ToolTip="Open the history of transfer dialog">
+                                <Button Grid.Column="1" Command="{Binding OpenExchangeHistory}" ToolTip="Open the history of transfer dialog" Margin="10" Background="Transparent" BorderBrush="Transparent" >
                                     <TextBlock FontSize="18" Text="🕑 Transfer History" TextWrapping="Wrap" TextAlignment="Center"/>
                                 </Button>
                             </Grid>

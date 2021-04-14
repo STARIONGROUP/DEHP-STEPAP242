@@ -37,14 +37,14 @@ namespace DEHPSTEPAP242.ViewModel
 
     using CDP4Dal;
 
+    using DEHPCommon.Enumerators;
     using DEHPCommon.Events;
+    using DEHPCommon.Services.ExchangeHistory;
     using DEHPCommon.UserInterfaces.ViewModels;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
     using DEHPSTEPAP242.DstController;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using DEHPCommon.Enumerators;
     using DEHPSTEPAP242.Events;
-
 
     /// <summary>
     /// Transfer Control ViewModel for STEP AP242 DST
@@ -61,6 +61,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IStatusBarControlViewModel"/>
         /// </summary>
         private readonly IStatusBarControlViewModel statusBar;
+
+        /// <summary>
+        /// The <see cref="IExchangeHistoryService"/>
+        /// </summary>
+        private readonly IExchangeHistoryService exchangeHistoryService;
 
         /// <summary>
         /// Backing field for <see cref="AreThereAnyTransferInProgress"/>
@@ -95,10 +100,13 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
-        public DstTransferControlViewModel(IDstController dstController, IStatusBarControlViewModel statusBar)
+        /// <param name="exchangeHistoryService">The <see cref="IExchangeHistoryService"/></param>
+        public DstTransferControlViewModel(IDstController dstController, IStatusBarControlViewModel statusBar,
+            IExchangeHistoryService exchangeHistoryService)
         {
             this.dstController = dstController;
             this.statusBar = statusBar;
+            this.exchangeHistoryService = exchangeHistoryService;
 
             this.InitializeCommandsAndObservables();
         }
@@ -148,9 +156,10 @@ namespace DEHPSTEPAP242.ViewModel
         /// <returns>A <see cref="Task"/><returns>
         private async Task CancelTransfer()
         {
-            await Task.Delay(1);
-
             this.dstController.CleanCurrentMapping();
+            this.exchangeHistoryService.ClearPending();
+
+            await Task.Delay(1);
 
             this.AreThereAnyTransferInProgress = false;
             this.IsIndeterminate = false;
@@ -167,6 +176,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.statusBar.Append($"Transfers in progress");
 
             await this.dstController.Transfer();
+            await this.exchangeHistoryService.Write();
 
             if (this.dstController.TransferTime > 1000)
             {

@@ -47,20 +47,21 @@ namespace DEHPSTEPAP242.DstController
     using CDP4Common.Types;
 
     using DEHPCommon.Enumerators;
+    using DEHPCommon.Events;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.MappingEngine;
-    using DEHPCommon.Events;
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.Views;
+    using DEHPCommon.Services.ExchangeHistory;
     using DEHPCommon.Services.NavigationService;
 
-    using DEHPSTEPAP242.MappingRules;
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Services.DstHubService;
 
     using STEP3DAdapter;
     using DEHPSTEPAP242.Events;
+    using CDP4Common;
 
 
     /// <summary>
@@ -85,6 +86,11 @@ namespace DEHPSTEPAP242.DstController
         /// The <see cref="INavigationService"/>
         /// </summary>
         private readonly INavigationService navigationService;
+
+        /// <summary>
+        /// The <see cref="IExchangeHistoryService"/>
+        /// </summary>
+        private readonly IExchangeHistoryService exchangeHistory;
 
         /// <summary>
         /// The <see cref="IDstHubService"/>
@@ -549,14 +555,17 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="mappingEngine">The <<see cref="IMappingEngine"/></param>
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
+        /// <param name="exchangeHistory">The <see cref="IExchangeHistoryService"/></param>
         /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
         /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
         public DstController(IHubController hubController, IMappingEngine mappingEngine,
-            INavigationService navigationService, IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
+            INavigationService navigationService, IExchangeHistoryService exchangeHistory,
+            IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
         {
             this.hubController = hubController;
             this.mappingEngine = mappingEngine;
             this.navigationService = navigationService;
+            this.exchangeHistory = exchangeHistory;
             this.dstHubService = dstHubService;
             this.statusBar = statusBar;
         }
@@ -720,10 +729,12 @@ namespace DEHPSTEPAP242.DstController
                 transaction.Create(clone);
                 containerClone.Add((TThing)clone);
                 this.AddIdCorrespondence(clone);
+                this.exchangeHistory.Append(clone, ChangeKind.Create);
             }
             else
             {
                 transaction.CreateOrUpdate(clone);
+                this.exchangeHistory.Append(clone, ChangeKind.Update);
             }
 
             return (TThing)clone;
@@ -787,7 +798,7 @@ namespace DEHPSTEPAP242.DstController
                 for (var index = 0; index < parameter.ValueSet.Count; index++)
                 {
                     var clone = newParameter.ValueSet[index].Clone(false);
-                    UpdateValueSet(clone, parameter.ValueSet[index]);
+                    this.UpdateValueSet(clone, parameter.ValueSet[index]);
                     transaction.CreateOrUpdate(clone);
                 }
 
@@ -823,8 +834,10 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="clone">The clone to update</param>
         /// <param name="valueSet">The <see cref="IValueSet"/> of reference</param>
-        private static void UpdateValueSet(ParameterValueSetBase clone, IValueSet valueSet)
+        private void UpdateValueSet(ParameterValueSetBase clone, IValueSet valueSet)
         {
+            this.exchangeHistory.Append(clone, valueSet);
+
             clone.Computed = valueSet.Computed;
             clone.ValueSwitch = valueSet.ValueSwitch;
         }

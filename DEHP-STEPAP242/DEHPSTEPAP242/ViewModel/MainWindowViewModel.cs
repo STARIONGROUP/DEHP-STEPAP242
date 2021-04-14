@@ -32,9 +32,10 @@ namespace DEHPSTEPAP242.ViewModel
     using System.Windows.Input;
 
     using DEHPCommon.Enumerators;
+    using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-
+    using DEHPCommon.UserInterfaces.Views.ExchangeHistory;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
 
@@ -55,6 +56,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IDstController"/>
         /// </summary>
         private readonly IDstController dstController;
+
+        /// <summary>
+        /// The <see cref="INavigationService"/>
+        /// </summary>
+        private readonly INavigationService navigationService;
 
         /// <summary>
         /// Gets the view model that represents the 10-25 data source
@@ -97,6 +103,11 @@ namespace DEHPSTEPAP242.ViewModel
         public ReactiveCommand<object> ChangeMappingDirection { get; private set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="ICommand"/> that will open the ExchangeHistory window
+        /// </summary>
+        public ReactiveCommand<object> OpenExchangeHistory { get; private set; }
+
+        /// <summary>
         /// Initializes a new <see cref="MainWindowViewModel"/>
         /// </summary>
         /// <param name="hubHubDataSourceViewModelViewModel">A <see cref="IHubDataSourceViewModel"/></param>
@@ -106,13 +117,15 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="mappingViewModel">The <see cref="IMappingViewModel"/></param>
         /// <param name="transferControlViewModel">The <see cref="ITransferControlViewModel"/></param>
         /// <param name="statusBarControlViewModel">The <see cref="IStatusBarControlViewModel"/></param>
+        /// <param name="navigationService">The <see cref="INavigationService"/></param>
         public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel, 
             IDstDataSourceViewModel dstSourceViewModelViewModel, 
             IDstController dstController,
             IHubNetChangePreviewViewModel hubNetChangePreviewViewModel,
             ITransferControlViewModel transferControlViewModel,
             IMappingViewModel mappingViewModel,
-            IStatusBarControlViewModel statusBarControlViewModel
+            IStatusBarControlViewModel statusBarControlViewModel,
+            INavigationService navigationService
             )
         {
             this.dstController = dstController;
@@ -122,6 +135,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.MappingViewModel = mappingViewModel;
             this.TransferControlViewModel = transferControlViewModel;
             this.StatusBarControlViewModel = statusBarControlViewModel;
+            this.navigationService = navigationService;
 
             this.InitializeCommands();
         }
@@ -133,6 +147,9 @@ namespace DEHPSTEPAP242.ViewModel
         {
             this.ChangeMappingDirection = ReactiveCommand.Create();
             this.ChangeMappingDirection.Subscribe(_ => this.ChangeMappingDirectionExecute());
+
+            this.OpenExchangeHistory = ReactiveCommand.Create();
+            this.OpenExchangeHistory.Subscribe(_ => this.navigationService.ShowDialog<ExchangeHistory>());
         }
 
         /// <summary>
