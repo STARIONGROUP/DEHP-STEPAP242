@@ -20,7 +20,7 @@
     <RepositoryType>Git</RepositoryType>
     <Authors>Open Engineering S.A.</Authors>
     <Version>1.2.0</Version>
-    <ApplicationIcon>Resources\cdplogo_48x48.ico</ApplicationIcon>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -68,7 +68,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\cdplogo3d_48x48.png" />
+    <Resource Include="Resources\logo.png" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
