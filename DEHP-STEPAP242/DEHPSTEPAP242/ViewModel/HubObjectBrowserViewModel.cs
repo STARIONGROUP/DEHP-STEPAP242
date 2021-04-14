@@ -180,9 +180,9 @@ namespace DEHPSTEPAP242.ViewModel
                     this.DownloadGuidCommand,
                     MenuItemKind.Export, ClassKind.NotThing));
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Logger.Warn(e, "Ignoring context menue creation for ParameterOrOverride");
+                Logger.Warn(exception, "Ignoring context menue creation for ParameterOrOverride");
             }
         }
 

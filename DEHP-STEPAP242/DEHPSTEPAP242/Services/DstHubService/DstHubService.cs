@@ -419,10 +419,10 @@ namespace DEHPSTEPAP242.Services.DstHubService
             {
                 await this.hubController.Write(transaction);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                this.logger.Error(e);
-                this.logger.Error($"Parameter(s) creation failed: {e.Message}");
+                this.logger.Error(exception);
+                this.logger.Error($"Parameter(s) creation failed: {exception.Message}");
                 throw;
             }
         }

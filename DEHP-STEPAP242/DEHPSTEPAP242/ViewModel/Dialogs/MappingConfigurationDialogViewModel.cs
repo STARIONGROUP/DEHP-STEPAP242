@@ -639,7 +639,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             {
                 this.statusBar.Append($"Mapping of {SelectedThing.Description} failed", StatusBarMessageSeverity.Error);
                 this.logger.Error(exception);
-                MessageBox.Show($"{exception.Message}");
             }
             finally
             {

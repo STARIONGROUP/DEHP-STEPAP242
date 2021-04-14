@@ -703,9 +703,9 @@ namespace DEHPSTEPAP242.DstController
 
                 this.logger.Info($"Transfer finished");
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                this.logger.Error(e);
+                this.logger.Error(exception);
                 throw;
             }
         }
