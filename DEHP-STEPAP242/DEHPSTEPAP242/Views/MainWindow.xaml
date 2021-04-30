@@ -91,15 +91,11 @@
                                 </Grid.RowDefinitions>
                                 <!-- Hub Connect section -->
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Width="150" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0"
+                                    <Button Width="150" Height="40" HorizontalAlignment="Right"
                                         Content="{Binding HubDataSourceViewModel.ConnectButtonText}" 
                                         Command="{Binding HubDataSourceViewModel.ConnectCommand}"
                                         ToolTip="Connect or Disconnect from a Hub data source"/>
-                                    <Button Width="40" Height="40" HorizontalAlignment="Left"
-                                            Command="{Binding HubDataSourceViewModel.RefreshCommand}"
-                                            ToolTip="Refresh the session">
-                                        <Image Source="{dx:DXImage 'Images/Actions/Refresh2_32x32.png'}"></Image>
-                                    </Button>
+                                    <common:HubSessionControl DataContext="{Binding HubDataSourceViewModel.SessionControl}"></common:HubSessionControl>
                                 </StackPanel>
                                 <!-- Hub Content section -->
                                 <!-- BorderThickness="0,0,0,1" -->

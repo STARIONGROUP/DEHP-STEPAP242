@@ -29,32 +29,26 @@
 namespace DEHPSTEPAP242.ViewModel
 {
     using System;
-    using System.Diagnostics;
     using System.Linq;
     using System.Reactive;
+    using System.Reactive.Linq;
     using System.Threading.Tasks;
+    using System.Windows.Threading;
+    using System.Windows;
 
-    using CDP4Common.SiteDirectoryData;
-    using CDP4Common.CommonData;
-    using CDP4Common.Types;
+    using ReactiveUI;
 
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.Services.ObjectBrowserTreeSelectorService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.Views;
-
-    using DEHPSTEPAP242.ViewModel.Interfaces;
-
-    using ReactiveUI;
-    using System.Collections.Generic;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using CDP4Dal;
-    using DEHPCommon.Events;
     using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
-    using System.Reactive.Linq;
+
     using DEHPSTEPAP242.DstController;
-    using System.Windows;
+    using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.Services.DstHubService;
+
 
     /// <summary>
     /// View model that represents a data source panel which holds a tree like browser, a informational header and
@@ -76,6 +70,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IDstController"/>
         /// </summary>
         private readonly IDstController dstController;
+
+        /// <summary>
+        /// Gets the <see cref="IHubSessionControlViewModel"/>
+        /// </summary>
+        public IHubSessionControlViewModel SessionControl { get; }
 
         /// <summary>
         /// The <see cref="IObjectBrowserTreeSelectorService"/>
@@ -107,6 +106,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="hubController">The <see cref="IHubController"/></param>
         /// <param name="dstController">The <see cref="IDstController"/></param>
+        /// <param name="sessionControl">The <see cref="IHubSessionControlViewModel"/></param>
         /// <param name="browserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         /// <param name="objectBrowser">The <see cref="IHubObjectBrowserViewModel"/></param>
         /// <param name="publicationBrowser">The <see cref="IPublicationBrowserViewModel"/></param>
@@ -117,6 +117,7 @@ namespace DEHPSTEPAP242.ViewModel
         public HubDataSourceViewModel(
             IHubController hubController,
             IDstController dstController,
+            IHubSessionControlViewModel sessionControl,
             IHubBrowserHeaderViewModel browserHeader, 
             IHubObjectBrowserViewModel objectBrowser,
             IPublicationBrowserViewModel publicationBrowser,
@@ -127,6 +128,7 @@ namespace DEHPSTEPAP242.ViewModel
         {
             this.hubController = hubController;
             this.dstController = dstController;
+            this.SessionControl = sessionControl;
             this.HubBrowserHeader = browserHeader;
             this.ObjectBrowser = objectBrowser;
             this.PublicationBrowser = publicationBrowser;
@@ -162,9 +164,6 @@ namespace DEHPSTEPAP242.ViewModel
                     this.dstHubService.CheckHubDependencies();
                 }
             });
-
-            this.RefreshCommand = ReactiveCommand.CreateAsyncTask(isConnected,
-                async _ => await this.RefreshCommandExecute(), RxApp.MainThreadScheduler);
         }
 
         /// <summary>
@@ -195,11 +194,6 @@ namespace DEHPSTEPAP242.ViewModel
         /// <see cref="ReactiveCommand{T}"/> for connecting to a data source
         /// </summary>
         public ReactiveCommand<object> ConnectCommand { get; set; }
-
-        /// <summary>
-        /// <see cref="ReactiveCommand{T}"/> to refresh the data source
-        /// </summary>
-        public ReactiveCommand<Unit> RefreshCommand { get; set; }
 
         /// <summary>
         /// Executes the <see cref="HubDataSourceViewModel.ConnectCommand"/>
@@ -236,14 +230,6 @@ namespace DEHPSTEPAP242.ViewModel
         private void UpdateConnectButtonText(bool isSessionOpen)
         {
             this.ConnectButtonText = isSessionOpen ? DisconnectText : ConnectText;
-        }
-
-        /// <summary>
-        /// Executes the <see cref="RefreshCommand"/>
-        /// </summary>
-        private async Task RefreshCommandExecute()
-        {
-            await this.hubController.Refresh();
         }
 
         /// <summary>
