@@ -341,7 +341,6 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.mappingEngine.Verify(x => x.Map(It.IsAny<object>()), Times.Once);
         }
 
-        [Ignore("Strange exception when testing first transfer (ED, EU, parameter and override")]
         [Test]
         public void VerifyTransferToHub()
         {
@@ -411,6 +410,16 @@ namespace DEHPSTEPAP242.Tests.DstController
                 }
             });
 
+            var map = new ExternalIdentifierMap();
+
+            this.hubController.Setup(x => x.GetThingById(It.IsAny<Guid>(), It.IsAny<Iteration>(), out map));
+
+            this.hubController.Setup(x =>
+                x.GetThingById(It.IsAny<Guid>(), It.IsAny<Iteration>(), out parameter));
+
+            this.hubController.Setup(x =>
+                x.GetThingById(parameterOverride.Iid, It.IsAny<Iteration>(), out parameterOverride));
+
             Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
 
             Assert.IsEmpty(this.controller.MapResult);
@@ -439,8 +448,6 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
 
-            // TODO: the following checks must revised when unexpected exception for the first transfer is solved
-
             this.navigationService.Verify(
                 x =>
                     x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
@@ -454,7 +461,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                 x => x.Refresh(), Times.Exactly(2));
 
             this.exchangeHistoryService.Verify(x =>
-                x.Append(It.IsAny<Thing>(), It.IsAny<ChangeKind>()), Times.Exactly(1));
+                x.Append(It.IsAny<Thing>(), It.IsAny<ChangeKind>()), Times.Exactly(3));
 
             this.exchangeHistoryService.Verify(x =>
                 x.Append(It.IsAny<ParameterValueSetBase>(), It.IsAny<IValueSet>()), Times.Exactly(2));
