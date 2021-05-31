@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="HubObjectBrowserViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,29 +28,24 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Reactive.Linq;
-
-    using ReactiveUI;
-    using NLog;
-
-    using CDP4Dal;
     using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
-
+    using CDP4Dal;
     using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.ObjectBrowserTreeSelectorService;
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Rows.ElementDefinitionTreeRows;
-
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.ViewModel.Interfaces;
-    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.Events;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.ViewModel.Interfaces;
+    using NLog;
+    using ReactiveUI;
+    using System;
+    using System.Linq;
+    using System.Reactive.Linq;
 
 
     /// <summary>
@@ -65,10 +60,6 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        /// <summary>
-        /// The <see cref="IDstController"/>
-        /// </summary>
-        private readonly IDstController dstController;
 
         /// <summary>
         /// The <see cref="IDstHubService"/>
@@ -89,7 +80,7 @@ namespace DEHPSTEPAP242.ViewModel
         public HubObjectBrowserViewModel(IDstController dstController, IDstHubService dstHubService,
             IHubController hubController, IObjectBrowserTreeSelectorService objectBrowserTreeSelectorService) : base(hubController, objectBrowserTreeSelectorService)
         {
-            this.dstController = dstController;
+            
             this.dstHubService = dstHubService;
 
             this.InitializesCommandsAndObservableSubscriptions();
@@ -124,26 +115,26 @@ namespace DEHPSTEPAP242.ViewModel
             switch (this.SelectedThings.LastOrDefault())
             {
                 case ParameterRowViewModel parameter:
-                {
-                    this.ProcessParameterRowViewModel(parameter);
-                }
-                break;
+                    {
+                        this.ProcessParameterRowViewModel(parameter);
+                    }
+                    break;
 
                 case ParameterComponentValueRowViewModel component:
-                {
-                    this.ProcessParameterComponentValueRowViewModel(component);
-                }
-                break;
+                    {
+                        this.ProcessParameterComponentValueRowViewModel(component);
+                    }
+                    break;
 
                 case ElementDefinitionRowViewModel elementDefinition:
-                {
-                    this.ProcessElementDefinitionRowViewModel(elementDefinition);
-                }
-                break;
+                    {
+                        this.ProcessElementDefinitionRowViewModel(elementDefinition);
+                    }
+                    break;
 
                 default:
                     //TODO: add processing for ElementUsages
-                return;
+                    return;
             }
         }
 
@@ -176,7 +167,7 @@ namespace DEHPSTEPAP242.ViewModel
                 this.fileRevisionId = part_filereference;
 
                 this.ContextMenu.Add(new ContextMenuItemViewModel(
-                    $"Download Associated STEP 3D file to \"{part_name}\" {part_filereference}", "", 
+                    $"Download Associated STEP 3D file to \"{part_name}\" {part_filereference}", "",
                     this.DownloadGuidCommand,
                     MenuItemKind.Export, ClassKind.NotThing));
             }

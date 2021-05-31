@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="MappingRowViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,16 +28,11 @@
 
 namespace DEHPSTEPAP242.ViewModel.Rows
 {
-    using System.Linq;
-
-    using ReactiveUI;
-
     using CDP4Common.EngineeringModelData;
-    using CDP4Common.SiteDirectoryData;
-
     using DEHPCommon.Enumerators;
-    using System;
     using DEHPSTEPAP242.DstController;
+    using ReactiveUI;
+    using System.Linq;
 
     /// <summary>
     /// Represents a row of mapped <see cref="ParameterOrOverrideBase"/> and <see cref="Step3DRowViewModel"/>
@@ -51,7 +46,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// Gets or sets the hub <see cref="MappedThing"/>
         /// </summary>
         public MappedThing HubThing { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the dst <see cref="MappedThing"/>
         /// </summary>
@@ -94,10 +89,10 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         public MappingRowViewModel(MappingDirection currentMappingDirection, ParameterBase parameter, Step3DRowViewModel part)
         {
             this.Direction = MappingDirection.FromDstToHub;
-            
-            this.DstThing = new MappedThing() 
+
+            this.DstThing = new MappedThing()
             {
-                Name = part.InstancePath, 
+                Name = part.InstancePath,
                 Value = string.IsNullOrEmpty(part.RelationLabel) ? $"STEP Entity {part.Description}" : $"STEP entity {part.Description} used at Relation {part.RelationLabel}"
                 //Value = $"STEP entity {part.Description}"
             };
@@ -105,11 +100,11 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             string value;
 
             var valueSet = parameter.QueryParameterBaseValueSet(part.SelectedOption, part.SelectedActualFiniteState);
-            
+
             if (valueSet.Computed[0] is { })
             {
                 var computed = valueSet.Computed;
-                
+
                 value = $"[{string.Join(", ", computed.Where(x => !string.IsNullOrEmpty(x)))}]";
             }
             else

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="IHubNetChangePreviweModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt

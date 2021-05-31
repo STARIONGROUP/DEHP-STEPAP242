@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DateSourceViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,11 +28,9 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-
     using DEHPCommon.Services.NavigationService;
-
     using ReactiveUI;
+    using System;
 
     /// <summary>
     /// The <see cref="DataSourceViewModel"/> is the base view model for view model that represents a data source like <see cref="DstDataSourceViewModel"/>

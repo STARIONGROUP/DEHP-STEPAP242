@@ -28,16 +28,12 @@
 
 namespace DEHPSTEPAP242.Tests
 {
-    using System;
+    using Autofac;
+    using DEHPCommon;
+    using NUnit.Framework;
     using System.Collections;
     using System.Collections.Generic;
 
-    using Autofac;
-
-    using DEHPCommon;
-
-    using NUnit.Framework;
-    
     [TestFixture]
     public class AppTestFixture
     {

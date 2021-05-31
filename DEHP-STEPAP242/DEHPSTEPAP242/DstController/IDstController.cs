@@ -28,19 +28,15 @@
 
 namespace DEHPSTEPAP242.DstController
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    
-    using ReactiveUI;
-
     using CDP4Common.EngineeringModelData;
     using CDP4Common.Types;
     using DEHPCommon.Enumerators;
-
     using DEHPSTEPAP242.ViewModel.Rows;
-
+    using ReactiveUI;
     using STEP3DAdapter;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Helper class which keeps a reference to the <see cref="ValueArray{string}"/> 

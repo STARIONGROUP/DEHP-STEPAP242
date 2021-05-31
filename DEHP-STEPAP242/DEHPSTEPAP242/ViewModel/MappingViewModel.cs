@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="MappingViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,24 +28,18 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
+    using CDP4Common.EngineeringModelData;
+    using DEHPCommon.Enumerators;
+    using DEHPCommon.HubController.Interfaces;
+    using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.ViewModel.Rows;
+    using NLog;
+    using ReactiveUI;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
-
-    using CDP4Common.EngineeringModelData;
-    using CDP4Common.MetaInfo;
-    using CDP4Common.Types;
-
-    using DEHPCommon.Enumerators;
-    using DEHPCommon.HubController.Interfaces;
-
-    using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.ViewModel.Interfaces;
-    using DEHPSTEPAP242.ViewModel.Rows;
-
-    using ReactiveUI;
-    using NLog;
 
     /// <summary>
     /// View Model for showing mapped things in the main window
@@ -62,10 +56,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private readonly IDstController dstController;
 
-        /// <summary>
-        /// The <see cref="IHubController"/>
-        /// </summary>
-        private readonly IHubController hubController;
+        
 
         /// <summary>
         /// Gets or sets the collection of <see cref="MappingRows"/>
@@ -80,8 +71,7 @@ namespace DEHPSTEPAP242.ViewModel
         public MappingViewModel(IDstController dstController, IHubController hubController,
             IDstObjectBrowserViewModel dstVariablesControlViewModel)
         {
-            this.dstController = dstController;
-            this.hubController = hubController;
+            this.dstController = dstController;            
 
             this.InitializeObservables();
         }
@@ -165,7 +155,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             var modified = this.dstController.ParameterNodeIds.Where(
                 x => x.Key.GetContainerOfType<ElementUsage>() == element).ToList();
-            
+
             foreach (var entry in modified)
             {
                 result.Add((entry.Key, entry.Value));

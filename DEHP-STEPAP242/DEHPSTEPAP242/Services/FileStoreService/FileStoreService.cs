@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
-//    Copyright (c) 2020-2021 Open Engineering S.A.
+// <copyright file="FileStoreService.cs" company="Open Engineering S.A.">
+//    Copyright (c) 2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
 //
@@ -28,12 +28,11 @@
 
 namespace DEHPSTEPAP242.Services.FileStoreService
 {
-    using System.IO;
-    using System.Reflection;
-
     using CDP4Common.EngineeringModelData;
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.Settings;
+    using System.IO;
+    using System.Reflection;
 
 
     /// <summary>
@@ -132,7 +131,7 @@ namespace DEHPSTEPAP242.Services.FileStoreService
             var extension = Path.GetExtension(fileRevision.Path);
 
             var storageName = $"{fileName}_rev{fileRevision.RevisionNumber}{extension}";
-            
+
             return storageName;
         }
 

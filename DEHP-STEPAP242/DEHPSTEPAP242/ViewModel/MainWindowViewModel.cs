@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="MainWindowViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,9 +28,6 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using System.Windows.Input;
-
     using DEHPCommon.Enumerators;
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.Behaviors;
@@ -38,8 +35,9 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.UserInterfaces.Views.ExchangeHistory;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
-
     using ReactiveUI;
+    using System;
+    using System.Windows.Input;
 
     /// <summary>
     /// <see cref="MainWindowViewModel"/> is the view model for <see cref="Views.MainWindow"/>
@@ -118,8 +116,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="transferControlViewModel">The <see cref="ITransferControlViewModel"/></param>
         /// <param name="statusBarControlViewModel">The <see cref="IStatusBarControlViewModel"/></param>
         /// <param name="navigationService">The <see cref="INavigationService"/></param>
-        public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel, 
-            IDstDataSourceViewModel dstSourceViewModelViewModel, 
+        public MainWindowViewModel(IHubDataSourceViewModel hubHubDataSourceViewModelViewModel,
+            IDstDataSourceViewModel dstSourceViewModelViewModel,
             IDstController dstController,
             IHubNetChangePreviewViewModel hubNetChangePreviewViewModel,
             ITransferControlViewModel transferControlViewModel,

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="IHubFileStoreBrowserViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,7 +28,6 @@
 
 namespace DEHPSTEPAP242.ViewModel.Interfaces
 {
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 
     using ReactiveUI;
     using System.Reactive;

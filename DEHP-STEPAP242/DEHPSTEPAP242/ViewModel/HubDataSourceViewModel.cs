@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="HUbDataSourceViewModel" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,26 +28,20 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using System.Linq;
-    using System.Reactive;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    using System.Windows.Threading;
-    using System.Windows;
-
-    using ReactiveUI;
-
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.Services.ObjectBrowserTreeSelectorService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using DEHPCommon.UserInterfaces.Views;
     using DEHPCommon.UserInterfaces.ViewModels.PublicationBrowser;
-
+    using DEHPCommon.UserInterfaces.Views;
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.ViewModel.Interfaces;
+    using ReactiveUI;
+    using System;
+    using System.Linq;
+    using System.Reactive.Linq;
+    using System.Windows;
 
 
     /// <summary>
@@ -75,11 +69,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// Gets the <see cref="IHubSessionControlViewModel"/>
         /// </summary>
         public IHubSessionControlViewModel SessionControl { get; }
-
-        /// <summary>
-        /// The <see cref="IObjectBrowserTreeSelectorService"/>
-        /// </summary>
-        private readonly IObjectBrowserTreeSelectorService treeSelectorService;
+               
 
         /// <summary>
         /// The <see cref="IHubBrowserHeaderViewModel"/>
@@ -118,7 +108,7 @@ namespace DEHPSTEPAP242.ViewModel
             IHubController hubController,
             IDstController dstController,
             IHubSessionControlViewModel sessionControl,
-            IHubBrowserHeaderViewModel browserHeader, 
+            IHubBrowserHeaderViewModel browserHeader,
             IHubObjectBrowserViewModel objectBrowser,
             IPublicationBrowserViewModel publicationBrowser,
             IHubFileStoreBrowserViewModel hubFileBrowser,
@@ -132,8 +122,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.HubBrowserHeader = browserHeader;
             this.ObjectBrowser = objectBrowser;
             this.PublicationBrowser = publicationBrowser;
-            this.HubFileStoreBrowser = hubFileBrowser;
-            this.treeSelectorService = treeSelectorService;
+            this.HubFileStoreBrowser = hubFileBrowser;            
             this.dstHubService = dstHubService;
 
             InitializeCommands();

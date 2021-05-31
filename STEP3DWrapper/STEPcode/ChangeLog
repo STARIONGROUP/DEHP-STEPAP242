@@ -1,9 +1,3 @@
-These sources were taken from Git tag: a9a7e0af4a18fcb5c666d8cd4adbcd5c6b71970e
-It contains the follwing changes in CMake:
-- SC_BUILD_SCHEMAS set to "ap242"
-- SC_INSTALL_PREFIX defined to a directory next to this sources
-- Add "extra" directory with the "step3d_wrapper" and "step3d_wrapper_test" projects.
-
 Recent changes are recorded in the publicly available repository:
 http://github.com/stepcode/stepcode
 

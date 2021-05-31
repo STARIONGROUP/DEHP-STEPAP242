@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="Step3DPartToElementDefinitionRule" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,29 +28,24 @@
 
 namespace DEHPSTEPAP242.MappingRules
 {
+    using Autofac;
+    using CDP4Common.CommonData;
+    using CDP4Common.EngineeringModelData;
+    using CDP4Common.SiteDirectoryData;
+    using CDP4Common.Types;
+    using DEHPCommon;
+    using DEHPCommon.HubController.Interfaces;
+    using DEHPCommon.MappingEngine;
+    using DEHPCommon.MappingRules.Core;
+    using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.ViewModel.Rows;
+    using NLog;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.ExceptionServices;
 
-    using Autofac;
-
-    using CDP4Common.CommonData;
-    using CDP4Common.EngineeringModelData;
-    using CDP4Common.SiteDirectoryData;
-    using CDP4Common.Types;
-
-    using DEHPCommon;
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon.MappingEngine;
-    using DEHPCommon.MappingRules.Core;
-
-    using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using DEHPSTEPAP242.ViewModel.Rows;
-
-    using NLog;
-    
 
     /// <summary>
     /// The <see cref="Step3DPartToElementDefinitionRule"/> is a <see cref="IMappingRule"/> 
@@ -117,7 +112,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         /// <param name="input">The <see cref="List{T}"/> of <see cref="Step3DRowViewModel"/> to transform</param>
         /// <returns>An <see cref="List{ElementDefinition}"/> as the top level <see cref="Thing"/> with changes</returns>
-        public override (Dictionary<ParameterOrOverrideBase, MappedParameterValue>, List<ElementBase>) Transform (List<Step3DRowViewModel> input)
+        public override (Dictionary<ParameterOrOverrideBase, MappedParameterValue>, List<ElementBase>) Transform(List<Step3DRowViewModel> input)
         {
             try
             {
@@ -246,7 +241,7 @@ namespace DEHPSTEPAP242.MappingRules
                             //x.ParameterType = parameterToOverride.ParameterType;
                             x.StateDependence = parameterToOverride.StateDependence;
                             x.IsOptionDependent = parameterToOverride.IsOptionDependent;
-                            
+
                             x.Owner = this.owner;
                         });
 
@@ -338,7 +333,7 @@ namespace DEHPSTEPAP242.MappingRules
                 part.SelectedParameter.ValueSet.Add(valueSet);
                 part.SelectedElementDefinition.Parameter.Add(part.SelectedParameter);
             }
-            
+
             this.UpdateValueSet(part, part.SelectedParameter);
         }
 
@@ -357,7 +352,7 @@ namespace DEHPSTEPAP242.MappingRules
                 // NOTE: this should not happen, the DST creates required types at connection time
                 this.logger.Warn("STEP Geometry parameter not found, creating a new one!");
 
-                parameterType = this.CreateCompoundParameterTypeForSte3DGeometry();
+                parameterType = this.CreateCompoundParameterTypeForStep3DGeometry();
             }
 
             return parameterType;
@@ -368,7 +363,7 @@ namespace DEHPSTEPAP242.MappingRules
         /// </summary>
         /// <returns>A <see cref="CompoundParameterType"/></returns>
         /// <remarks>This method will not be called because all was created at connection time</remarks>
-        private CompoundParameterType CreateCompoundParameterTypeForSte3DGeometry()
+        private CompoundParameterType CreateCompoundParameterTypeForStep3DGeometry()
         {
             this.logger.Warn("STEP Geometry compound parameter should be created by HubDstService instance at Connect time");
 
@@ -380,7 +375,7 @@ namespace DEHPSTEPAP242.MappingRules
                 //string STEP_FILE_REF_NAME = "step file reference";
                 string STEP_GEOMETRY_NAME = "step geometry";
 
-                x.ShortName = STEP_GEOMETRY_NAME;
+                x.Name = STEP_GEOMETRY_NAME;
                 x.ShortName = "step_geo";
                 x.Symbol = "-";
 
@@ -404,6 +399,33 @@ namespace DEHPSTEPAP242.MappingRules
                             }
                             );
                     }));
+                x.Component.Add(this.Bake<ParameterTypeComponent>(
+                    p =>
+                    {
+                        p.ShortName = "rep_type";
+                        p.ParameterType = this.Bake<TextParameterType>();
+                    }));
+
+                x.Component.Add(this.Bake<ParameterTypeComponent>(
+                    p =>
+                    {
+                        p.ShortName = "assembly_label";
+                        p.ParameterType = this.Bake<TextParameterType>();
+                    }));
+                x.Component.Add(this.Bake<ParameterTypeComponent>(
+                    p =>
+                    {
+                        p.ShortName = "assembly_id";
+                        p.ParameterType = this.Bake<TextParameterType>();
+                    }));
+                x.Component.Add(this.Bake<ParameterTypeComponent>(
+                   p =>
+                   {
+                       p.ShortName = "source";
+                       p.ParameterType = this.Bake<TextParameterType>();
+                   }));
+
+
             });
         }
 
@@ -528,20 +550,20 @@ namespace DEHPSTEPAP242.MappingRules
                     case "assembly_id": valuearray[index++] = $"{part.RelationId}"; break;
 
                     case "source":
-                    {
-                        // NOTE: FileRevision.Iid will be known at Transfer time
-                        //       store the current index to know which possition corresponds
-                        //       to the source (avoid searching it again)
-                        //this.parametersMappingInfo[part.SelectedParameter] = new MappedParameterValue(part, valuearray, index);
+                        {
+                            // NOTE: FileRevision.Iid will be known at Transfer time
+                            //       store the current index to know which possition corresponds
+                            //       to the source (avoid searching it again)
+                            //this.parametersMappingInfo[part.SelectedParameter] = new MappedParameterValue(part, valuearray, index);
 
-                        this.logger.Debug($"Updating map parametersMappingInfo[{parameter.Iid}]");
-                        this.parametersMappingInfo[parameter] = new MappedParameterValue(part, valuearray, index);
-                        valuearray[index++] = "";
-                    }
-                    break;
+                            this.logger.Debug($"Updating map parametersMappingInfo[{parameter.Iid}]");
+                            this.parametersMappingInfo[parameter] = new MappedParameterValue(part, valuearray, index);
+                            valuearray[index++] = "";
+                        }
+                        break;
 
                     default:
-                    break;
+                        break;
                 }
             }
         }

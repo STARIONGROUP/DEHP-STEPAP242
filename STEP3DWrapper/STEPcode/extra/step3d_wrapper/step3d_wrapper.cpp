@@ -30,12 +30,12 @@
 
 #include "step3d_wrapper.h"
 
-#include "sc_version_string.h"
+#include "sc_cf.h"
 
 
 char* getStepcodeVersion()
 {
-    return sc_version;
+    return SC_VERSION;
 }
 
 

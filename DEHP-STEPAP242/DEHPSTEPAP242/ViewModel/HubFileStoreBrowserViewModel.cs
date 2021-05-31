@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="HubFileStoreBrowserViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,29 +28,26 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    
-    using ReactiveUI;
-
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-
-    using DEHPSTEPAP242.ViewModel.Interfaces;
-    using DEHPSTEPAP242.Services.FileStoreService;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using System.Reactive;
     using CDP4Dal;
-    using DEHPCommon.Events;
-    using DEHPCommon.Services.FileDialogService;
-    using DEHPSTEPAP242.Events;
     using DEHPCommon.Enumerators;
+    using DEHPCommon.Events;
+    using DEHPCommon.HubController.Interfaces;
+    using DEHPCommon.Services.FileDialogService;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPSTEPAP242.Events;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.Services.FileStoreService;
+    using DEHPSTEPAP242.ViewModel.Interfaces;
+    using ReactiveUI;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Reactive;
+    using System.Reactive.Linq;
+    using System.Threading.Tasks;
     using System.Windows;
 
     /// <summary>
@@ -165,7 +162,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// Sets and gets selected <see cref="HubFile"/> from <see cref="HubFiles"/> list
         /// </summary>
         public HubFile CurrentHubFile
-        { 
+        {
             get => currentHubFile;
             set => this.RaiseAndSetIfChanged(ref this.currentHubFile, value);
         }
@@ -210,7 +207,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="fileStoreService"></param>
         /// <param name="dstHubService"></param>
         /// <param name="fileDialogService"></param>
-        public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView, 
+        public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView,
             IFileStoreService fileStoreService, IDstHubService dstHubService,
             IOpenSaveFileDialogService fileDialogService)
         {
@@ -256,7 +253,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.LoadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.LoadFileCommandExecute());
 
             this.DownloadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.DownloadFileCommandExecute());
-            
+
             this.DownloadFileAsCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.DownloadFileAsCommandExecute());
         }
 
@@ -453,7 +450,7 @@ namespace DEHPSTEPAP242.ViewModel
                 Application.Current.Dispatcher.Invoke(() => statusBar.Append("No current file selected to perform the load"));
                 return;
             }
-            
+
             if (!fileStoreService.Exists(fileRevision))
             {
                 await DownloadFileCommandExecute();

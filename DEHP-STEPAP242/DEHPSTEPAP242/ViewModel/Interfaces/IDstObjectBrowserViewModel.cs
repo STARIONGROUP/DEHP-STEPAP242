@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="IDstObjectBrowserViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,9 +28,8 @@
 
 namespace DEHPSTEPAP242.ViewModel.Interfaces
 {
-    using System.Collections.Generic;
-
     using DEHPSTEPAP242.ViewModel.Rows;
+    using System.Collections.Generic;
 
     ///	<summary>
     /// Interface definition for <see cref="DstObjectBrowserViewModel"/> is the

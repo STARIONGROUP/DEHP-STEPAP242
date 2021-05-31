@@ -28,35 +28,29 @@
 
 namespace DEHPSTEPAP242
 {
-    using System;
-    using System.Reflection;
-    using System.Windows;
-    using System.Windows.Threading;
-
     using Autofac;
-
     using DEHPCommon;
-    using DEHPCommon.Services.NavigationService;
-    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPCommon.MappingEngine;
+    using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-
+    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.Settings;
-    using DEHPSTEPAP242.Services.FileStoreService;
     using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.Services.FileStoreService;
+    using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.ViewModel;
     using DEHPSTEPAP242.ViewModel.Dialogs;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.ViewModel.NetChangePreview;
     using DEHPSTEPAP242.Views;
-
     using DevExpress.Xpf.Core;
-
     using NLog;
-
+    using System;
+    using System.Reflection;
+    using System.Windows;
+    using System.Windows.Threading;
     using DXSplashScreenViewModel = DevExpress.Mvvm.DXSplashScreenViewModel;
     using SplashScreen = DEHPCommon.UserInterfaces.Views.SplashScreen;
 

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstTransferControlViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,23 +28,17 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using System.Reactive;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-
-    using ReactiveUI;
-
     using CDP4Dal;
-
     using DEHPCommon.Enumerators;
     using DEHPCommon.Events;
     using DEHPCommon.Services.ExchangeHistory;
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.Events;
+    using ReactiveUI;
+    using System;
+    using System.Reactive.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Transfer Control ViewModel for STEP AP242 DST
@@ -116,7 +110,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void InitializeCommandsAndObservables()
         {
-            var canTransfert = CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
+             CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
                 .Select(x => !x.Reset).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(this.UpdateCanTransfer);
 

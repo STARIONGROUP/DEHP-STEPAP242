@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="IDstHubService.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,11 +28,10 @@
 
 namespace DEHPSTEPAP242.Services.DstHubService
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public interface IDstHubService
     {

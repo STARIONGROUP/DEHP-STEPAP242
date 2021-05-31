@@ -28,22 +28,13 @@
 
 namespace DEHPSTEPAP242.Tests.DstController
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Windows;
     using CDP4Common;
     using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
     using CDP4Common.Types;
-
     using CDP4Dal;
     using CDP4Dal.Operations;
-
     using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.MappingEngine;
@@ -51,29 +42,25 @@ namespace DEHPSTEPAP242.Tests.DstController
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.Views;
-
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.MappingRules;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Rows;
-
-    using DevExpress.Mvvm;
-    using DevExpress.Mvvm.Native;
-
     using Moq;
-
     using NUnit.Framework;
-
-    using ReactiveUI;
-
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using INavigationService = DEHPCommon.Services.NavigationService.INavigationService;
 
     [TestFixture, Apartment(ApartmentState.STA)]
     public class DstControllerTestFixture
     {
         private DstController controller;
-        private Mock<IHighLevelRepresentationBuilder> hlrBuilder;
+        //private Mock<IHighLevelRepresentationBuilder> hlrBuilder;
         private Mock<IDstHubService> dstHubService;
         private Mock<IHubController> hubController;
         private Mock<IMappingEngine> mappingEngine;
@@ -122,7 +109,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                     }
                 };
 
-            this.assembler.Cache.TryAdd(new CacheKey(this.iteration.Iid, null),new Lazy<Thing>(() => this.iteration));
+            this.assembler.Cache.TryAdd(new CacheKey(this.iteration.Iid, null), new Lazy<Thing>(() => this.iteration));
 
             this.hubController.Setup(x => x.OpenIteration).Returns(this.iteration);
 
@@ -149,7 +136,7 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.hubController.Setup(x => x.Write(It.IsAny<ThingTransaction>())).Returns(Task.CompletedTask);
 
 
-            this.hlrBuilder = new Mock<IHighLevelRepresentationBuilder>();
+            //this.hlrBuilder = new Mock<IHighLevelRepresentationBuilder>();
 
             this.dstHubService = new Mock<IDstHubService>();
 
@@ -163,7 +150,7 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.exchangeHistoryService = new Mock<IExchangeHistoryService>();
             this.exchangeHistoryService.Setup(x => x.Write()).Returns(Task.CompletedTask);
 
-            this.controller = new DstController(this.hubController.Object, 
+            this.controller = new DstController(this.hubController.Object,
                 this.mappingEngine.Object, this.navigationService.Object, this.exchangeHistoryService.Object,
                 this.dstHubService.Object, this.statusBarViewModel.Object);
         }
@@ -242,7 +229,7 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             this.controller.IdCorrespondences.AddRange(new[]
             {
-                new IdCorrespondence() { ExternalId = "0"}, 
+                new IdCorrespondence() { ExternalId = "0"},
                 new IdCorrespondence() { ExternalId = "1" },
                 new IdCorrespondence() { ExternalId = "-1" }
             });
@@ -471,7 +458,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         public void VerifyUpdateValueSets()
         {
             var element = new ElementDefinition();
-            
+
             var parameter = new Parameter()
             {
                 ValueSet =
@@ -515,8 +502,8 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.controller.MapResult.Add(element);
 
             Assert.DoesNotThrowAsync(async () => await this.controller.UpdateParametersValueSets());
-            
-            this.hubController.Verify(x => 
+
+            this.hubController.Verify(x =>
                 x.Write(It.IsAny<ThingTransaction>()), Times.Once);
         }
     }

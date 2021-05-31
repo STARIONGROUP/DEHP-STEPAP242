@@ -25,7 +25,7 @@ if(NOT "${SC_BUILD_SCHEMAS}" STREQUAL "")
     LOCATE_SCHEMA(${FILE} abspath)
     SCHEMA_CMLIST(${abspath})
   endforeach()
-endif(NOT "${SC_BUILD_SCHEMAS}" STREQUAL "")
+endif()
 
 # Local Variables:
 # tab-width: 8

@@ -107,7 +107,7 @@ void PrintInstance(SDAI_Application_instance* instance)
     std::cout << "StepFileId: " << instance->StepFileId() << std::endl;
     //std::cout << "Comment: " << instance->P21Comment() << std::endl;
             
-    const EntityDescriptor* entityDescriptor = instance->getEDesc();
+    const EntityDescriptor* entityDescriptor = instance->eDesc;
     std::cout << "Subtypes: " << entityDescriptor->Subtypes().EntryCount() << std::endl;
     std::cout << "Supertypes: " << entityDescriptor->Supertypes().EntryCount() << std::endl;
     std::cout << "ExplicitAttr: " << entityDescriptor->ExplicitAttr().EntryCount() << std::endl;

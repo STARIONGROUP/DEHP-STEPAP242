@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
-//    Copyright (c) 2020-2021 Open Engineering S.A.
+// <copyright file="IHighLevelRepresentationBuilder.cs" company="Open Engineering S.A.">
+//    Copyright (c) 2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
 //
@@ -28,11 +28,9 @@
 
 namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
 {
-    using System.Collections.Generic;
-
     using DEHPSTEPAP242.ViewModel.Rows;
-
     using STEP3DAdapter;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Helper class to create the High Level Representation (HLR) View Model for STEP AP242 file

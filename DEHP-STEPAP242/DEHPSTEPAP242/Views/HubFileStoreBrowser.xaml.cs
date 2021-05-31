@@ -28,16 +28,16 @@
 
 namespace DEHPSTEPAP242.Views
 {
-	using System.Windows.Controls;
+    using System.Windows.Controls;
 
-	/// <summary>
-	/// Interaction logic for HubFileBrowser.xaml
-	/// </summary>
-	public partial class HubFileStoreBrowser : UserControl
-	{
-		public HubFileStoreBrowser()
-		{
-			InitializeComponent();
-		}
-	}
+    /// <summary>
+    /// Interaction logic for HubFileBrowser.xaml
+    /// </summary>
+    public partial class HubFileStoreBrowser : UserControl
+    {
+        public HubFileStoreBrowser()
+        {
+            InitializeComponent();
+        }
+    }
 }

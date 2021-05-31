@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="Program.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -24,58 +24,57 @@
 
 namespace STEP3DAdapter.Console
 {
-	using System;
+    using STEP3DAdapter;
+    using System;
 
-	using STEP3DAdapter;
+    static class Program
+    {
+        static private void ShowSTEP3DInformation(String fname)
+        {
+            System.Console.WriteLine("STEP3D file information (from step3d_wrapper.dll)");
+            System.Console.WriteLine("");
 
-	static class Program
-	{
-		static private void ShowSTEP3DInformation(String fname)
-		{
-			System.Console.WriteLine("STEP3D file information (from step3d_wrapper.dll)");
-			System.Console.WriteLine("");
+            var step3d = new STEP3DFile(fname);
 
-			var step3d = new STEP3DFile(fname);
+            if (step3d.HasFailed)
+            {
+                System.Console.WriteLine($"Error message: { step3d.ErrorMessage }");
+                return;
+            }
 
-			if (step3d.HasFailed)
-			{
-				System.Console.WriteLine($"Error message: { step3d.ErrorMessage }");
-				return;
-			}
+            var hdr = step3d.HeaderInfo;
+            var parts = step3d.Parts;
+            var relations = step3d.Relations;
 
-			var hdr = step3d.HeaderInfo;
-			var parts = step3d.Parts;
-			var relations = step3d.Relations;
+            System.Console.WriteLine($"\nFile name: { step3d.FileName }");
 
-			System.Console.WriteLine($"\nFile name: { step3d.FileName }");
+            System.Console.WriteLine("\nHEADER --------------------------------");
+            System.Console.WriteLine("File_Description:");
+            System.Console.WriteLine($"   description:          { hdr.file_description.description }");
+            System.Console.WriteLine($"   implementation_level: { hdr.file_description.implementation_level }");
+            System.Console.WriteLine("File_Name:");
+            System.Console.WriteLine($"   name:                 { hdr.file_name.name }");
+            System.Console.WriteLine($"   time_stamp:           { hdr.file_name.time_stamp }");
+            System.Console.WriteLine($"   author:               { hdr.file_name.author }");
+            System.Console.WriteLine($"   organization:         { hdr.file_name.organization }");
+            System.Console.WriteLine($"   preprocessor_version: { hdr.file_name.preprocessor_version }");
+            System.Console.WriteLine($"   originating_system:   { hdr.file_name.originating_system }");
+            System.Console.WriteLine($"   authorisation:        { hdr.file_name.authorisation }");
+            System.Console.WriteLine("File_Schema:");
+            System.Console.WriteLine($"   schema:               { hdr.file_schema }");
 
-			System.Console.WriteLine("\nHEADER --------------------------------");
-			System.Console.WriteLine("File_Description:");
-			System.Console.WriteLine($"   description:          { hdr.file_description.description }");
-			System.Console.WriteLine($"   implementation_level: { hdr.file_description.implementation_level }");
-			System.Console.WriteLine("File_Name:");
-			System.Console.WriteLine($"   name:                 { hdr.file_name.name }");
-			System.Console.WriteLine($"   time_stamp:           { hdr.file_name.time_stamp }");
-			System.Console.WriteLine($"   author:               { hdr.file_name.author }");
-			System.Console.WriteLine($"   organization:         { hdr.file_name.organization }");
-			System.Console.WriteLine($"   preprocessor_version: { hdr.file_name.preprocessor_version }");
-			System.Console.WriteLine($"   originating_system:   { hdr.file_name.originating_system }");
-			System.Console.WriteLine($"   authorisation:        { hdr.file_name.authorisation }");
-			System.Console.WriteLine("File_Schema:");
-			System.Console.WriteLine($"   schema:               { hdr.file_schema }");
+            System.Console.WriteLine("\nDATA ----------------------------------");
 
-			System.Console.WriteLine("\nDATA ----------------------------------");
+            foreach (var p in parts)
+            {
+                System.Console.WriteLine($"Part: #{p.stepId} {p.type} '{p.name}'");
+            }
 
-			foreach (var p in parts)
-			{
-				System.Console.WriteLine($"Part: #{p.stepId} {p.type} '{p.name}'");
-			}
+            foreach (var r in relations)
+            {
 
-			foreach (var r in relations)
-			{
-				
-				System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.id},{r.name}' for #{r.relating_id} --> #{r.related_id}");
-			}
+                System.Console.WriteLine($"Relation: #{r.id} {r.type} '{r.id},{r.name}' for #{r.relating_id} --> #{r.related_id}");
+            }
 
 #if WITH_RELATION_PART_REFERENCES
 			if (parts[0] == relations[0].relating_part)
@@ -94,13 +93,13 @@ namespace STEP3DAdapter.Console
 				System.Console.WriteLine("Differents");
 			}
 #endif
-		}
-		static void Main(string[] args)
-		{
-			foreach (var argument in args)
-			{
-				ShowSTEP3DInformation(argument);
-			}
-		}
-	}
+        }
+        static void Main(string[] args)
+        {
+            foreach (var argument in args)
+            {
+                ShowSTEP3DInformation(argument);
+            }
+        }
+    }
 }

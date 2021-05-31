@@ -28,40 +28,34 @@
 
 namespace DEHPSTEPAP242.DstController
 {
-    using System;
-    using System.Diagnostics;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using System.Windows;
-    using System.Runtime.ExceptionServices;
-    using System.Diagnostics.CodeAnalysis;
-
-    using ReactiveUI;
-    using NLog;
-
+    using CDP4Common;
+    using CDP4Common.CommonData;
+    using CDP4Common.EngineeringModelData;
+    using CDP4Common.Types;
     using CDP4Dal;
     using CDP4Dal.Operations;
-    using CDP4Common.EngineeringModelData;
-    using CDP4Common.CommonData;
-    using CDP4Common.Types;
-
     using DEHPCommon.Enumerators;
     using DEHPCommon.Events;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.MappingEngine;
+    using DEHPCommon.Services.ExchangeHistory;
+    using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.Views;
-    using DEHPCommon.Services.ExchangeHistory;
-    using DEHPCommon.Services.NavigationService;
-
-    using DEHPSTEPAP242.ViewModel.Rows;
-    using DEHPSTEPAP242.Services.DstHubService;
-
-    using STEP3DAdapter;
     using DEHPSTEPAP242.Events;
-    using CDP4Common;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.ViewModel.Rows;
+    using NLog;
+    using ReactiveUI;
+    using STEP3DAdapter;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Windows;
 
 
     /// <summary>
@@ -128,7 +122,7 @@ namespace DEHPSTEPAP242.DstController
         /// <seealso cref="LoadAsync"/>
         /// </summary>
         public STEP3DFile Step3DFile
-        { 
+        {
             get => step3dFile;
             private set => step3dFile = value;
         }
@@ -195,7 +189,7 @@ namespace DEHPSTEPAP242.DstController
         /// <param name="filename">Full path to a STEP-AP242 file</param>
         public async Task LoadAsync(string filename)
         {
-            await Task.Run( () => Load(filename) );
+            await Task.Run(() => Load(filename));
         }
 
         /// <summary>
@@ -330,7 +324,7 @@ namespace DEHPSTEPAP242.DstController
 
             if (this.mappingEngine.Map(parts) is (Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo, List<ElementBase> elements) && elements.Any())
             {
-                foreach(var e in elements)
+                foreach (var e in elements)
                 {
                     this.logger.Debug($"Adding Map ElementBase {e.Name}");
                 }
@@ -464,7 +458,7 @@ namespace DEHPSTEPAP242.DstController
 
             foreach (var item in this.IdCorrespondences)
             {
-                var clonedCorrespondance  = item.Clone(false);
+                var clonedCorrespondance = item.Clone(false);
                 this.ExternalIdentifierMap.Correspondence.Add(clonedCorrespondance);
 
 #if DEBUG_EXTERNAL_IDENTITIER_MAP
@@ -858,7 +852,7 @@ namespace DEHPSTEPAP242.DstController
 #if DEBUG_SHOW_CORRESPONDENCES
             this.ShowCorrespondances(this.ExternalIdentifierMap.Correspondence);
 #endif
-            
+
             if (this.ExternalIdentifierMap.Iid == Guid.Empty)
             {
                 this.ExternalIdentifierMap = this.ExternalIdentifierMap.Clone(true);

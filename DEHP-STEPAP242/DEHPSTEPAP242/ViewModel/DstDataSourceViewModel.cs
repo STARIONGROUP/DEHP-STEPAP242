@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstDataSourceViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,19 +28,15 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using ReactiveUI;
-    using Autofac;
-
+    using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.NavigationService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-
     using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Views.Dialogs;
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon;
-    using DEHPSTEPAP242.Services.DstHubService;
+    using ReactiveUI;
+    using System;
     using System.Linq;
     using System.Windows;
 
@@ -87,7 +83,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Gets or sets a value indicating whether the TransfertCommand" is executing
         /// </summary>
-        public bool IsFileInHub 
+        public bool IsFileInHub
         {
             get => this.isFileInHub;
             private set => this.RaiseAndSetIfChanged(ref this.isFileInHub, value);
@@ -104,8 +100,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="dstBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
-        public DstDataSourceViewModel(INavigationService navigationService, 
-            IDstController dstController, IDstBrowserHeaderViewModel dstBrowserHeader, 
+        public DstDataSourceViewModel(INavigationService navigationService,
+            IDstController dstController, IDstBrowserHeaderViewModel dstBrowserHeader,
             IDstObjectBrowserViewModel dstObjectBrowser,
             IHubController hubController,
             IDstHubService dstHubService) : base(navigationService)

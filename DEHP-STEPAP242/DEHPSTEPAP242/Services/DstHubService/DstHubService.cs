@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstHubService.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,22 +28,17 @@
 
 namespace DEHPSTEPAP242.Services.DstHubService
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading.Tasks;
-    using System.Reactive.Linq;
-    using System.Linq;
-    using System.IO;
-
-    using NLog;
-
-    using CDP4Dal.Operations;
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
-    
+    using CDP4Dal.Operations;
     using DEHPCommon.HubController.Interfaces;
-
+    using NLog;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reactive.Linq;
+    using System.Threading.Tasks;
     using File = CDP4Common.EngineeringModelData.File;
 
     /// <summary>
@@ -190,7 +185,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
                 if (this.IsSTEPFileType(cfrev))
                 {
                     revisions.Add(cfrev);
-                }    
+                }
             }
 
             return revisions;
@@ -563,7 +558,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
 
             this.logger.Info($"Adding CompoundParameter: {theParameter.Name} [{theParameter.ShortName}]");
 
-            rdlClone.ParameterType.Add(theParameter); 
+            rdlClone.ParameterType.Add(theParameter);
             transaction.CreateOrUpdate(theParameter);
         }
     }

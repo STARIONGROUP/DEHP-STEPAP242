@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="MappingConfigurationDialogViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,6 +28,21 @@
 
 namespace DEHPSTEPAP242.ViewModel.Dialogs
 {
+    using Autofac;
+    using CDP4Common.CommonData;
+    using CDP4Common.EngineeringModelData;
+    using DEHPCommon.Enumerators;
+    using DEHPCommon.HubController.Interfaces;
+    using DEHPCommon.UserInterfaces.Behaviors;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPSTEPAP242.DstController;
+    using DEHPSTEPAP242.Services.DstHubService;
+    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+    using DEHPSTEPAP242.ViewModel.Rows;
+    using DEHPSTEPAP242.Views.Dialogs;
+    using DevExpress.Mvvm.Native;
+    using NLog;
+    using ReactiveUI;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -35,27 +50,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Input;
-
-    using DevExpress.Mvvm.Native;
-    using ReactiveUI;
-    using Autofac;
-    using NLog;
-
-    using CDP4Common.CommonData;
-    using CDP4Common.EngineeringModelData;
-
-    using DEHPCommon;
-    using DEHPCommon.Enumerators;
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon.UserInterfaces.Behaviors;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using DEHPCommon.Services.NavigationService;
-
-    using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
-    using DEHPSTEPAP242.ViewModel.Rows;
-    using DEHPSTEPAP242.Views.Dialogs;
-    using DEHPSTEPAP242.Services.DstHubService;
 
 
     /// <summary>
@@ -223,7 +217,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                         default:
                             warnings.Add($"The mapped Thing \"{thing.Iid}\" [{thing}] is not managed");
                             break;
-                    };
+                    }
                 }
             }
 
@@ -383,7 +377,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="dstHubService">The <see cref="IDstHubService"/></param>
         /// <param name="statusBar">The <see cref="IStatusBarControlViewModel"/></param>
-        public MappingConfigurationDialogViewModel(IHubController hubController, IDstController dstController, 
+        public MappingConfigurationDialogViewModel(IHubController hubController, IDstController dstController,
             IDstHubService dstHubService, IStatusBarControlViewModel statusBar)
         {
             this.hubController = hubController;
@@ -425,7 +419,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.ContinueCommand = ReactiveCommand.Create();
             this.ContinueCommand.Subscribe(_ => this.ExecuteContinueCommand());
-            
+
             // UI triggers
             this.WhenAnyValue(x => x.SelectedThing.SelectedOption)
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -575,7 +569,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             var usages = new List<ElementUsage>();
 
             var option = this.SelectedThing?.SelectedOption;
-            
+
             if (option is null)
             {
                 // All ElementUsages can be selected
@@ -587,7 +581,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             {
                 // Filter ElementUsages when an Option is selected
                 usages.AddRange(this.AvailableElementDefinitions.SelectMany(d => d.ContainedElement)
-                    .Where(u => u.ElementDefinition.Iid == ed.Iid && 
+                    .Where(u => u.ElementDefinition.Iid == ed.Iid &&
                         !u.ExcludeOption.Contains(option)).Select(x => x.Clone(true))
                     );
             }

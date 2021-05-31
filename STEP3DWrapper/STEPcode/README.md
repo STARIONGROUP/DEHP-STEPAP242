@@ -1,10 +1,19 @@
-   Travis-CI   |   AppVeyor CI
-:-------------:|:---------------:
-Linux, OSX (LLVM) | Windows (MSVC)
-[![Build Status](https://travis-ci.org/stepcode/stepcode.svg?branch=master)](https://travis-ci.org/stepcode/stepcode) | [![Build status](https://ci.appveyor.com/api/projects/status/3fbr9t9gfa812oqu?svg=true)](https://ci.appveyor.com/project/mpictor/stepcode)
+DEHP Step 242 Integration
+
+Before building the adapter you should build this version of stepcode that includes some additional classes.
+The easiest way to do it is to use Visual Studio Code. 
+First build the ALL_BUILD target (select it at the bottom of visual studio code) then build the
+COPY_STEP3D target. Please not that the CMAKE_BUILD_TYPE must be set to the build type before
+building the COPY_STEP3D target. If it is not set properly you will have to move int directories
+found in Step3DWrapper/Step3DWrapperLibrary in into a subdirectory named Debug or Release that you must create in the Step3DWrapperLibrary.
+
+
+
+
+
 
 ***********************************************************************
-STEPcode v0.8 -- stepcode.org, github.com/stepcode/stepcode
+STEPcode v0.9 -- stepcode.org, github.com/stepcode/stepcode
 
 * What is STEPcode? SC reads ISO10303-11 EXPRESS schemas and generates
   C++ source code that can read and write Part 21 files conforming
@@ -36,14 +45,16 @@ CODING STANDARDS
 SC's source has been reformatted with astyle. When making changes, try
 to match the current formatting. The main points are:
 
-  - compact (java-style) brackets:
+  - K&R (Kernighan & Ritchie) brackets:
 ```C
-    if( a == 3 ) {
-        c = 5;
-        function( a, b );
-    } else {
-        somefunc( );
-    }
+   int Foo(bool isBar)
+   {
+       if (isBar) {
+           bar();
+           return 1;
+       } else
+           return 0;
+   }
 ```
   - indents are 4 spaces
   - no tab characters

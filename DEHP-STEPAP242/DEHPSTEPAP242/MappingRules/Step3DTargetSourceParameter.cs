@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="Step3DTargetSourceParameter.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -36,7 +36,7 @@ namespace DEHPSTEPAP242.MappingRules
 
     /// <summary>
     /// Helper class which keeps a reference to the <see cref="ValueArray{string}"/> 
-    /// that needs to me updated with the new <see cref="FileRevision"/> of the source
+    /// that needs to be updated with the new <see cref="FileRevision"/> of the source
     /// STEP 3D file in the Hub.
     /// </summary>
     public class Step3DTargetSourceParameter

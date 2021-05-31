@@ -1,8 +1,8 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="Step3DViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
-//    Author: Juan Pablo Hernandez Vogt
+//    Authors: Juan Pablo Hernandez Vogt, Ivan Fontaine
 //
 //    Part of the code was based on the work performed by RHEA as result
 //    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
@@ -28,15 +28,11 @@
 
 namespace DEHPSTEPAP242.ViewModel.Rows
 {
-    using System;
-    using System.Collections.Generic;
-    
-    using ReactiveUI;
-
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
-    
+    using ReactiveUI;
     using STEP3DAdapter;
+    using System;
 
     /// <summary>
     /// The <see cref="Step3DRowViewModel"/> is the node in the HLR tree structure.
@@ -207,7 +203,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// <summary>
         /// Gets or sets the mapping configurations
         /// </summary>
-        public ReactiveList<IdCorrespondence> MappingConfigurations { get; set; } = new ReactiveList<IdCorrespondence>();
+        public ReactiveList<IdCorrespondence> MappingConfigurations { get; set; } = new ReactiveList<IdCorrespondence>() { ChangeTrackingEnabled = true };
 
         /// <summary>
         /// Cleans all the "Selected" fields
@@ -359,9 +355,9 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             this.SetMappingStatus(MappingStatusType.Nothing);
         }
 
-#endregion
+        #endregion
 
-#region Constructor
+        #region Constructor
 
         /// <summary>
         /// Constructor
@@ -378,10 +374,9 @@ namespace DEHPSTEPAP242.ViewModel.Rows
 
             this.ResetMappingStatus();
 
-            //TODO: not working as expected
-            //this.WhenAnyValue(x => x.MappingConfigurations).Subscribe(x => this.UpdateMappingStatus());
+            this.MappingConfigurations.ItemChanged.Subscribe(x => this.UpdateMappingStatus());
         }
 
-#endregion
+        #endregion
     }
 }

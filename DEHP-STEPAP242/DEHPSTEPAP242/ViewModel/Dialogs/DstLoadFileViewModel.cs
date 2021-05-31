@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstLoadFileViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,22 +28,19 @@
 
 namespace DEHPSTEPAP242.ViewModel.Dialogs
 {
-    using System;
-    using System.IO;
-    using System.Threading.Tasks;
-    using System.Reactive;
-
-    using Microsoft.Win32;
-    using ReactiveUI;
-
     using DEHPCommon.Enumerators;
     using DEHPCommon.UserInterfaces.Behaviors;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
-
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+    using Microsoft.Win32;
+    using ReactiveUI;
+    using System;
+    using System.IO;
+    using System.Reactive;
+    using System.Threading.Tasks;
 
 
     /// <summary>

@@ -30,8 +30,6 @@ namespace DEHPSTEPAP242.Views
 {
     using System.Windows.Controls;
 
-    using DEHPSTEPAP242.ViewModel.Interfaces;
-
     /// <summary>
     /// Interaction logic for <see cref="DstBrowserHeader"/> XAML
     /// </summary>

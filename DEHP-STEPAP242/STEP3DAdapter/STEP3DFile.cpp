@@ -110,7 +110,7 @@ void STEP3DAdapter::STEP3DFile::convertHeaderInfo()
 void STEP3DAdapter::STEP3DFile::convertParts()
 {
     auto nodes = m_wrapper->getNodes();
-    const int sz = nodes.size();
+    const int sz = (int)nodes.size();
 
     array<STEP3D_Part^>^ parts = gcnew array<STEP3D_Part^>(sz);
 
@@ -126,7 +126,7 @@ void STEP3DAdapter::STEP3DFile::convertParts()
 void STEP3DAdapter::STEP3DFile::convertPartRelations()
 {
     auto relations = m_wrapper->getRelations();
-    const int sz = relations.size();
+    const int sz = (int)relations.size();
 
     array<STEP3D_PartRelation^>^ partRelations = gcnew array<STEP3D_PartRelation^>(sz);
 

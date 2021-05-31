@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="MappingConfigurationDialogViewModel" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,26 +28,19 @@
 
 namespace DEHPSTEPAP242.ViewModel.Dialogs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Reactive;
-
-    using ReactiveUI;
-
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using DEHPCommon.UserInterfaces.Behaviors;
-    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
-
-    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
-    using DEHPSTEPAP242.Settings;
     using CDP4Common.EngineeringModelData;
+    using CDP4Dal;
+    using DEHPCommon.HubController.Interfaces;
+    using DEHPCommon.UserInterfaces.Behaviors;
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Events;
-    using CDP4Dal;
+    using DEHPSTEPAP242.Settings;
+    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+    using ReactiveUI;
+    using System;
+    using System.Linq;
 
     /// <summary>
     /// The view-model for the Mapping Configuration Manager dialog that allows users
@@ -163,7 +156,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             {
                 this.SelectedExternalIdentifierMap = this.AvailableExternalIdentifierMap.FirstOrDefault(
                     x => x.Name == usedMappingName);
-                
+
                 // In case the Configuration name is not found, propose the creation
                 if (this.SelectedExternalIdentifierMap is null)
                 {
@@ -189,8 +182,8 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 vm => vm.CreateNewMappingConfigurationChecked,
                 vm => vm.NewExternalIdentifierMapName,
                 vm => vm.SelectedExternalIdentifierMap,
-                (newChecker, newName, selectedMap) => 
-                    (newChecker && !string.IsNullOrWhiteSpace(newName)) || 
+                (newChecker, newName, selectedMap) =>
+                    (newChecker && !string.IsNullOrWhiteSpace(newName)) ||
                     (!newChecker && selectedMap != null)
                 );
 

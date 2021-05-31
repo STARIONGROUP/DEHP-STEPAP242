@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
-//    Copyright (c) 2020-2021 Open Engineering S.A.
+// <copyright file="HighLevelRepresentationBuilder.cs" company="Open Engineering S.A.">
+//    Copyright (c) 2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
 //
@@ -28,11 +28,10 @@
 
 namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
 {
-    using System.Collections.Generic;
-    
     using DEHPSTEPAP242.ViewModel.Rows;
     using NLog;
     using STEP3DAdapter;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Self-referential data source content.

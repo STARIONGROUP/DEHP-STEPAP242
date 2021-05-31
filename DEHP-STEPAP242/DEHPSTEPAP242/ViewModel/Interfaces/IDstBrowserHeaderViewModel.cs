@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="IDstDrowserHeaderViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,8 +28,6 @@
 
 namespace DEHPSTEPAP242.ViewModel.Interfaces
 {
-    using STEP3DAdapter;
-
     /// <summary>
     /// Interface definition for <see cref="DstBrowserHeaderViewModel"/>
     /// </summary>

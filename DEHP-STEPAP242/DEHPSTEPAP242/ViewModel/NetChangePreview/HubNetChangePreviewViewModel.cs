@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="HubNetChangePrewiewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,16 +28,9 @@
 
 namespace DEHPSTEPAP242.ViewModel.NetChangePreview
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
     using CDP4Dal;
-    using CDP4Dal.Events;
     using DEHPCommon.Events;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.ObjectBrowserTreeSelectorService;
@@ -47,8 +40,10 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
     using DEHPCommon.UserInterfaces.ViewModels.Rows.ElementDefinitionTreeRows;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
-    using DEHPSTEPAP242.ViewModel.Rows;
-    using ReactiveUI;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reactive.Linq;
 
 
     /// <summary>
@@ -69,7 +64,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         /// </summary>
         private readonly List<Step3DRowViewModel> previousSelection = new List<Step3DRowViewModel>();
 #endif
-        
+
         /// <summary>
         /// Gets or sets a value indicating that the tree in the case that
         /// <see cref="DstController.MapResult"/> is not empty and the tree is not showing all changes
@@ -82,7 +77,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="hubController">The <see cref="T:DEHPCommon.HubController.Interfaces.IHubController" /></param>
         /// <param name="objectBrowserTreeSelectorService">The <see cref="T:DEHPCommon.Services.ObjectBrowserTreeSelectorService.IObjectBrowserTreeSelectorService" /></param>
-        public HubNetChangePreviewViewModel(IDstController dstController, IHubController hubController, IObjectBrowserTreeSelectorService objectBrowserTreeSelectorService) 
+        public HubNetChangePreviewViewModel(IDstController dstController, IHubController hubController, IObjectBrowserTreeSelectorService objectBrowserTreeSelectorService)
             : base(hubController, objectBrowserTreeSelectorService)
         {
             this.dstController = dstController;
@@ -353,7 +348,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             var isExpanded = this.Things.First().IsExpanded;
             this.ComputeValues();
             this.Things.First().IsExpanded = isExpanded;
-            
+
             this.IsDirty = false;
 
             this.IsBusy = false;

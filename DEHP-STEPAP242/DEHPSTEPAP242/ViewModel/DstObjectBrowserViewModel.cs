@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstObjectBrowserViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -30,39 +30,29 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    using System.Windows;
-
     using Autofac;
-    using ReactiveUI;
-
-    using CDP4Dal;
     using CDP4Common.CommonData;
-    using CDP4Common.EngineeringModelData;
+    using CDP4Dal;
     using DEHPCommon;
     using DEHPCommon.Enumerators;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.NavigationService;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.ViewModels;
-
+    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.ViewModel.Dialogs;
+    using DEHPSTEPAP242.Events;
     using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.ViewModel.Rows;
     using DEHPSTEPAP242.Views.Dialogs;
-    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using DEHPSTEPAP242.Events;
-
-    using STEP3DAdapter;
     using NLog;
+    using ReactiveUI;
+    using STEP3DAdapter;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reactive.Linq;
 
     /// <summary>
     /// The <see cref="DstObjectBrowserViewModel"/> is the view model 
@@ -305,7 +295,7 @@ namespace DEHPSTEPAP242.ViewModel
                 vm => vm.dstController.MappingDirection,
                 vm => vm.isBusy,
                 (hlr, iteration, mappingDirection, busy) =>
-                    hlr.Value.Count>0 && iteration.Value != null &&
+                    hlr.Value.Count > 0 && iteration.Value != null &&
                     mappingDirection.Value is MappingDirection.FromDstToHub &&
                     !busy.Value
                 );
@@ -319,7 +309,7 @@ namespace DEHPSTEPAP242.ViewModel
                 vm => vm.dstController.MappingDirection,
                 vm => vm.isBusy,
                 (part, iteration, mappingDirection, busy) =>
-                    part.Value != null && iteration.Value != null && 
+                    part.Value != null && iteration.Value != null &&
                     mappingDirection.Value is MappingDirection.FromDstToHub &&
                     !busy.Value
                 );

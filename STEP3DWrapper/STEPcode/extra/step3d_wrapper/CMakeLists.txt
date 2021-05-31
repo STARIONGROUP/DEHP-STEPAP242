@@ -43,14 +43,14 @@ target_compile_definitions(step3d_wrapper PRIVATE step3d_DLL_EXPORTS)
 set(BIN_INSTALL_DIR bin)
 set(LIB_INSTALL_DIR lib)
 
-#message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
-#message(STATUS "CONFIG=${CONFIG}")
-#message(STATUS "CMAKE_CONFIGURATION_TYPE=${CMAKE_CONFIGURATION_TYPE}")
-#message(STATUS "CMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}")
-#message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
-#message(STATUS "SC_INSTALL_PREFIX=${SC_INSTALL_PREFIX}")
-#message(STATUS "BIN_INSTALL_DIR=${BIN_INSTALL_DIR}")
-#message(STATUS "LIB_INSTALL_DIR=${LIB_INSTALL_DIR}")
+message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+message(STATUS "CONFIG=${CONFIG}")
+message(STATUS "CMAKE_CONFIGURATION_TYPE=${CMAKE_CONFIGURATION_TYPE}")
+message(STATUS "CMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}")
+message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
+message(STATUS "SC_INSTALL_PREFIX=${SC_INSTALL_PREFIX}")
+message(STATUS "BIN_INSTALL_DIR=${BIN_INSTALL_DIR}")
+message(STATUS "LIB_INSTALL_DIR=${LIB_INSTALL_DIR}")
 
 install(FILES step3d_dllinterface.h step3d_wrapper.h
   DESTINATION ${SC_INSTALL_PREFIX}/step3d/include)
@@ -69,12 +69,13 @@ set(step_deps
 	${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${BIN_INSTALL_DIR}/sdai_ap242.dll
   )
 
+set(STEP3D_WRAPPER_DIR "${CMAKE_BINARY_DIR}/../../Step3DWrapperLibrary/${CMAKE_BUILD_TYPE}")
 install(FILES ${CMAKE_BINARY_DIR}/${BIN_INSTALL_DIR}/step3d_wrapper.dll ${step_deps}
-  DESTINATION ${SC_INSTALL_PREFIX}/step3d/bin)
+  DESTINATION ${STEP3D_WRAPPER_DIR}/bin)
 
 #message(STATUS "step_deps=${step_deps}")
 
-set(STEP3D_WRAPPER_DIR "${CMAKE_BINARY_DIR}/../step3d_$<CONFIGURATION>")
+
 #message(STATUS "STEP3D_WRAPPER_DIR=${STEP3D_WRAPPER_DIR}")
 
 add_custom_target(COPY_STEP3D 
@@ -82,6 +83,7 @@ add_custom_target(COPY_STEP3D
 	COMMAND ${CMAKE_COMMAND} -E make_directory "${STEP3D_WRAPPER_DIR}/bin"
 	COMMAND ${CMAKE_COMMAND} -E make_directory "${STEP3D_WRAPPER_DIR}/lib"
 	
+  
 	# Wrapper
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/step3d_dllinterface.h" "${STEP3D_WRAPPER_DIR}/include"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/step3d_wrapper.h" "${STEP3D_WRAPPER_DIR}/include"
@@ -96,8 +98,9 @@ add_custom_target(COPY_STEP3D
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/$<CONFIGURATION>/bin/stepdai.dll" "${STEP3D_WRAPPER_DIR}/bin"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/$<CONFIGURATION>/bin/steputils.dll" "${STEP3D_WRAPPER_DIR}/bin"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/$<CONFIGURATION>/bin/sdai_ap242.dll" "${STEP3D_WRAPPER_DIR}/bin"
-	
+ 
 	COMMENT "Copying step3d_wrapper library files"
+  COMMENT "${STEP3D_WRAPPER_DIR}/lib"
 )
 
 

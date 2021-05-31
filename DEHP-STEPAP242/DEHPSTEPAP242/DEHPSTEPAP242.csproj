@@ -21,11 +21,14 @@
     <Authors>Open Engineering S.A.</Authors>
     <Version>1.2.1</Version>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    <AssemblyName>M</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.1.0" />
-    <PackageReference Include="DEHPCommon" Version="1.0.212" />
+    <PackageReference Include="DEHPCommon" Version="1.0.212">
+      <GeneratePathProperty>true</GeneratePathProperty>
+    </PackageReference>
     <PackageReference Include="NLog" Version="4.6.8" />
     <PackageReference Include="NLog.Schema" Version="4.6.8" />
     <PackageReference Include="DevExpress.WindowsDesktop.Wpf.Layout" Version="20.1.8" />

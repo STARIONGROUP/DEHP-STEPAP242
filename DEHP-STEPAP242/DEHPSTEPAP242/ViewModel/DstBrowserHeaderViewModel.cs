@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstBrowserHeaderViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -28,14 +28,12 @@
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    using System;
-    using ReactiveUI;
-    
+    using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Views;
-    using DEHPSTEPAP242.DstController;
-
+    using ReactiveUI;
     using STEP3DAdapter;
+    using System;
 
     /// <summary>
     /// The <see cref="DstBrowserHeaderViewModel"/> is the view model the <see cref="DstBrowserHeader"/>
@@ -227,14 +225,14 @@ namespace DEHPSTEPAP242.ViewModel
         #endregion
 
         #region Constructor
-        
+
         public DstBrowserHeaderViewModel(IDstController dstController)
         {
             this.dstController = dstController;
 
             this.WhenAnyValue(x => x.dstController.IsLoading).Subscribe(_ => this.UpdateHeader());
         }
-        
+
         #endregion
 
         #region Private Methods
