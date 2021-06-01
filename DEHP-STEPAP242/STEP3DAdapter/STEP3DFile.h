@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="STEP3DFile.h" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
 // 
 //    Author: Juan Pablo Hernandez Vogt
@@ -26,7 +26,8 @@
 
 using namespace System;
 
-#include "step3d_wrapper.h"
+#include <step3d_wrapper.h>
+
 #include "Tools/Tools.h"
 
 
