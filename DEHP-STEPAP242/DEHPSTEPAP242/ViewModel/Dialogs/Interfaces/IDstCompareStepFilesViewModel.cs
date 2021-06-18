@@ -1,8 +1,8 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IHighLevelRepresentationBuilder.cs" company="Open Engineering S.A.">
+// <copyright file="IDstCompareStepFile.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2021 Open Engineering S.A.
 // 
-//    Author: Juan Pablo Hernandez Vogt
+//    Author: Ivan Fontaine
 //
 //    Part of the code was based on the work performed by RHEA as result
 //    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
@@ -26,20 +26,20 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
-{
-    using DEHPSTEPAP242.ViewModel.Rows;
-    using STEP3DAdapter;
-    using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-    /// <summary>
-    /// Helper class to create the High Level Representation (HLR) View Model for STEP AP242 file
-    /// </summary>
-    public interface IHighLevelRepresentationBuilder
+namespace DEHPSTEPAP242.Dialog.Interfaces
+{
+    public interface IDstCompareStepFilesViewModel
     {
-        /// <summary>
-        /// Creates the High Level Representation (HLR) View Model for STEP AP242 file
-        /// </summary>
-        List<Step3DRowData> CreateHLR(STEP3DFile step3d);
+
+        void SetFiles(string path1, string path2);
+        bool IsLoadingFile { get; }
+        Task Process();
+
     }
 }

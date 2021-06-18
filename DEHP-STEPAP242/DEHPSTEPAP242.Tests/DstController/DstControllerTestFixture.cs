@@ -320,7 +320,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                 Container = this.iteration
             });
 
-            Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation())));
+         //   Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation())));
 
             this.mappingEngine.Setup(x => x.Map(It.IsAny<object>())).Throws<InvalidOperationException>();
             Assert.Throws<NullReferenceException>(() => this.controller.Map(default(Step3DRowViewModel)));

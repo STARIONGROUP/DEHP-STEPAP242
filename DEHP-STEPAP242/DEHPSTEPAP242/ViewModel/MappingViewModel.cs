@@ -68,8 +68,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="hubController">The <see cref="IHubController"/>"/></param>
-        public MappingViewModel(IDstController dstController, IHubController hubController,
-            IDstObjectBrowserViewModel dstVariablesControlViewModel)
+        public MappingViewModel(IDstController dstController)
         {
             this.dstController = dstController;            
 

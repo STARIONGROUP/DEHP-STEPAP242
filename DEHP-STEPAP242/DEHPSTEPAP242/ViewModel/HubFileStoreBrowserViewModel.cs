@@ -1,25 +1,25 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="HubFileStoreBrowserViewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
-// 
+//
 //    Author: Juan Pablo Hernandez Vogt
 //
 //    Part of the code was based on the work performed by RHEA as result
 //    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
 //    by Sam Gerené, Alex Vorobiev, Alexander van Delft and Nathanael Smiechowski.
-// 
+//
 //    This file is part of DEHP STEP-AP242 (STEP 3D CAD) adapter project.
-// 
+//
 //    The DEHP STEP-AP242 is free software; you can redistribute it and/or
 //    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
 //    version 3 of the License, or (at your option) any later version.
-// 
+//
 //    The DEHP STEP-AP242 is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //    Lesser General Public License for more details.
-// 
+//
 //    You should have received a copy of the GNU Lesser General Public License
 //    along with this program; if not, write to the Free Software Foundation,
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -36,10 +36,15 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.FileDialogService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPSTEPAP242.Dialog.Interfaces;
+    using DEHPSTEPAP242.Dialogs;
+    using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Events;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.Services.FileStoreService;
     using DEHPSTEPAP242.ViewModel.Interfaces;
+    using DEHPSTEPAP242.Views.Dialogs;
+    using NLog;
     using ReactiveUI;
     using System;
     using System.Collections.Generic;
@@ -47,8 +52,10 @@ namespace DEHPSTEPAP242.ViewModel
     using System.Linq;
     using System.Reactive;
     using System.Reactive.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Threading;
 
     /// <summary>
     /// Wrapper class to display <see cref="FileRevision"/> of a STEP <see cref="File"/>
@@ -98,7 +105,7 @@ namespace DEHPSTEPAP242.ViewModel
     /// <summary>
     /// ViewModel for all the STEP files in the current <see cref="Iteration"/>
     /// and <see cref="EngineeringModel"/>.
-    /// 
+    ///
     /// Only last revisions are shown.
     /// </summary>
     public class HubFileStoreBrowserViewModel : ReactiveObject, IHubFileStoreBrowserViewModel
@@ -109,6 +116,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IDstController"/> instance
         /// </summary>
         private readonly IHubController hubController;
+
+        private readonly IDstController dstController;
 
         /// <summary>
         /// The <see cref="IDstHubService"/> instance
@@ -130,6 +139,11 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private readonly IOpenSaveFileDialogService fileDialogService;
 
+        // <summary>
+        /// The <see cref="IDstCompareStepFilesViewModel"/>
+        /// </summary>
+
+        private readonly IDstCompareStepFilesViewModel fileCompare;
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
         /// </summary>
@@ -144,7 +158,9 @@ namespace DEHPSTEPAP242.ViewModel
             set => this.RaiseAndSetIfChanged(ref this.isBusy, value);
         }
 
-        #endregion
+        #endregion Private members
+
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         #region IHubFileBrowserViewModel interface
 
@@ -165,6 +181,14 @@ namespace DEHPSTEPAP242.ViewModel
         {
             get => currentHubFile;
             set => this.RaiseAndSetIfChanged(ref this.currentHubFile, value);
+        }
+
+        private string localStepFilePath;
+
+        public string LocalStepFilePath
+        {
+            get => localStepFilePath;
+            set => this.RaiseAndSetIfChanged(ref this.localStepFilePath, value);
         }
 
         /// <summary>
@@ -188,14 +212,16 @@ namespace DEHPSTEPAP242.ViewModel
 
         /// <summary>
         /// Loads one STEP-AP242 file from the local storage
-        /// 
+        ///
         /// If files does not exist, it call <see cref="DownloadFileCommand"/> first.
-        /// 
+        ///
         /// Uses the <see cref="CurrentHubFile"/> value.
         /// </summary>
         public ReactiveCommand<Unit> LoadFileCommand { get; private set; }
 
-        #endregion
+        public ReactiveCommand<Unit> CompareFileCommand { get; private set; }
+
+        #endregion IHubFileBrowserViewModel interface
 
         #region Constructor
 
@@ -209,20 +235,23 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="fileDialogService"></param>
         public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView,
             IFileStoreService fileStoreService, IDstHubService dstHubService,
-            IOpenSaveFileDialogService fileDialogService)
+            IOpenSaveFileDialogService fileDialogService, IDstController dstController, IDstCompareStepFilesViewModel fileCompare)
         {
             this.hubController = hubController;
             this.statusBar = statusBarControlView;
             this.fileStoreService = fileStoreService;
             this.dstHubService = dstHubService;
             this.fileDialogService = fileDialogService;
+            this.dstController = dstController;
+            this.fileCompare = fileCompare;
+
 
             HubFiles = new ReactiveList<HubFile>();
 
             InitializeCommandsAndObservables();
         }
 
-        #endregion
+        #endregion Constructor
 
         #region Private/Protected methods
 
@@ -233,22 +262,28 @@ namespace DEHPSTEPAP242.ViewModel
         {
             // Change on connection
             this.WhenAnyValue(x => x.hubController.OpenIteration).ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => this.UpdateFileList());
+            .Subscribe(_ => this.UpdateFileList());
 
             // Refresh/Transfer emits UpdateObjectBrowserTreeEvent (cache changed)
             CDPMessageBus.Current.Listen<UpdateObjectBrowserTreeEvent>()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(x => this.UpdateFileList());
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(x => this.UpdateFileList());
 
             // Ask for download
             CDPMessageBus.Current.Listen<DownloadFileRevisionEvent>()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(async x => await this.DownloadFileRevisionIdAs(x.TargetId));
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(async x => await this.DownloadFileRevisionIdAs(x.TargetId));
 
             // Commands on selected FileRevision
+
             var fileSelected = this.WhenAny(
                 vm => vm.CurrentHubFile,
                 (x) => x.Value != null);
+
+            //var cancompare = this.WhenAnyValue(vm => vm.dstController.IsFileOpen).ObserveOn(RxApp.MainThreadScheduler).CombineLatest(fileSelected, (a, b) => a && b).DistinctUntilChanged();
+
+            var cancompare = this.WhenAnyValue(vm => vm.dstController.IsFileOpen).ObserveOn(RxApp.MainThreadScheduler);//.CombineLatest(fileSelected, (a, b) => a && b).DistinctUntilChanged();
+            this.CompareFileCommand = ReactiveCommand.CreateAsyncTask(cancompare, async x => await CompareFileCommandExecute());
 
             this.LoadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.LoadFileCommandExecute());
 
@@ -259,7 +294,7 @@ namespace DEHPSTEPAP242.ViewModel
 
         /// <summary>
         /// Fills the list of STEP files
-        /// 
+        ///
         /// Files correspond to the current <see cref="Iteration"/> and current <see cref="DomainOfExpertise"/>
         /// and <see cref="EngineeringModel"/>.
         /// </summary>
@@ -392,7 +427,7 @@ namespace DEHPSTEPAP242.ViewModel
 
         /// <summary>
         /// Executes the <see cref="DownloadFileCommand"/> asynchronously.
-        /// 
+        ///
         /// File is downloaded from the Hub into destination choosen by the user.
         /// </summary>
         private async Task DownloadFileAsCommandExecute()
@@ -409,7 +444,7 @@ namespace DEHPSTEPAP242.ViewModel
 
         /// <summary>
         /// Executes the <see cref="DownloadFileCommand"/> asynchronously.
-        /// 
+        ///
         /// File is downloaded from the Hub and stored locally.
         /// <seealso cref="FileStoreService"/>.
         /// </summary>
@@ -439,7 +474,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <remarks>
         /// If file does not exists in the local cache <see cref="FileStoreService"/>, it is first downloaded from the Hub.
-        /// 
+        ///
         /// File is loaded by the current default application from the local storage <see cref="FileStoreService"/>.
         /// </remarks>
         private async Task LoadFileCommandExecute()
@@ -488,6 +523,34 @@ namespace DEHPSTEPAP242.ViewModel
             return fileopener.Start();
         }
 
-        #endregion
+        private async Task CompareFileCommandExecute()
+        {
+            await DownloadFileCommandExecute();
+            string hubdestinationPath = "D:\\acme\\dev\\DEHP\\STEP-AP242\\XIPE Examples\\XIPE_all_v2.stp";//  fileStoreService.GetPath(CurrentFileRevision());
+            string loadedStepFilePath = this.dstController.Step3DFile.FileName;
+            logger.Debug("Hub file is located here {0}", hubdestinationPath);
+            logger.Debug("Local file is located here {0} ", loadedStepFilePath);
+
+            var dlg = new SimpleUndeterminateProgressBar();
+
+            dlg.Show();
+          
+            await Task.Run(() => { 
+                this.fileCompare.SetFiles(loadedStepFilePath, hubdestinationPath);
+                Task task = this.fileCompare.Process();
+            });
+
+            dlg.Close();
+
+            var compareDialog = new DstCompareStepFiles()
+            {
+                DataContext = this.fileCompare
+            };
+
+            compareDialog.ShowDialog();
+            
+        }
+
+        #endregion Private/Protected methods
     }
 }

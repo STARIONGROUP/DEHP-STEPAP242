@@ -112,7 +112,7 @@ namespace DEHPSTEPAP242.ViewModel
             IHubObjectBrowserViewModel objectBrowser,
             IPublicationBrowserViewModel publicationBrowser,
             IHubFileStoreBrowserViewModel hubFileBrowser,
-            IObjectBrowserTreeSelectorService treeSelectorService,
+            
             IDstHubService dstHubService,
             INavigationService navigationService) : base(navigationService)
         {

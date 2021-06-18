@@ -130,7 +130,16 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Returns the status of the last load action.
         /// </summary>
-        public bool IsFileOpen => step3dFile?.HasFailed == false;
+        /// 
+
+
+        private bool isFileOpen;
+
+        public bool IsFileOpen
+        {
+            get => isFileOpen;
+            private set => this.RaiseAndSetIfChanged(ref isFileOpen, value);
+        }
 
         /// <summary>
         /// The <see cref="IsLoading"/> that indicates the loading status flag.
@@ -152,7 +161,7 @@ namespace DEHPSTEPAP242.DstController
         public void Load(string filename)
         {
             this.IsLoading = true;
-
+            this.IsFileOpen = false;
             var timer = new Stopwatch();
             timer.Start();
 
@@ -179,7 +188,7 @@ namespace DEHPSTEPAP242.DstController
 
             // Update the new instance only when a load success
             this.Step3DFile = step;
-
+            this.IsFileOpen = !step.HasFailed;
             this.IsLoading = false;
         }
 
@@ -190,6 +199,7 @@ namespace DEHPSTEPAP242.DstController
         public async Task LoadAsync(string filename)
         {
             await Task.Run(() => Load(filename));
+            
         }
 
         /// <summary>

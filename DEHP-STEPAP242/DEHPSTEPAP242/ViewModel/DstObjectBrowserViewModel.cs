@@ -166,7 +166,15 @@ namespace DEHPSTEPAP242.ViewModel
 
             var builder = AppContainer.Container.Resolve<IHighLevelRepresentationBuilder>();
 
-            Step3DHLR = builder.CreateHLR(dstController.Step3DFile);
+            var mvl = new List<Step3DRowViewModel>();
+
+            var stepdalist = builder.CreateHLR(dstController.Step3DFile);
+            foreach( Step3DRowData rowData in stepdalist){
+                
+                mvl.Add(new Step3DRowViewModel(rowData));
+                
+            }
+            Step3DHLR = mvl;
 
             IsBusy = false;
 

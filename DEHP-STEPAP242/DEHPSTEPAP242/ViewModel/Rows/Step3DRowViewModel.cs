@@ -42,8 +42,9 @@ namespace DEHPSTEPAP242.ViewModel.Rows
     /// </summary>
     public class Step3DRowViewModel : ReactiveObject
     {
-        internal STEP3D_Part part;
-        internal STEP3D_PartRelation relation;
+        
+
+        internal Step3DRowData stepRowData;
 
         #region HLR Tree Indexes
 
@@ -53,14 +54,17 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// <remarks>
         /// It is an unique value in the <see cref="Builds.HighLevelRepresentationBuilder.HighLevelRepresentationBuilder"/> context.
         /// </remarks>
-        public int ID { get; set; }
-
-        /// <summary>
-        /// Auxiliary parent index for tree control.
-        /// </summary>
-        public int ParentID { get; set; }
 
         #endregion
+
+
+
+
+        
+
+
+
+
 
         #region Part Fields
 
@@ -71,55 +75,55 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// The instance is the part name and the usage id <see cref="STEP3D_PartRelation.id"/>
         /// representing a unique string for the part.
         /// </remarks>
-        public string InstanceName { get; }
+        public string InstanceName { get => stepRowData.InstanceName; }
 
         /// <summary>
         /// Get full path of compised part instance names
         /// </summary>
-        public string InstancePath { get; private set; }
+        public string InstancePath { get => stepRowData.InstancePath; }
 
         /// <summary>
         /// Get Part name.
         /// </summary>
-        public string Name { get => part.name; }
+        public string Name { get => stepRowData.Name; }
 
         /// <summary>
         /// Get short entity type.
         /// </summary>
-        public string Type { get => part.type; }
+        public string Type { get => stepRowData.Type; }
 
         /// <summary>
         /// Get STEP entity type.
         /// </summary>
-        public string RepresentationType { get => part.representation_type; }
+        public string RepresentationType { get => stepRowData.RepresentationType; }
 
         /// <summary>
         /// Get STEP entity file Id.
         /// </summary>
-        public int StepId { get => part.stepId; }
+        public int StepId { get => stepRowData.StepId; }
+
+        public int ID { get => stepRowData.ID; }
+
+        public int ParentID { get => stepRowData.ParentID;}
 
         /// <summary>
         /// Compose a reduced description of the <see cref="STEP3D_Part"/>
         /// </summary>
         public string Description
         {
-            get => $"{part.type}#{part.stepId} '{part.name}'";
+            get => $"{stepRowData.Type}#{stepRowData.StepId} '{stepRowData.Name}'";
         }
 
         /// <summary>
         /// Gets a label of association
-        /// </summary>
-        /// <remarks>
-        /// Using as label the <see cref="STEP3D_PartRelation.id"/> instead 
-        /// <see cref="STEP3D_PartRelation.name"/> because it was the only unique value 
-        /// exported by the different CAD applications tested during developments.
-        /// </remarks>
-        public string RelationLabel { get => relation?.id; }
+        /// </summary>        
+        public string RelationLabel {            
+            get => stepRowData.RelationLabel; }
 
         /// <summary>
         /// Gets the Get STEP entity file Id of the relation (NAUO)
         /// </summary>
-        public string RelationId { get => $"{relation?.stepId}"; }
+        public string RelationId { get => $"{stepRowData.StepId}"; }
 
         #endregion
 
@@ -364,10 +368,10 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         /// <param name="part">Reference to <see cref="STEP3D_Part"/> entity in the <see cref="STEP3DFile"/></param>
         /// <param name="relation">Reference to <see cref="STEP3D_Part"/> entity in the <see cref="STEP3DFile"/></param>
-        public Step3DRowViewModel(STEP3D_Part part, STEP3D_PartRelation relation, string parentPath = "")
+      /*  public Step3DRowViewModel(STEP3D_Part part, STEP3D_PartRelation relation, string parentPath = "")
         {
-            this.part = part;
-            this.relation = relation;
+            //this.part = part;
+            //this.relation = relation;
 
             this.InstanceName = string.IsNullOrWhiteSpace(this.RelationLabel) ? this.Name : $"{this.Name} ({this.RelationLabel})";
             this.InstancePath = string.IsNullOrWhiteSpace(parentPath) ? this.InstanceName : $"{parentPath}.{this.InstanceName}";
@@ -376,6 +380,23 @@ namespace DEHPSTEPAP242.ViewModel.Rows
 
             this.MappingConfigurations.ItemChanged.Subscribe(x => this.UpdateMappingStatus());
         }
+      */
+
+
+        public Step3DRowViewModel(Step3DRowData rowdata)
+        {
+            this.stepRowData = rowdata;
+            //this.part = part;
+            //this.relation = relation;
+
+            //this.InstanceName = string.IsNullOrWhiteSpace(this.RelationLabel) ? this.Name : $"{this.Name} ({this.RelationLabel})";
+            //this.InstancePath = string.IsNullOrWhiteSpace(parentPath) ? this.InstanceName : $"{parentPath}.{this.InstanceName}";
+
+            this.ResetMappingStatus();
+
+            this.MappingConfigurations.ItemChanged.Subscribe(x => this.UpdateMappingStatus());
+        }
+
 
         #endregion
     }

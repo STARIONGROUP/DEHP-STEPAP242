@@ -25,6 +25,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Events\Class1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="6.1.0" />
     <PackageReference Include="DEHPCommon" Version="1.0.212">
       <GeneratePathProperty>true</GeneratePathProperty>

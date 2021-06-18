@@ -1,0 +1,119 @@
+﻿<Window
+    x:Class="DEHPSTEPAP242.Views.Dialogs.DstCompareStepFiles"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Views="clr-namespace:DEHPSTEPAP242.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Step File Differences"
+    MinWidth="800"
+    MinHeight="800"
+    MaxHeight="1000"
+    d:DesignHeight="736.525"
+    d:DesignWidth="417.48"
+    ShowInTaskbar="False"
+    SizeToContent="WidthAndHeight"
+    TextBlock.TextAlignment="Center"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+
+    <Grid VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="230" />
+            <RowDefinition Height="600" />
+            <RowDefinition Height="60" />
+        </Grid.RowDefinitions>
+        <Grid
+            Grid.Row="0"
+            Grid.Column="0"
+           
+            
+            Margin="0,00,0,0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="110" />
+                <RowDefinition Height="110" />
+            </Grid.RowDefinitions>
+            <Views:DstBrowserHeader
+                Grid.Row="0"
+                VerticalAlignment="Bottom"
+                Background="Yellow"
+                DataContext="{Binding FirstFileHeader}" />
+            <Views:DstBrowserHeader
+                Grid.Row="1"
+                VerticalAlignment="Bottom"
+                Background="LightGreen"
+                DataContext="{Binding FirstFileHeader}" />
+        </Grid>
+        <dxg:TreeListControl
+            x:Name="treeList"
+            Grid.Row="1"
+            ItemsSource="{Binding Step3DHLR}"
+            SelectionMode="None">
+
+            <dxg:TreeListControl.View>
+                <dxg:TreeListView
+                    x:Name="treeListView"
+                    AllowEditing="False"
+                    AutoWidth="False"
+                    ExpandStateFieldName="IsExpanded"
+                    HorizontalScrollbarVisibility="Auto"
+                    KeyFieldName="ID"
+                    NavigationStyle="Cell"
+                    ParentFieldName="ParentID"
+                    ShowVerticalLines="False"
+                    TreeLineStyle="Solid">
+
+                    <dxg:TreeListView.RowStyle>
+                        <Style TargetType="{x:Type dxg:RowControl}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Row.PartOf}" Value="FIRST">
+                                    <Setter Property="Background" Value="Yellow" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Row.PartOf}" Value="SECOND">
+                                    <Setter Property="Background" Value="LightGreen" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Row.PartOf}" Value="BOTH">
+                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:TreeListView.RowStyle>
+                </dxg:TreeListView>
+            </dxg:TreeListControl.View>
+            <dxg:TreeListControl.Columns>
+                <dxg:TreeListColumn FieldName="Name" Fixed="Left" />
+
+            </dxg:TreeListControl.Columns>
+
+        </dxg:TreeListControl>
+
+
+        <Button
+            Grid.Row="2"
+            Width="93"
+            Margin="0,0,0,20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            AutomationProperties.HelpText="Close The Dialog Box"
+            BorderThickness="1"
+            Click="SimpleButton_Click"
+            IsCancel="True"
+            IsDefault="True">
+            Close
+        </Button>
+    </Grid>
+
+
+
+</Window>

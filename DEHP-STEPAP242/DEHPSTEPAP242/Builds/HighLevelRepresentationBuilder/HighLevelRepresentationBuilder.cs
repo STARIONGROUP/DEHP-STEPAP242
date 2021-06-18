@@ -31,6 +31,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
     using DEHPSTEPAP242.ViewModel.Rows;
     using NLog;
     using STEP3DAdapter;
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -60,6 +61,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// </summary>
         private readonly Dictionary<int, STEP3D_Part> idToPartMap = new Dictionary<int, STEP3D_Part>();
 
+        private readonly Dictionary<string, int> nameDict = new();
         /// <summary>
         /// Helper structure to speedup tree searches.
         /// <seealso cref="InitializeAuxiliaryData"/>
@@ -105,8 +107,9 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         ///
         /// The global identification of a Part instance is the full path of IDs.
         /// </remarks>
-        public List<Step3DRowViewModel> CreateHLR(STEP3DFile step3d)
+        public List<Step3DRowData> CreateHLR(STEP3DFile step3d)
         {
+            var entries = new List<Step3DRowData>();
             if (step3d is null)
             {
                 this.logger.Debug("Creating empty HLR for null STEP3DFile");
@@ -118,7 +121,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
                 InitializeAuxiliaryData(step3d.Parts, step3d.Relations);
             }
 
-            var entries = new List<Step3DRowViewModel>();
+            
             int nextID = 1;
 
             foreach (var p in this.parts)
@@ -126,10 +129,10 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
                 if (IsIsolatedPart(p))
                 {
                     // Orphan parts are added to the maint Root
-                    var node = new Step3DRowViewModel(p, null) { ID = nextID++ };
+                    var node = new Step3DRowData(nameDict,p, null) { ID = nextID++ };
                     entries.Add(node);
 
-                    // Process part's childs
+                    // Process parts of children
                     AddSubTree(entries, node, ref nextID);
                 }
             }
@@ -221,25 +224,30 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// <param name="entries">Tree container to fill</param>
         /// <param name="parent">Parent row node</param>
         /// <param name="nextID">Global tree ID for next creation operation</param>
-        private void AddSubTree(ICollection<Step3DRowViewModel> entries, Step3DRowViewModel parent, ref int nextID)
+        private void AddSubTree(ICollection<Step3DRowData> entries, Step3DRowData parent, ref int nextID)
         {
             var children = FindChildren(parent.StepId);
-
+          //  int childidx = 0;
+            List<Step3DRowData> listOfChild = new();
             foreach (var cr in children)
             {
                 var child = cr.Item1;
                 var relation = cr.Item2;
-
-                var node = new Step3DRowViewModel(child, relation, parent.InstancePath)
+                
+                var node = new Step3DRowData(nameDict,child, relation, parent.InstancePath)
                 {
                     ID = nextID++,
-                    ParentID = parent.ID
+                    Parent = parent,
+                    ParentID = parent.ID,
+                    
+                    
                 };
-
+                listOfChild.Add(node);
                 entries.Add(node);
 
                 AddSubTree(entries, node, ref nextID);
             }
+            parent.Children = listOfChild;
         }
     }
 }

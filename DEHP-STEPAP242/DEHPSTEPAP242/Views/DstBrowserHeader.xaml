@@ -28,7 +28,7 @@
             </StackPanel>
         </ToolTip>
     </UserControl.ToolTip>
-    <Grid Background="AliceBlue">
+    <Grid Background="{Binding Color}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

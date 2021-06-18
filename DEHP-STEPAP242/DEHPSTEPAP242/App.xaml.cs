@@ -35,6 +35,8 @@ namespace DEHPSTEPAP242
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
+    using DEHPSTEPAP242.Dialog.Interfaces;
+    using DEHPSTEPAP242.Dialogs;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.Services.FileStoreService;
@@ -177,6 +179,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<MappingConfigurationManagerDialogViewModel>().As<IMappingConfigurationManagerDialogViewModel>();
             containerBuilder.RegisterType<MappingViewModel>().As<IMappingViewModel>().SingleInstance();
             containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>().SingleInstance();
+            containerBuilder.RegisterType<DstCompareStepFilesViewModel>().As<IDstCompareStepFilesViewModel>().SingleInstance();
         }
     }
 }

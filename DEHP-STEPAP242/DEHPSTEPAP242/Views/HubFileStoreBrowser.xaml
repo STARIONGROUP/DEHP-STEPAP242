@@ -34,6 +34,9 @@
             <Button Content="Open" Margin="2,0,0,0" 
                     Command="{Binding LoadFileCommand}"
                     ToolTip="Open file from the Hub using the external default application"/>
+            <Button Content="Compare with Loaded File" Margin="2,0,0,0" 
+                    Command="{Binding CompareFileCommand}"
+                    ToolTip="Compare the  file from the Hub with the current Loaded file"/>
         </StackPanel>
         
     </Grid>

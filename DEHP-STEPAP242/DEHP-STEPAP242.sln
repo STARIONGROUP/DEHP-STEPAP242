@@ -8,10 +8,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STEP3DAdapter.Console", "STEP3DAdapter.Console\STEP3DAdapter.Console.csproj", "{20D6933C-BA2F-4EB2-B1BE-3DD0C2C241FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STEP3DAdapter.Tests", "STEP3DAdapter.Tests\STEP3DAdapter.Tests.csproj", "{ACEB7A43-9329-4E8B-8C73-2476C28D987A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AFD5C0CF-EB70-4762-BBBC-32F309BC51A0} = {AFD5C0CF-EB70-4762-BBBC-32F309BC51A0}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DEHPSTEPAP242", "DEHPSTEPAP242\DEHPSTEPAP242.csproj", "{AFD5C0CF-EB70-4762-BBBC-32F309BC51A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DEHPSTEPAP242.Tests", "DEHPSTEPAP242.Tests\DEHPSTEPAP242.Tests.csproj", "{E3B99744-955A-4D4D-9A20-5A880BFC4C07}"
+	ProjectSection(ProjectDependencies) = postProject
+		{25E58B82-2329-4DDC-9349-ED899CBC7A50} = {25E58B82-2329-4DDC-9349-ED899CBC7A50}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,8 +29,8 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|Any CPU.Build.0 = Debug|Win32
+		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|Any CPU.Build.0 = Debug|x64
 		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|x64.ActiveCfg = Debug|x64
 		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|x64.Build.0 = Debug|x64
 		{25E58B82-2329-4DDC-9349-ED899CBC7A50}.Debug|x86.ActiveCfg = Debug|Win32
