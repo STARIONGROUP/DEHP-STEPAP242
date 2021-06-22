@@ -228,8 +228,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         private void AddSubTree(ICollection<Step3DRowData> entries, Step3DRowData parent, ref int nextID)
         {
             var children = FindChildren(parent.StepId);
-          //  int childidx = 0;
-            List<Step3DRowData> listOfChild = new();
+          
             foreach (var cr in children)
             {
                 var child = cr.Item1;
