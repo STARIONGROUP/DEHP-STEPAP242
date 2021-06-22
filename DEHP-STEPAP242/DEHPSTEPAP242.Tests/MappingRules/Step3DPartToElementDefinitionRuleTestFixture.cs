@@ -227,7 +227,7 @@ namespace DEHPSTEPAP242.Tests.MappingRules
             Assert.IsTrue(values.Computed[ID].Equals("1"));
             Assert.IsTrue(values.Computed[REPRESENTATION_TYPE].Equals("Shape_Representation"));
             Assert.IsTrue(values.Computed[ASSEMBLY_LABEL].Equals("Spider1:1"));
-            Assert.IsTrue(values.Computed[ASSEMBLY_ID].Equals("211"));
+            Assert.IsTrue(values.Computed[ASSEMBLY_ID].Equals("1"));
             Assert.IsTrue(values.Computed[SOURCE].Equals(""));
         }       
     }

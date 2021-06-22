@@ -112,17 +112,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
        
         public string RelationLabel
         {
-            get
-            {
-                if (Relation == null) return "";
-                string relation = Relation.id;
-                if (relation.All(char.IsDigit))
-                {// we only have digit. we're going to prefix it with the name to get a proper instancepath"
-
-                    return Part.name + ":" + Relation.id;
-                };
-                return Relation.id;
-            }
+            get => $"{Relation?.id}";
         }
             
             
@@ -154,13 +144,14 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             this.Part = part;
             this.Relation = relation;
             this.UniqueName = this.Name;
-            if (namedict.TryGetValue(this.Name, out int namecnt))
+            if (this.Name!=null && namedict.TryGetValue(this.Name, out int namecnt))
             {
                 string suffix = namecnt.ToString();
                 this.UniqueName += suffix;
                 namecnt++;
+                namedict[this.Name] = namecnt;
             }
-            namedict[this.Name] = namecnt;
+            
             
             this.InstanceName = string.IsNullOrWhiteSpace(this.RelationLabel) ?this.Name : $"{this.Name}({this.RelationLabel})";
             this.InstancePath = string.IsNullOrWhiteSpace(parentPath) ? this.InstanceName : $"{parentPath}.{this.InstanceName}";
