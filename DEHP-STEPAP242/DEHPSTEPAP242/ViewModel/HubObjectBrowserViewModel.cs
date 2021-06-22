@@ -77,7 +77,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private ReactiveCommand<object> DownloadGuidCommand;
 
-        public HubObjectBrowserViewModel(IDstController dstController, IDstHubService dstHubService,
+        public HubObjectBrowserViewModel( IDstHubService dstHubService,
             IHubController hubController, IObjectBrowserTreeSelectorService objectBrowserTreeSelectorService) : base(hubController, objectBrowserTreeSelectorService)
         {
             

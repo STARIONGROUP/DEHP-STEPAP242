@@ -1,5 +1,5 @@
 ﻿<Window
-    x:Class="DEHPSTEPAP242.Views.Dialogs.SimpleUndeterminateProgressBar"
+    x:Class="DEHPSTEPAP242.Views.Dialogs.UndeterminateProgressBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="In Progress..."

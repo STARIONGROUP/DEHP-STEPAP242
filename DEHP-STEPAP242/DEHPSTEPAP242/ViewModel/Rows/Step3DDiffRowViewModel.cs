@@ -33,7 +33,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
     using STEP3DAdapter;
     using System;
     using System.Collections.Generic;
-    using static DEHPSTEPAP242.ViewModel.Interfaces.IDstNodeDiffData;
+   
 
     /// <summary>
     /// The <see cref="Step3DDiffRowViewModel"/> is the node in the Step comparison tree
@@ -41,11 +41,12 @@ namespace DEHPSTEPAP242.ViewModel.Rows
     /// <seealso cref="DstObjectBrowserViewModel"/>
     /// <seealso cref="Builds.HighLevelRepresentationBuilder.HighLevelRepresentationBuilder"/>
     /// </summary>
-    public class Step3DDiffRowViewModel : ReactiveObject,IDstNodeDiffData
+    public class Step3DDiffRowViewModel : ReactiveObject
     {
        
+        public enum PartOfKind {  BOTH,FIRST,SECOND,SECONDTORELOCATE}
 
-        private Step3DRowData stepRowData;
+        private readonly Step3DRowData stepRowData;
 
         #region HLR Tree Indexes
 
@@ -77,9 +78,9 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// <summary>
         /// Get Part name.
 
-        string IDstNodeDiffData.Signature { get => stepRowData.GetSignature(); }
+        public string Signature { get => stepRowData.GetSignature(); }
         /// </summary>
-        string IDstNodeDiffData.Name { get => stepRowData.Name; }
+        public string Name { get => stepRowData.Name; }
 
         /// <summary>
         /// Get short entity type.
@@ -96,10 +97,10 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         public int StepId { get => stepRowData.StepId; }
 
-        int IDstNodeDiffData.ID { get => stepRowData.ID; set => stepRowData.ID = value; }
+        public int ID { get => stepRowData.ID; set => stepRowData.ID = value; }
 
-        public List<Step3DRowData> Children { get => stepRowData.Children; }
-        int IDstNodeDiffData.ParentID { get => stepRowData.ParentID; set => stepRowData.ParentID=value; }
+        
+        public int ParentID { get => stepRowData.ParentID; set => stepRowData.ParentID=value; }
 
         /// <summary>
         /// Compose a reduced description of the <see cref="STEP3D_Part"/>
@@ -119,19 +120,19 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         public string RelationId { get => $"{stepRowData.StepId}"; }
 
-        #endregion Part Fields
-
-        
+        #endregion Part Fields       
                
-
+        /** <summary>Used to keep track of the node belonging during the comparison process
+         * </summary>
+         */
         public PartOfKind PartOf { get; set; }
       
         #region Constructor
 
-        public Step3DDiffRowViewModel(Step3DRowData rowdata, IDstNodeDiffData.PartOfKind partOf)
+        public Step3DDiffRowViewModel(Step3DRowData rowdata, PartOfKind partOf)
         {
             this.stepRowData = rowdata;
-            ((IDstNodeDiffData)this).PartOf = partOf;
+            this.PartOf = partOf;
           
         }
 

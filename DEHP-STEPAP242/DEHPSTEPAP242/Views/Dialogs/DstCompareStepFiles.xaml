@@ -28,8 +28,6 @@
         <Grid
             Grid.Row="0"
             Grid.Column="0"
-           
-            
             Margin="0,00,0,0"
             HorizontalAlignment="Center"
             VerticalAlignment="Top">
@@ -50,7 +48,7 @@
                 Grid.Row="1"
                 VerticalAlignment="Bottom"
                 Background="LightGreen"
-                DataContext="{Binding FirstFileHeader}" />
+                DataContext="{Binding SecondFileHeader}" />
         </Grid>
         <dxg:TreeListControl
             x:Name="treeList"
@@ -92,7 +90,10 @@
                 </dxg:TreeListView>
             </dxg:TreeListControl.View>
             <dxg:TreeListControl.Columns>
-                <dxg:TreeListColumn FieldName="Name" Fixed="Left" />
+                <dxg:TreeListColumn
+                    MinWidth="650"
+                    FieldName="Name"
+                    Fixed="Left" />
 
             </dxg:TreeListControl.Columns>
 

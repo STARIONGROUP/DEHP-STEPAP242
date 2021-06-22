@@ -107,8 +107,10 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         ///
         /// The global identification of a Part instance is the full path of IDs.
         /// </remarks>
-        public List<Step3DRowData> CreateHLR(STEP3DFile step3d)
+        
+        public List<Step3DRowData> CreateHLR(STEP3DFile step3d,int cntOffSet=1)
         {
+            
             var entries = new List<Step3DRowData>();
             if (step3d is null)
             {
@@ -122,7 +124,7 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
             }
 
             
-            int nextID = 1;
+            int nextID = cntOffSet;
 
             foreach (var p in this.parts)
             {
@@ -136,7 +138,6 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
                     AddSubTree(entries, node, ref nextID);
                 }
             }
-
             return entries;
         }
 
@@ -241,13 +242,12 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
                     ParentID = parent.ID,
                     
                     
-                };
-                listOfChild.Add(node);
+                };            
                 entries.Add(node);
 
                 AddSubTree(entries, node, ref nextID);
             }
-            parent.Children = listOfChild;
+            
         }
     }
 }

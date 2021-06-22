@@ -37,7 +37,6 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.Services.FileDialogService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPSTEPAP242.Dialog.Interfaces;
-    using DEHPSTEPAP242.Dialogs;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Events;
     using DEHPSTEPAP242.Services.DstHubService;
@@ -52,10 +51,8 @@ namespace DEHPSTEPAP242.ViewModel
     using System.Linq;
     using System.Reactive;
     using System.Reactive.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
-    using System.Windows.Threading;
 
     /// <summary>
     /// Wrapper class to display <see cref="FileRevision"/> of a STEP <see cref="File"/>
@@ -144,6 +141,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
 
         private readonly IDstCompareStepFilesViewModel fileCompare;
+
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
         /// </summary>
@@ -245,7 +243,6 @@ namespace DEHPSTEPAP242.ViewModel
             this.dstController = dstController;
             this.fileCompare = fileCompare;
 
-
             HubFiles = new ReactiveList<HubFile>();
 
             InitializeCommandsAndObservables();
@@ -280,9 +277,8 @@ namespace DEHPSTEPAP242.ViewModel
                 vm => vm.CurrentHubFile,
                 (x) => x.Value != null);
 
-            //var cancompare = this.WhenAnyValue(vm => vm.dstController.IsFileOpen).ObserveOn(RxApp.MainThreadScheduler).CombineLatest(fileSelected, (a, b) => a && b).DistinctUntilChanged();
-
-            var cancompare = this.WhenAnyValue(vm => vm.dstController.IsFileOpen).ObserveOn(RxApp.MainThreadScheduler);//.CombineLatest(fileSelected, (a, b) => a && b).DistinctUntilChanged();
+            var cancompare = this.WhenAnyValue(vm => vm.dstController.IsFileOpen).ObserveOn(RxApp.MainThreadScheduler).CombineLatest(fileSelected, (a, b) => a && b).DistinctUntilChanged();
+            
             this.CompareFileCommand = ReactiveCommand.CreateAsyncTask(cancompare, async x => await CompareFileCommandExecute());
 
             this.LoadFileCommand = ReactiveCommand.CreateAsyncTask(fileSelected, async _ => await this.LoadFileCommandExecute());
@@ -522,33 +518,44 @@ namespace DEHPSTEPAP242.ViewModel
             fileopener.StartInfo.Arguments = "\"" + path + "\"";
             return fileopener.Start();
         }
-
+        /**<summary>
+         * The command executable code for comparing two step files.
+         * This command manages the different dialog boxes.
+         * </summary>
+         * */
         private async Task CompareFileCommandExecute()
         {
             await DownloadFileCommandExecute();
-            string hubdestinationPath = "D:\\acme\\dev\\DEHP\\STEP-AP242\\XIPE Examples\\XIPE_all_v2.stp";//  fileStoreService.GetPath(CurrentFileRevision());
+            string hubdestinationPath =  fileStoreService.GetPath(CurrentFileRevision());
             string loadedStepFilePath = this.dstController.Step3DFile.FileName;
-            logger.Debug("Hub file is located here {0}", hubdestinationPath);
-            logger.Debug("Local file is located here {0} ", loadedStepFilePath);
+            logger.Debug("Step comparison: Hub file is located here : {0}", hubdestinationPath);
+            logger.Debug("Step comparison: Local file is located here : {0} ", loadedStepFilePath);
 
-            var dlg = new SimpleUndeterminateProgressBar();
+            var dlg = new UndeterminateProgressBar();
 
             dlg.Show();
-          
-            await Task.Run(() => { 
-                this.fileCompare.SetFiles(loadedStepFilePath, hubdestinationPath);
-                Task task = this.fileCompare.Process();
+            bool isOK = false;
+            await Task.Run(() =>
+            {
+                isOK = this.fileCompare.SetFiles(loadedStepFilePath, hubdestinationPath);
+                isOK = isOK && this.fileCompare.Process();
             });
 
             dlg.Close();
 
-            var compareDialog = new DstCompareStepFiles()
+            if (!isOK)
             {
-                DataContext = this.fileCompare
-            };
+                MessageBox.Show(string.Format("An error occured when comparing\n {0} and\n {1}", loadedStepFilePath, hubdestinationPath), "An Error Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                var compareDialog = new DstCompareStepFiles()
+                {
+                    DataContext = this.fileCompare
+                };
 
-            compareDialog.ShowDialog();
-            
+                compareDialog.ShowDialog();
+            }
         }
 
         #endregion Private/Protected methods

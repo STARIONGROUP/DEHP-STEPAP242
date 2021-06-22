@@ -36,10 +36,16 @@ namespace DEHPSTEPAP242.Dialog.Interfaces
 {
     public interface IDstCompareStepFilesViewModel
     {
-
-        void SetFiles(string path1, string path2);
-        bool IsLoadingFile { get; }
-        Task Process();
-
+        /** <summary>>Do the main DIff process. 
+         * </summary>
+         * <returns>true if the diff is successful, false otherwise</returns>
+         */
+        bool Process();
+        /** <summary>
+         * Sets the two input files path of the files we want to display the differences and loads them.
+         * </summary>
+         * <returns>false if an error occured  while reading one of the files. true if they could be read.</returns>
+         */
+        bool SetFiles(string path1, string path2);
     }
 }

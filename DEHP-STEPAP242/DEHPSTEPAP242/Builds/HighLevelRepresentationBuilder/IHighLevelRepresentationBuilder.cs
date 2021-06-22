@@ -40,6 +40,6 @@ namespace DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder
         /// <summary>
         /// Creates the High Level Representation (HLR) View Model for STEP AP242 file
         /// </summary>
-        List<Step3DRowData> CreateHLR(STEP3DFile step3d);
+        List<Step3DRowData> CreateHLR(STEP3DFile step3d, int cntOffSet = 1);
     }
 }

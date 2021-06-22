@@ -1,100 +1,122 @@
-﻿using DEHPCommon.UserInterfaces.Behaviors;
-using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DstCompareStepFileVieModel.cs" company="Open Engineering S.A.">
+//     Copyright (c) 2021 Open Engineering S.A.
+//
+//     Author: Ivan Fontaine
+//
+//     Part of the code was based on the work performed by RHEA as result of the collaboration in
+//     the context of "Digital Engineering Hub Pathfinder" by Sam Gerené, Alex Vorobiev, Alexander
+//     van Delft and Nathanael Smiechowski.
+//
+//     This file is part of DEHP STEP-AP242 (STEP 3D CAD) adapter project.
+//
+//     The DEHP STEP-AP242 is free software; you can redistribute it and/or modify it under the
+//     terms of the GNU Lesser General Public License as published by the Free Software Foundation;
+//     either version 3 of the License, or (at your option) any later version.
+//
+//     The DEHP STEP-AP242 is distributed in the hope that it will be useful, but WITHOUT ANY
+//     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE. See the GNU Lesser General Public License for more details.
+//
+//     You should have received a copy of the GNU Lesser General Public License along with this
+//     program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+//     Floor, Boston, MA 02110-1301, USA.
+// </copyright>
 using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 using DEHPSTEPAP242.Dialog.Interfaces;
 using DEHPSTEPAP242.DstController;
 using DEHPSTEPAP242.ViewModel;
-using DEHPSTEPAP242.ViewModel.Interfaces;
 using DEHPSTEPAP242.ViewModel.Rows;
-using DEHPSTEPAP242.Views;
-using DEHPSTEPAP242.Views.Dialogs;
+using NLog;
 using ReactiveUI;
 using STEP3DAdapter;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using static DEHPSTEPAP242.ViewModel.Interfaces.IDstNodeDiffData;
 using static DEHPSTEPAP242.ViewModel.Rows.Step3DDiffRowViewModel;
 
 namespace DEHPSTEPAP242.Dialogs
 {
-     class DstCompareStepFilesViewModel : ReactiveObject, IDstCompareStepFilesViewModel, ICloseWindowViewModel
+    internal class DstCompareStepFilesViewModel : ReactiveObject, IDstCompareStepFilesViewModel
     {
-        // <summary>
-        // This inner private class will be use to store information that will be used to build the resulting
-        // diff tree
-        //</summary?
-        private class DstFacadeNode: IDstNodeDiffData
-        {
-            public int ID { set; get; }
-            public int ParentID { set; get; }
-            public string Name { get => ""; }
-            public string Signature{ get=> "/"; }
-            public PartOfKind PartOf { get => PartOfKind.BOTH; set { } }
+        /** <summary>
+         * A list used to store the nodes from both files. Used to initialize the fullNodeLookUp
+         * </summary>
+         */
 
+        private readonly List<Step3DDiffRowViewModel> fullNodeList = new();
 
+        /** <summary>
+         * A lookup used to store the nodes from both files. The Signature is used as a key for building the lookup
+         * </summary>
+         */
+        private ILookup<string, Step3DDiffRowViewModel> fullNodeLookup;
 
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        /**<summary>
+         * Used to store the first file Header viewmodel
+         * </summary>
+         **/
 
-
-
-        }
-
-        public PartOfKind PartOf { get; set; }
-        private List<Step3DDiffRowViewModel> rdList = new();
-
-        private ILookup<string, Step3DDiffRowViewModel> rdLookup;
-
-      //  private List<List<Step3DRowData>> MustMerge = new();
-
-        //private List<Step3DDiffRowViewModel> vmList = new();
-        private bool loadingFile;
-
-        /// <summary>
-        /// Gets or sets the current loading task status.
-        /// </summary>
-        public bool IsLoadingFile
-        {
-            get => loadingFile;
-            set => this.RaiseAndSetIfChanged(ref this.loadingFile, value);
-        }
-
-
-        private int NewID { get; set; }
         public DstStep3DFileHeaderViewModel FirstFileHeader { get; set; }
-        public DstStep3DFileHeaderViewModel SecondFileHeader { get; set; }
-        private STEP3DFile FirstFile { get;  set; }
-        private STEP3DFile SecondFile { get; set; }
-        private List<IDstNodeDiffData> step3Work = new();
+        /**<summary>
+         *Used to store the secod file Header viewmodel
+         * </summary>
+         **/
 
-        private List<IDstNodeDiffData> step3DHLR;//= new List<Step3DDiffRowViewModel>();
+        public DstStep3DFileHeaderViewModel SecondFileHeader { get; set; }
+        /**<summary>
+         * Used to store the first STEP3DFile
+         * </summary>
+         **/
+
+        private STEP3DFile FirstFile { get; set; }
+        /**<summary>
+         * Used to store the second STEP3DFIle
+         * </summary>
+         **/
+        private STEP3DFile SecondFile { get; set; }
+        /**<summary>
+         *The  dstcontroller is required by the HeaderviewModel.
+         * </summary>
+         **/
+        private readonly IDstController dstController;
+
+        /* *<summary>
+         * Use to the the HLR data for the first file
+         * </summary>
+         * */
+        private List<Step3DRowData> FirstStepData;
+
+        /* *<summary>
+     * Use to the the HLR data for the second file
+     * </summary>
+     * */
+        private List<Step3DRowData> SecondStepData;
+
+        private List<Step3DDiffRowViewModel> step3DHLR = new();
 
         /// <summary>
         /// Gets or sets the Step3D High Level Representation structure.
         /// </summary>
-        ///
-       
 
-        public List<IDstNodeDiffData> Step3DHLR
+        public List<Step3DDiffRowViewModel> Step3DHLR
         {
             get => this.step3DHLR;
             private set => this.RaiseAndSetIfChanged(ref this.step3DHLR, value);
         }
 
-        public ICloseWindowBehavior CloseWindowBehavior { get; set; }
-        
-       
+        #region Private tree management methods
+        /**<summary>
+         * Retrieve the children of a node (using the list in Step3DHLR) filtering out the node that are not PartOf the given kind.
+         * </summary>
+         */
 
-       
-
-        private List<IDstNodeDiffData> GetVmChildren(int parentID, PartOfKind kind)
+        private List<Step3DDiffRowViewModel> GetVmChildren(int parentID, PartOfKind kind)
         {
-            List<IDstNodeDiffData> returnList = new();
-            foreach (var node in step3Work)
+            List<Step3DDiffRowViewModel> returnList = new();
+            foreach (var node in Step3DHLR)
             {
                 if (node.ParentID == parentID && node.PartOf == kind)
                 {
@@ -104,36 +126,44 @@ namespace DEHPSTEPAP242.Dialogs
             return returnList;
         }
 
-        private void TagSubTree(IDstNodeDiffData   root, PartOfKind kind)
+        /**<summary>
+        * This method is use to change the "PartOf" member of a complete subtree that has been relocated.
+        </summary>
+
+        */
+
+        private void TagSubTree(Step3DDiffRowViewModel root, PartOfKind kind)
         {
             int parentID = root.ID;
-            root.ID = NewID++;
             root.PartOf = kind;
-            List<IDstNodeDiffData> children = GetVmChildren(parentID, PartOfKind.SECONDTORELOCATE);
+            List<Step3DDiffRowViewModel> children = GetVmChildren(parentID, PartOfKind.SECONDTORELOCATE);
             foreach (var child in children)
             {
-                child.ParentID = root.ID;
                 TagSubTree(child, kind);
             }
         }
 
-        private void AddNode(IDstNodeDiffData rootnode, IDstNodeDiffData newnode)
+        /**<summary>
+         * Connect the newnode as a chid of rootnote then change all the new subtree as belonging to the Second file.
+         * </summary>
+         */
+
+        private void AddNode(Step3DDiffRowViewModel rootnode, Step3DDiffRowViewModel newnode)
         {
             newnode.ParentID = rootnode.ID; // we just change the parent ID
-
             TagSubTree(newnode, PartOfKind.SECOND);
         }
 
-        private bool RelocateNode(IDstNodeDiffData  node)
+        private bool RelocateNode(Step3DDiffRowViewModel node)
         {
-            // string nodeSignature = node.Signature;
             string parentSignature = node.Signature.Substring(0, node.Signature.LastIndexOf('/'));
-            // as the HLR only contains a node
-            IDstNodeDiffData targetNode = null;
-            foreach (var treenode in step3Work)
-            { 
+
+            Step3DDiffRowViewModel targetNode = null;
+            foreach (var treenode in Step3DHLR)
+            {
                 if (treenode.Signature == parentSignature && treenode.PartOf == PartOfKind.BOTH)
                 {
+                    logger.Info("Step Diff: relocating the branch {0} from the second file to {1}", node.Signature, treenode.Signature);
                     targetNode = treenode;
                     break;
                 }
@@ -146,48 +176,33 @@ namespace DEHPSTEPAP242.Dialogs
             AddNode(targetNode, node);
             return true;
         }
+
         /**<summary>
          * This method try to relocate a nodes whose signature is one of  shortest one among the nodes to relocate.
          * We then reconnect all of its children to the reallocated nodes. (From shortest descending the tree towards the leafs)
+         * This method will be called repeatedly until there no nodes tagged with the type SECONDTORELOCATE
          * </summary>
          */
+
         private bool TryToRelocateShortestPath()
         {
-            IDstNodeDiffData shortest = null;
+            Step3DDiffRowViewModel shortest = null;
             int min = Int32.MaxValue;
-            foreach (var node in step3Work)
-            {// In Step3DHLR in case of signature equality we use the node from the first tree
-             // Node that belongs only to the first tree are tagged as being part of the first file
-             // we need only to relocate nodes from the second file.
+            foreach (var node in step3DHLR)
+            {
+                // Nodes that belongs only to the first file are tagged as being part of the first
+                // file we need only to relocate nodes from the second file.
                 if (node.PartOf == PartOfKind.SECONDTORELOCATE)
                 {
                     int pathLenght = node.Signature.Split('/').Count();
-                    /* Here we need to relocate the node to a new root. In fact we need to create a new node that will be the new root for both trees.
-                     */
-                    if (pathLenght == 1)
-                    {
-                        var newRootData = new DstFacadeNode() { ID = -1 };
-                        foreach (var oldrootnode in step3Work)
-                        {
-                            if(oldrootnode.PartOf==PartOfKind.BOTH && oldrootnode.Signature.Split('/').Count() == 2)
-                            {
-                                oldrootnode.ParentID = -1;
-
-                            }
-
-                        }
-
-
-
-                    }
                     if (pathLenght < min)
                     {
                         shortest = node;
                         min = pathLenght;
+                        logger.Info("Step Diff: relocating the branch {0} from the second file", node.Signature);
                     }
                 }
             }
-
             if (min == Int32.MaxValue)
             {
                 return false;// we do not have a node to relocate
@@ -196,99 +211,140 @@ namespace DEHPSTEPAP242.Dialogs
         }
 
         /** <summary>
-         * To identify the subtree we compute a Hash function for every subtree. When to subtree have the same hash
-         * value we consider that they are equal. The "unique name" thing is to avoid to have duplicate name that whould produce the same hash value.
-         * This is an euristic algorithm we will be able to process correctly all the differences. But when the file share a similar structure it is going to work.
+         * Main method the build the diff in itself.
+         * The algorithm is based on the nodes signature wich is a string that contains the path of the nodes.
+         * This current version is based on unique signature for each file. All the nodes names are unique.
+         * If the files contain a lot of duplicate names with some big structures modification this could trigger the detection of
+         * more differences that there actually is.
+         *
          * </summary>
          */
 
-                    private void BuildDiff()
+        private bool BuildDiff()
         {
-            rdLookup = rdList.ToLookup(x => ((IDstNodeDiffData)x).Signature, x => x);
-            // first we consider that all the nodes that have the same signature are  equivalent.
-            //
-            foreach (var values in rdLookup)
+            fullNodeLookup = fullNodeList.ToLookup(x => ((Step3DDiffRowViewModel)x).Signature, x => x);
+            // first we consider that all the nodes that have the same signature are equivalent.
+                        
+            bool noCommonRoot = false;
+            bool onlyBoth = true;
+            foreach (var values in fullNodeLookup)
             {
                 if (values.AsEnumerable().Count() > 1)
                 {
-                    ((IDstNodeDiffData)values.AsEnumerable().First()).PartOf = PartOfKind.BOTH;
-
-                    step3Work.Add(values.AsEnumerable().First());
+                    values.AsEnumerable().First().PartOf = PartOfKind.BOTH;
+                    Step3DHLR.Add(values.AsEnumerable().First());
                 }
                 else
                 {
-                    if (((IDstNodeDiffData)values.AsEnumerable().First()).PartOf == PartOfKind.SECOND)
+                    if (values.AsEnumerable().First().Signature.Split('/').Count() == 1)
                     {
-                        ((IDstNodeDiffData)values.AsEnumerable().First()).PartOf = PartOfKind.SECONDTORELOCATE;
+                        noCommonRoot = true;
                     }
-
-                    step3Work.Add(values.AsEnumerable().First());
+                    Step3DHLR.Add(values.AsEnumerable().First());
                 }
-            };
+            }
 
-            // the Stephlr now contains all the node we need.
-            // Next step is to try to connect "orphan subtree"
-            while (TryToRelocateShortestPath()) ;
+            if (noCommonRoot)
+            {
+                logger.Info("Step Diff: the two files have no common root node.");
+            }
+            else
+            {
+                foreach (var node in step3DHLR)
+                {
+                    if (node.PartOf == PartOfKind.SECOND)
+                    {
+                        onlyBoth = false;
+                        node.PartOf = PartOfKind.SECONDTORELOCATE;
+                    }
+                }
+                if (onlyBoth)
+                {
+                    logger.Info("Step Diff: the two files are the same.");
+                }
+                while (!onlyBoth && TryToRelocateShortestPath()) ;
+            }
+            // we check if we have some duplicate keys. If we have duplicate we should no try to
+            // display the dialog box as it will crash. We normally have no duplicates but this is a
+            // security check.
+            bool anyDuplicate = step3DHLR.GroupBy(x => x.ID).Any(g => g.Count() > 1);
+            return anyDuplicate;
         }
-
-       
-
-        private List<Step3DRowData> FirstStepData;
-
-        private List<Step3DRowData> SecondStepData = new();
-
-        public DstCompareStepFilesViewModel(IDstController dstController        )
-        {
-            // Here we initialize the two header view model used to describe the loaded files.
-            FirstFileHeader = new DstStep3DFileHeaderViewModel(dstController);
-            SecondFileHeader = new DstStep3DFileHeaderViewModel(dstController);          
+        #endregion Private tree management methods
+        #region consructor
+        /**<summary>
+         * The constructor.
+         * </summary>
+         */
+        public DstCompareStepFilesViewModel(IDstController dstController)
+        {                        
+            this.dstController = dstController;
         }
-         /** <summary>
-          * Sets the path of the file to compare then read them and update the header viewmodel.
-          * </summary>
-          */
-        public void SetFiles(string path1, string path2)
+        #endregion constructor
+
+        /** <summary>
+         * Sets the path of the files to compare then read them and update the header viewmodel.
+         * </summary>
+         */
+        #region Public methods
+        public bool SetFiles(string path1, string path2)
         {
-            
             FirstFile = new STEP3DFile(path1);
             SecondFile = new STEP3DFile(path2);
+            if (FirstFile.HasFailed || SecondFile.HasFailed)
+            {
+                return false;
+            }
+
+            FirstFileHeader = new DstStep3DFileHeaderViewModel(dstController);
+            SecondFileHeader = new DstStep3DFileHeaderViewModel(dstController);
             FirstFileHeader.File = FirstFile;
             SecondFileHeader.File = SecondFile;
+
             FirstFileHeader.UpdateHeader();
             SecondFileHeader.UpdateHeader();
-
-
+            return true;
         }
+
+        /** <summary>
+         * Set the HLR data for both files
+         * </summary>
+         */
+
+        public void SetHlrData(List<Step3DRowData> first, List<Step3DRowData> second)
+        {
+            this.FirstStepData = first;
+            this.SecondStepData = second;
+        }
+
         /** <summary>
          * Do the file comparison in itself.
          * </summary>
          */
-        public async Task Process()
-        {           
+
+        public bool Process()
+        {
+            Step3DHLR?.Clear();
+            FirstStepData?.Clear();
+            SecondStepData?.Clear();
+            fullNodeList?.Clear();
+
             var hlr1 = new HighLevelRepresentationBuilder();
             var hlr2 = new HighLevelRepresentationBuilder();
-
-            FirstStepData = hlr1.CreateHLR(FirstFile);
-            SecondStepData = hlr2.CreateHLR(SecondFile);            
+            var firstHlrData = hlr1.CreateHLR(FirstFile, 1);
+            var secondHlrData = hlr2.CreateHLR(SecondFile, firstHlrData.Count() + 2);
+            SetHlrData(firstHlrData, secondHlrData);
 
             foreach (var dataNode in FirstStepData)
             {
-                rdList.Add(new Step3DDiffRowViewModel(dataNode, PartOfKind.FIRST));
+                fullNodeList.Add(new Step3DDiffRowViewModel(dataNode, PartOfKind.FIRST));
             }
             foreach (var dataNode in SecondStepData)
             {
-                rdList.Add(new Step3DDiffRowViewModel(dataNode, PartOfKind.SECOND));
-            }            
-            BuildDiff();         
-            Step3DHLR = step3Work;          
+                fullNodeList.Add(new Step3DDiffRowViewModel(dataNode, PartOfKind.SECOND));
             }
+            return !BuildDiff();// we have duplicates that's bad.
+        }
+        #endregion Public Methods
     }
-
-
-
-        
-
 }
-
-
-
