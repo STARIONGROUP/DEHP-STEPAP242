@@ -29,22 +29,18 @@ using DEHPSTEPAP242.ViewModel.Interfaces;
 using STEP3DAdapter;
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace DEHPSTEPAP242.ViewModel.Rows
 {
-    public class Step3DRowData: IEquatable<Step3DRowData>
-    {
-     
-        
+    public class Step3DRowData
+    {         
         private STEP3D_Part Part { get; }
 
         private STEP3D_PartRelation Relation { get; }
 
         public int ID { get; set; }
 
-
-        //public int NodeIndex { get; set; }
         /// <summary>
         /// Auxiliary parent index for tree control.
         /// </summary>
@@ -60,11 +56,15 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// 
 
         public Step3DRowData Parent{ get; set; }
+        
 
-        public List<Step3DRowData> Children { get; set; }
-
-        public byte[] Hash { get; set; }
+        /**<summary> Use to store a unique name made by using the name and a numeral suffix in case of several node having the same name
+         * </summary>
+         */
         public string UniqueName { get; set; }
+
+
+
         public string InstanceName { get; private set; }
 
         /// <summary>
@@ -109,10 +109,11 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// <see cref="STEP3D_PartRelation.name"/> because it was the only unique value 
         /// exported by the different CAD applications tested during developments.
         /// </remarks>
+       
         public string RelationLabel
         {
-            get;
-            /*{
+            get
+            {
                 if (Relation == null) return "";
                 string relation = Relation.id;
                 if (relation.All(char.IsDigit))
@@ -121,7 +122,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
                     return Part.name + ":" + Relation.id;
                 };
                 return Relation.id;
-            }*/
+            }
         }
             
             
@@ -131,39 +132,10 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         public string RelationId { get => $"{Relation?.stepId}"; }
 
-        public override int GetHashCode() => (ID, ParentID, Name).GetHashCode();
-
-        public override bool Equals(object obj)
-        {
-
-            Step3DRowData other = obj as Step3DRowData;
-            if (other != null)
-            {
-                return Equals(other);
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-       
-
-        public  bool Equals(Step3DRowData other)
-        {
-
-            if (Object.ReferenceEquals(other, null)) return false;
-
-            if(Object.ReferenceEquals(this, other)) return true;
-
-
-
-            return this.GetSignature().Equals(other.GetSignature()); ;// && this.Name.Equals(other.Name); ;// && this.ParentID.Equals(other.ParentID) && this.Name.Equals(other.Name);
-
-        }
-
-
-
+    /** <summary>
+     * Retrieves the signature of the node. It is basically the full path of the node, made using uniquenames.
+     * </summary>
+     */
         public string GetSignature()
         {
             string me = this.UniqueName;
@@ -182,11 +154,10 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             this.Part = part;
             this.Relation = relation;
             this.UniqueName = this.Name;
-            int namecnt=1;
-            if (namedict.TryGetValue(this.Name,out namecnt))
+            if (namedict.TryGetValue(this.Name, out int namecnt))
             {
                 string suffix = namecnt.ToString();
-                this.UniqueName = this.UniqueName + suffix;
+                this.UniqueName += suffix;
                 namecnt++;
             }
             namedict[this.Name] = namecnt;

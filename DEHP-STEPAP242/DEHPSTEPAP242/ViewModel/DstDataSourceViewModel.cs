@@ -115,7 +115,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.WhenAnyValue(
                 vm => vm.dstController.Step3DFile,
                 vm => vm.hubController.OpenIteration
-                ).Subscribe(_ => this.UpdateFileInHubStatus());
+               ).Subscribe(_ => this.UpdateFileInHubStatus());
 
             this.InitializeCommands();
         }

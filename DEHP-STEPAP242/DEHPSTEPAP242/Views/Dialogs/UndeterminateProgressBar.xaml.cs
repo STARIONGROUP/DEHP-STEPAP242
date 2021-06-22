@@ -24,24 +24,59 @@
 //    along with this program; if not, write to the Free Software Foundation,
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // </copyright>
-
+using System;
+using System.ComponentModel;
+using System.Threading;
 using System.Windows;
 
 namespace DEHPSTEPAP242.Views.Dialogs
 {
     /// <summary>
-    /// Interaction logic for StepCompareDialog.xaml
+    /// Interaction logic for UndeterminateProgressBar.xaml
     /// </summary>
-    public partial class DstCompareStepFiles : Window
-    {
-        public DstCompareStepFiles()
+    public partial class UndeterminateProgressBar : Window
+    { 
+        /** <summary>
+         * The constructor
+         * </summary>
+         */
+        public UndeterminateProgressBar()
         {            
-            InitializeComponent();            
+            InitializeComponent();
         }
-
-        private void SimpleButton_Click(object sender, RoutedEventArgs e)
+        /** <summary>
+         * The background worker use to change the progress value to animate the progressbar
+         * </summary>
+         */
+        private void Worker_Work(object sender, DoWorkEventArgs e)
         {
-
+            for (int i = 0; i < 100; i++)
+            {
+                (sender as BackgroundWorker).ReportProgress(i);
+                Thread.Sleep(100);
+            }
+        }
+        /**<summary>
+         * Method used to handle the progress changed event.
+         * </summary>
+         */
+        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            pbStatus.Value = e.ProgressPercentage;
+        }
+        /**<summary>
+         * Here we create the background worker that will keep the progressbar animated
+         * </summary>
+         */
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = true;
+            worker.DoWork += Worker_Work;
+            worker.ProgressChanged += Worker_ProgressChanged;
+            worker.RunWorkerAsync();
+            this.Topmost = false;
+            this.Activate();
         }
     }
 }
