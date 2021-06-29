@@ -90,8 +90,8 @@
             </dxg:TreeListControl.View>
             <dxg:TreeListControl.Columns>
                 <dxg:TreeListColumn
-                    Width="700"
-                    MinWidth="600"
+                    Width="600"
+                    MinWidth="500"
                     FieldName="Name"
                     Fixed="Left" />
 
