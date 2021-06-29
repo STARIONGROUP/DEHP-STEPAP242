@@ -20,8 +20,10 @@
     <RepositoryType>Git</RepositoryType>
     <Authors>Open Engineering S.A.</Authors>
     <Version>1.3.0</Version>
-    <ApplicationIcon></ApplicationIcon>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
     <AssemblyName>DEHPSTEPAP242</AssemblyName>
+    <PackageIcon>icon.ico</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,6 +69,10 @@
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Resources\icon.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
     
