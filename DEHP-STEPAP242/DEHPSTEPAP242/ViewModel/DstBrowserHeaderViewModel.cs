@@ -75,7 +75,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// Backing field for <see cref="FilePath"/>
         /// </summary>
         private string filePath = "<unloaded>";
-        public string Color = "AliceBlue";
+       
         /// <summary>
         /// Gets or sets the current path to a STEP file.
         /// </summary>

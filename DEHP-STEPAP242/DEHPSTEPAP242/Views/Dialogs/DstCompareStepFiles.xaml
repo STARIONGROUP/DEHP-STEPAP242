@@ -7,11 +7,11 @@
     xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Step File Differences"
-    MinWidth="800"
+    MinWidth="500"
     MinHeight="800"
     MaxHeight="1000"
     d:DesignHeight="736.525"
-    d:DesignWidth="417.48"
+    d:DesignWidth="400"
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
     TextBlock.TextAlignment="Center"
@@ -90,8 +90,8 @@
             </dxg:TreeListControl.View>
             <dxg:TreeListControl.Columns>
                 <dxg:TreeListColumn
-                    Width="800"
-                    MinWidth="750"
+                    Width="700"
+                    MinWidth="600"
                     FieldName="Name"
                     Fixed="Left" />
 
