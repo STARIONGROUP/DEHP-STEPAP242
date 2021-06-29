@@ -1,0 +1,145 @@
+﻿<Window
+    x:Class="DEHPSTEPAP242.Views.Dialogs.DstUserSettings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="User Settings"
+    Width="600"
+    Height="200"
+    MinWidth="400"
+    MinHeight="200"
+    d:DesignHeight="400"
+    d:DesignWidth="300"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Border Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Name="fileStorePath" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Content="File Store Directory Name:" />
+                <TextBox
+                    Grid.Column="1"
+                    Width="339"
+                    Margin="0.429,4,-4,3.857"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="{Binding FileStoreDirectoryName, BindsDirectlyToSource=True, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="This is the local directory name within the Step Adapter application directory" />
+            </Grid>
+            <Grid Name="cleanOnInit" Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Content="Clean File Store At Startup:" />
+                <CheckBox
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding FileStoreCleanOnInit, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="Specify if the local File Store Directory needs to be cleaned up on startup" />
+
+            </Grid>
+            <!--  File Path section  -->
+            <Grid Name="selectFileGrid" Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  File Path row  -->
+
+                <Grid Grid.Row="0" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Content="External Step Viewer Program:" />
+                    <TextBox
+                        x:Name="FilePath"
+                        Grid.Column="1"
+                        Margin="0,5,0,5"
+                        Text="{Binding PathToStepViewer, BindsDirectlyToSource=True, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="The default system application is used if the path is left empty." />
+                    <Button
+                        x:Name="FileBrowse"
+                        Grid.Column="2"
+                        Height="Auto"
+                        MinWidth="40"
+                        MaxWidth="40"
+                        Margin="5"
+                        Command="{Binding SelectFileCommand}"
+                        FontSize="12"
+                        ToolTip="Browse to a step viewer...">
+
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{dx:DXImage Image=LoadFrom_16x16.png}" Stretch="Uniform" />
+                        </StackPanel>
+
+                    </Button>
+                </Grid>
+
+            </Grid>
+            <Grid
+                Name="buttons"
+                Grid.Row="5"
+                VerticalAlignment="Bottom">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    Name="btnOK"
+                    Grid.Column="0"
+                    Margin="0,0,30,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Click="btnOK_Click"
+                    ToolTip="Save the new user settings">
+                    OK
+                </Button>
+                <Button
+                    Grid.Column="1"
+                    Margin="0,0,30,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    IsCancel="True"
+                    IsDefault="True">
+                    Cancel
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

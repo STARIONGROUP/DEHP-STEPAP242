@@ -36,11 +36,13 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.FileDialogService;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+    using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.Dialog.Interfaces;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Events;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.Services.FileStoreService;
+    using DEHPSTEPAP242.Settings;
     using DEHPSTEPAP242.ViewModel.Interfaces;
     using DEHPSTEPAP242.Views.Dialogs;
     using NLog;
@@ -112,6 +114,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// The <see cref="IDstController"/> instance
         /// </summary>
+        
         private readonly IHubController hubController;
 
         private readonly IDstController dstController;
@@ -142,6 +145,10 @@ namespace DEHPSTEPAP242.ViewModel
 
         private readonly IDstCompareStepFilesViewModel fileCompare;
 
+        // <summary>
+        /// The <see cref="IUserPreferenceService"/>
+        /// </summary>
+        private readonly IUserPreferenceService<AppSettings> userPreferenceService;
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
         /// </summary>
@@ -231,9 +238,10 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="fileStoreService"></param>
         /// <param name="dstHubService"></param>
         /// <param name="fileDialogService"></param>
+        /// <param name=userPreferenceService></param>
         public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView,
             IFileStoreService fileStoreService, IDstHubService dstHubService,
-            IOpenSaveFileDialogService fileDialogService, IDstController dstController, IDstCompareStepFilesViewModel fileCompare)
+            IOpenSaveFileDialogService fileDialogService, IDstController dstController, IDstCompareStepFilesViewModel fileCompare, IUserPreferenceService<AppSettings> userPreferenceService)
         {
             this.hubController = hubController;
             this.statusBar = statusBarControlView;
@@ -242,7 +250,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.fileDialogService = fileDialogService;
             this.dstController = dstController;
             this.fileCompare = fileCompare;
-
+            this.userPreferenceService = userPreferenceService;
             HubFiles = new ReactiveList<HubFile>();
 
             InitializeCommandsAndObservables();
@@ -272,7 +280,6 @@ namespace DEHPSTEPAP242.ViewModel
             .Subscribe(async x => await this.DownloadFileRevisionIdAs(x.TargetId));
 
             // Commands on selected FileRevision
-
             var fileSelected = this.WhenAny(
                 vm => vm.CurrentHubFile,
                 (x) => x.Value != null);
@@ -492,7 +499,18 @@ namespace DEHPSTEPAP242.ViewModel
             IsBusy = true;
             Application.Current.Dispatcher.Invoke(() => statusBar.Append($"Loading from Hub: {destinationPath}"));
 
-            bool openOK = this.OpenWithDefaultProgram(destinationPath);
+            bool openOK = false;
+            userPreferenceService.Read();
+            string stepViewerPath = userPreferenceService.UserPreferenceSettings.PathToStepViewer;
+
+            if (stepViewerPath.Length < 1)
+            {
+                openOK = this.OpenWithDefaultProgram(destinationPath);
+            }
+            else
+            {
+                openOK = this.OpenWithUserProgram(stepViewerPath, destinationPath);
+            }
 
             if (openOK)
             {
@@ -504,6 +522,37 @@ namespace DEHPSTEPAP242.ViewModel
             }
 
             IsBusy = false;
+        }
+        /// <summary>
+        /// Opens a file using an application given as parameter. Used for opening the step file with the application defined in the user settings.
+        /// </summary>
+        /// <param name="stepViewerPath">Full path to the application to use</param>
+        /// <param name="filePath">Full path to the file to be opened</param>
+        /// <returns>True if the execution was performed</returns>
+        private bool OpenWithUserProgram(string stepviewerPath, string filePath)
+        {
+            string output="";
+            try
+            {
+                logger.Info("Using {0] to open the step file {1}", stepviewerPath,filePath);
+                System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
+                pProcess.StartInfo.FileName = stepviewerPath;
+                pProcess.StartInfo.Arguments = filePath;
+                pProcess.StartInfo.UseShellExecute = false;
+                pProcess.StartInfo.RedirectStandardOutput = true;
+                pProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                pProcess.StartInfo.CreateNoWindow = true;
+                pProcess.Start();
+                output = pProcess.StandardOutput.ReadToEnd();
+                pProcess.WaitForExit();
+            }
+            catch(Exception)
+            {
+                logger.Error("An error occured when using the user specified program for displaying the file:\n{0}\n{1}\n ", filePath, output);
+                MessageBox.Show(string.Format("An error occured when trying to open\n{0}\nWith:\n{1}",filePath,stepviewerPath), "An Error Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -537,7 +586,9 @@ namespace DEHPSTEPAP242.ViewModel
             bool isOK = false;
             await Task.Run(() =>
             {
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Loading files."));
                 isOK = this.fileCompare.SetFiles(loadedStepFilePath, hubdestinationPath);
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Comparing the files."));
                 isOK = isOK && this.fileCompare.Process();
             });
 

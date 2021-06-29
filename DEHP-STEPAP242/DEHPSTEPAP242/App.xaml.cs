@@ -82,7 +82,9 @@ namespace DEHPSTEPAP242
             containerBuilder ??= new ContainerBuilder();
             RegisterTypes(containerBuilder);
             RegisterViewModels(containerBuilder);
+            
             AppContainer.BuildContainer(containerBuilder);
+            
         }
 
         /// <summary>
@@ -156,6 +158,7 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<UserPreferenceService<AppSettings>>().As<IUserPreferenceService<AppSettings>>().SingleInstance();
             containerBuilder.RegisterType<MappingEngine>().As<IMappingEngine>().WithParameter(MappingEngine.ParameterName, Assembly.GetExecutingAssembly());
             containerBuilder.RegisterType<HighLevelRepresentationBuilder>().As<IHighLevelRepresentationBuilder>();
+           
         }
 
         /// <summary>
@@ -180,6 +183,14 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<MappingViewModel>().As<IMappingViewModel>().SingleInstance();
             containerBuilder.RegisterType<DstTransferControlViewModel>().As<ITransferControlViewModel>().SingleInstance();
             containerBuilder.RegisterType<DstCompareStepFilesViewModel>().As<IDstCompareStepFilesViewModel>().SingleInstance();
+            containerBuilder.RegisterType<DstUserSettingsViewModel>().As<IDstUserSettingsViewModel>().SingleInstance();
+            containerBuilder.RegisterType<DstStatusBarControlViewModel>().As<IStatusBarControlViewModel>().SingleInstance();
+
+
+            
+
+
+
         }
     }
 }
