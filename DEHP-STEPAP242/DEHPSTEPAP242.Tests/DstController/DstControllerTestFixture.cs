@@ -319,8 +319,8 @@ namespace DEHPSTEPAP242.Tests.DstController
             {
                 Container = this.iteration
             });
-            Dictionary<string, int> named = new Dictionary<string, int>();
-            Step3DRowData stepData = new Step3DRowData(named, new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation());
+            
+            Step3DRowData stepData = new Step3DRowData(null, new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation());
 
 
             Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(stepData)));

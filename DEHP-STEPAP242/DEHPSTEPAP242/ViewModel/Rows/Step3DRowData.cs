@@ -144,13 +144,18 @@ namespace DEHPSTEPAP242.ViewModel.Rows
             this.Part = part;
             this.Relation = relation;
             this.UniqueName = this.Name;
-            if (this.Name!=null && namedict.TryGetValue(this.Name, out int namecnt))
+            int namecnt = 1;
+            if (namedict != null)
             {
-                string suffix = namecnt.ToString();
-                this.UniqueName += suffix;
-                namecnt++;
+                if (namedict.TryGetValue(this.Name, out namecnt))
+                {
+                    string suffix = namecnt.ToString();
+                    this.UniqueName += suffix;
+                    namecnt++;
+                }
                 namedict[this.Name] = namecnt;
             }
+
             
             
             this.InstanceName = string.IsNullOrWhiteSpace(this.RelationLabel) ?this.Name : $"{this.Name}({this.RelationLabel})";

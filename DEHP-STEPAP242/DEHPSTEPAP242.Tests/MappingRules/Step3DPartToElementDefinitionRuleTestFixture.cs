@@ -193,8 +193,8 @@ namespace DEHPSTEPAP242.Tests.MappingRules
                 stepId = 211,
                 type = "NUAO"
             };
-            Dictionary<string, int> named = new Dictionary<string, int>();
-            Step3DRowData stepData = new Step3DRowData(named,part, relation, "step_assembly");
+            
+            Step3DRowData stepData = new Step3DRowData(null,part, relation, "step_assembly");
 
             Step3DRowViewModel stepModel = new Step3DRowViewModel(stepData);
 

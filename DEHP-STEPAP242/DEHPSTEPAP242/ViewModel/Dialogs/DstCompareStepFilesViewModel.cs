@@ -22,6 +22,7 @@
 //     program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 //     Floor, Boston, MA 02110-1301, USA.
 // </copyright>
+//--------------------------------------------------------------------------------------------------------------------
 using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 using DEHPSTEPAP242.Dialog.Interfaces;
 using DEHPSTEPAP242.DstController;
