@@ -10,7 +10,7 @@
     MinWidth="500"
     MinHeight="800"
     MaxHeight="1000"
-    d:DesignHeight="736.525"
+    d:DesignHeight="736"
     d:DesignWidth="400"
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
