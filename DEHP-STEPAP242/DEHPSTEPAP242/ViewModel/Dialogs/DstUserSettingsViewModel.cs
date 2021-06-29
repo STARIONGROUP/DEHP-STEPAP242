@@ -42,7 +42,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         private readonly IUserPreferenceService<AppSettings> userPreferenceService;
 
         /// Backing field for <see cref="FileStoreDirectoryName"/>
-        public string fileStoreDirectoryName = "";
+        private string fileStoreDirectoryName = "";
 
         /// <summary>
         /// The property used to store the subdirectory name for the filestore.

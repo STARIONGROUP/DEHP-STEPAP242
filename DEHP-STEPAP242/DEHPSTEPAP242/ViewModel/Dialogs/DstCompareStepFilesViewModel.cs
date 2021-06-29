@@ -51,8 +51,10 @@ namespace DEHPSTEPAP242.Dialogs
          * A lookup used to store the nodes from both files. The Signature is used as a key for building the lookup
          * </summary>
          */
-        private ILookup<string, Step3DDiffRowViewModel> fullNodeLookup;
-
+       
+/// <summary>
+/// A currentlogger instance.
+/// </summary>
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         /**<summary>
@@ -223,7 +225,7 @@ namespace DEHPSTEPAP242.Dialogs
 
         private bool BuildDiff()
         {
-            fullNodeLookup = fullNodeList.ToLookup(x => ((Step3DDiffRowViewModel)x).Signature, x => x);
+         ILookup<string, Step3DDiffRowViewModel> fullNodeLookup= fullNodeList.ToLookup(x => (x).Signature, x => x);
             // first we consider that all the nodes that have the same signature are equivalent.
                         
             bool noCommonRoot = false;
@@ -263,7 +265,7 @@ namespace DEHPSTEPAP242.Dialogs
                 {
                     logger.Info("Step Diff: the two files are the same.");
                 }
-                while (!onlyBoth && TryToRelocateShortestPath()) ;
+                while (!onlyBoth && TryToRelocateShortestPath()) { } ;
             }
             // we check if we have some duplicate keys. If we have duplicate we should no try to
             // display the dialog box as it will crash. We normally have no duplicates but this is a
@@ -333,7 +335,7 @@ namespace DEHPSTEPAP242.Dialogs
             var hlr1 = new HighLevelRepresentationBuilder();
             var hlr2 = new HighLevelRepresentationBuilder();
             var firstHlrData = hlr1.CreateHLR(FirstFile, 1);
-            var secondHlrData = hlr2.CreateHLR(SecondFile, firstHlrData.Count() + 2);
+            var secondHlrData = hlr2.CreateHLR(SecondFile, firstHlrData.Count + 2);
             SetHlrData(firstHlrData, secondHlrData);
 
             foreach (var dataNode in FirstStepData)
