@@ -211,10 +211,7 @@ namespace DEHPSTEPAP242.MappingRules
                     {
                         parameterOverride = this.Bake<ParameterOverride>(x =>
                         {
-                            x.Parameter = parameter;
-                            //x.ParameterType = parameter.ParameterType;
-                            //x.StateDependence = parameter.StateDependence;
-                            //x.IsOptionDependent = parameter.IsOptionDependent;
+                            x.Parameter = parameter;                            
                             x.Owner = this.owner;
                         });
 
@@ -237,8 +234,7 @@ namespace DEHPSTEPAP242.MappingRules
                     {
                         parameterOverride = this.Bake<ParameterOverride>(x =>
                         {
-                            x.Parameter = parameterToOverride;
-                            //x.ParameterType = parameterToOverride.ParameterType;
+                            x.Parameter = parameterToOverride;                           
                             x.StateDependence = parameterToOverride.StateDependence;
                             x.IsOptionDependent = parameterToOverride.IsOptionDependent;
 
@@ -322,7 +318,7 @@ namespace DEHPSTEPAP242.MappingRules
                 part.SelectedParameter = this.Bake<Parameter>(x =>
                 {
                     x.ParameterType = part.SelectedParameterType;
-                    //TODO: ask how to add parameter and make it option dependent --> ParameterOverride
+                    // ask how to add parameter and make it option dependent --> ParameterOverride
                     x.Owner = this.owner;
                 });
 
@@ -369,10 +365,7 @@ namespace DEHPSTEPAP242.MappingRules
 
             return this.Bake<CompoundParameterType>(x =>
             {
-                //string STEP_ID_UNIT_NAME = "step id";
-                //string STEP_ID_NAME = "step id";
-                //string STEP_LABEL_NAME = "step label";
-                //string STEP_FILE_REF_NAME = "step file reference";
+                
                 string STEP_GEOMETRY_NAME = "step geometry";
 
                 x.Name = STEP_GEOMETRY_NAME;
@@ -394,8 +387,8 @@ namespace DEHPSTEPAP242.MappingRules
                             d =>
                             {
                                 d.Symbol = "#";
-                                //d.DefaultScale = ?
-                                //d.PossibleScale = new List<MeasurementScale> { ? }
+                                // d.DefaultScale = ?
+                                // d.PossibleScale = new List<MeasurementScale> { ? }
                             }
                             );
                     }));

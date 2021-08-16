@@ -331,7 +331,7 @@ namespace DEHPSTEPAP242.DstController
             var parts = new List<Step3DRowViewModel> { part };
 
             this.AddPreviousIdCorrespondances(part.MappingConfigurations);
-
+           
             if (this.mappingEngine.Map(parts) is (Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo, List<ElementBase> elements) && elements.Any())
             {
                 foreach (var e in elements)

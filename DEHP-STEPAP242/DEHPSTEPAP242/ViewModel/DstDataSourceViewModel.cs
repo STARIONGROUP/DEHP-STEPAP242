@@ -96,7 +96,8 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Initializes a new <see cref="DstDataSourceViewModel"/>
         /// </summary>
-        /// <param name="navigationService">The <see cref="INavigationService"/></param>
+        /// <param name="
+        /// ">The <see cref="INavigationService"/></param>
         /// <param name="dstController">The <see cref="IDstController"/></param>
         /// <param name="dstBrowserHeader">The <see cref="IHubBrowserHeaderViewModel"/></param>
         /// <param name="hubController">The <see cref="IHubController"/></param>
