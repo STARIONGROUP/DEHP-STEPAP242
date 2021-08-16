@@ -57,7 +57,7 @@ using INavigationService = DEHPCommon.Services.NavigationService.INavigationServ
 
 namespace DEHPSTEPAP242.Tests.MappingRules
 {
-    [TestFixture, Apartment(ApartmentState.STA)]
+    [TestFixture]
     public class Step3DPartToElementDefinitionRuleTestFixture
     {
         private const int ASSEMBLY_ID = 4;
@@ -173,6 +173,7 @@ namespace DEHPSTEPAP242.Tests.MappingRules
             AppContainer.Container = containerBuilder.Build();
         }
 
+       
 
         [TestCase]
         public void MappingRulesTestFixture_TransformOneSinglePart()

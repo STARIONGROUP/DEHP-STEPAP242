@@ -23,6 +23,7 @@
 //     Floor, Boston, MA 02110-1301, USA.
 // </copyright>
 //--------------------------------------------------------------------------------------------------------------------
+using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
 using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
 using DEHPSTEPAP242.Dialog.Interfaces;
 using DEHPSTEPAP242.DstController;
@@ -34,11 +35,12 @@ using STEP3DAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using static DEHPSTEPAP242.ViewModel.Rows.Step3DDiffRowViewModel;
 
 namespace DEHPSTEPAP242.Dialogs
 {
-    internal class DstCompareStepFilesViewModel : ReactiveObject, IDstCompareStepFilesViewModel
+    public class DstCompareStepFilesViewModel : ReactiveObject, IDstCompareStepFilesViewModel
     {
         /** <summary>
          * A list used to store the nodes from both files. Used to initialize the fullNodeLookUp
@@ -46,15 +48,16 @@ namespace DEHPSTEPAP242.Dialogs
          */
 
         private readonly List<Step3DDiffRowViewModel> fullNodeList = new();
+        /// <summary>
+        /// The <see cref="IStatusBarControlViewModel"/> instance
+        /// </summary>
+        private readonly IStatusBarControlViewModel statusBar;
 
-        /** <summary>
-         * A lookup used to store the nodes from both files. The Signature is used as a key for building the lookup
-         * </summary>
-         */
-       
-/// <summary>
-/// A currentlogger instance.
-/// </summary>
+
+
+        /// <summary>
+        /// A currentlogger instance.
+        /// </summary>
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         /**<summary>
@@ -241,7 +244,8 @@ namespace DEHPSTEPAP242.Dialogs
                 {
                     if (values.AsEnumerable().First().Signature.Split('/').Count() == 1)
                     {
-                        noCommonRoot = true;
+                        noCommonRoot = true; 
+                        
                     }
                     Step3DHLR.Add(values.AsEnumerable().First());
                 }
@@ -249,6 +253,10 @@ namespace DEHPSTEPAP242.Dialogs
 
             if (noCommonRoot)
             {
+                if (Application.ResourceAssembly != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() => statusBar.Append("Both step files looks completely different."));
+                }
                 logger.Info("Step Diff: the two files have no common root node.");
             }
             else
@@ -261,11 +269,16 @@ namespace DEHPSTEPAP242.Dialogs
                         node.PartOf = PartOfKind.SECONDTORELOCATE;
                     }
                 }
-                if (onlyBoth)
+                if (onlyBoth  )                  
                 {
+                    if( Application.ResourceAssembly != null){
+
+                        Application.Current.Dispatcher.Invoke(() => statusBar.Append("Both step files looks the same.")); 
+                    }
                     logger.Info("Step Diff: the two files are the same.");
+                    
                 }
-                while (!onlyBoth && TryToRelocateShortestPath()) { } ;
+                while (!onlyBoth && TryToRelocateShortestPath()) ;
             }
             // we check if we have some duplicate keys. If we have duplicate we should no try to
             // display the dialog box as it will crash. We normally have no duplicates but this is a
@@ -279,9 +292,10 @@ namespace DEHPSTEPAP242.Dialogs
          * The constructor.
          * </summary>
          */
-        public DstCompareStepFilesViewModel(IDstController dstController)
+        public DstCompareStepFilesViewModel(IDstController dstController, IStatusBarControlViewModel statusBarControlViewModel)
         {                        
             this.dstController = dstController;
+            this.statusBar = statusBarControlViewModel;
         }
         #endregion constructor
 
@@ -306,6 +320,11 @@ namespace DEHPSTEPAP242.Dialogs
 
             FirstFileHeader.UpdateHeader();
             SecondFileHeader.UpdateHeader();
+            var hlr1 = new HighLevelRepresentationBuilder();
+            var hlr2 = new HighLevelRepresentationBuilder();
+            var firstHlrData = hlr1.CreateHLR(FirstFile, 1);
+            var secondHlrData = hlr2.CreateHLR(SecondFile, firstHlrData.Count + 2);
+            SetHlrData(firstHlrData, secondHlrData);
             return true;
         }
 
@@ -328,15 +347,10 @@ namespace DEHPSTEPAP242.Dialogs
         public bool Process()
         {
             Step3DHLR?.Clear();
-            FirstStepData?.Clear();
-            SecondStepData?.Clear();
+           
             fullNodeList?.Clear();
 
-            var hlr1 = new HighLevelRepresentationBuilder();
-            var hlr2 = new HighLevelRepresentationBuilder();
-            var firstHlrData = hlr1.CreateHLR(FirstFile, 1);
-            var secondHlrData = hlr2.CreateHLR(SecondFile, firstHlrData.Count + 2);
-            SetHlrData(firstHlrData, secondHlrData);
+           
 
             foreach (var dataNode in FirstStepData)
             {

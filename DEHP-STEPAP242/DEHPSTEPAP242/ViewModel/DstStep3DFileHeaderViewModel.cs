@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DEHPSTEPAP242.ViewModel
 {
-    class DstStep3DFileHeaderViewModel:DstBrowserHeaderViewModel
+    public class DstStep3DFileHeaderViewModel:DstBrowserHeaderViewModel
 
     {
 

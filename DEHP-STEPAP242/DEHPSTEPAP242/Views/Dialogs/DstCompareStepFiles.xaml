@@ -60,11 +60,17 @@
                     x:Name="treeListView"
                     AllowEditing="False"
                     AutoWidth="False"
+                    ExpandCollapseNodesOnNavigation="True"
                     ExpandStateFieldName="IsExpanded"
+                    FixedLineWidth="0"
                     HorizontalScrollbarVisibility="Auto"
                     KeyFieldName="ID"
                     NavigationStyle="Cell"
                     ParentFieldName="ParentID"
+                    ShowAutoFilterRow="False"
+                    ShowBandsPanel="False"
+                    ShowHorizontalLines="False"
+                    ShowIndicator="False"
                     ShowVerticalLines="False"
                     TreeLineStyle="Solid">
 

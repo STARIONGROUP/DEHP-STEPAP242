@@ -1,25 +1,25 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstController.cs" company="Open Engineering S.A.">
+// <copyright file="DstControllerTestFixtures.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
-// 
-//    Author: Juan Pablo Hernandez Vogt
+//
+//    Authors: Juan Pablo Hernandez Vogt, Ivan Fontaine
 //
 //    Part of the code was based on the work performed by RHEA as result
 //    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
 //    by Sam Gerené, Alex Vorobiev, Alexander van Delft and Nathanael Smiechowski.
-// 
+//
 //    This file is part of DEHP STEP-AP242 (STEP 3D CAD) adapter project.
-// 
+//
 //    The DEHP STEP-AP242 is free software; you can redistribute it and/or
 //    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
 //    version 3 of the License, or (at your option) any later version.
-// 
+//
 //    The DEHP STEP-AP242 is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //    Lesser General Public License for more details.
-// 
+//
 //    You should have received a copy of the GNU Lesser General Public License
 //    along with this program; if not, write to the Free Software Foundation,
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -42,13 +42,12 @@ namespace DEHPSTEPAP242.Tests.DstController
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.Views;
-    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.MappingRules;
     using DEHPSTEPAP242.Services.DstHubService;
     using DEHPSTEPAP242.ViewModel.Rows;
     using Moq;
     using NUnit.Framework;
+    using STEP3DAdapter;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -60,8 +59,10 @@ namespace DEHPSTEPAP242.Tests.DstController
     public class DstControllerTestFixture
     {
         private DstController controller;
+
         //private Mock<IHighLevelRepresentationBuilder> hlrBuilder;
         private Mock<IDstHubService> dstHubService;
+
         private Mock<IHubController> hubController;
         private Mock<IMappingEngine> mappingEngine;
         private Mock<IStatusBarControlViewModel> statusBarViewModel;
@@ -70,7 +71,6 @@ namespace DEHPSTEPAP242.Tests.DstController
 
         private Iteration iteration;
         private Assembler assembler;
-
 
         private string cwd;
         private string examplesDir;
@@ -134,7 +134,6 @@ namespace DEHPSTEPAP242.Tests.DstController
                 .Returns(Task.CompletedTask);
 
             this.hubController.Setup(x => x.Write(It.IsAny<ThingTransaction>())).Returns(Task.CompletedTask);
-
 
             //this.hlrBuilder = new Mock<IHighLevelRepresentationBuilder>();
 
@@ -288,6 +287,43 @@ namespace DEHPSTEPAP242.Tests.DstController
         }
 
         [Test]
+        public void VerifyMergeExternalIdentifierMapWithNullMap()
+        {
+            this.controller.SetExternalIdentifierMap(null);
+            Assert.DoesNotThrow(() => this.controller.MergeExternalIdentifierMap());
+        }
+
+        [Test]
+        public void VerifyCallToResetExternalMappingIdentifier()
+
+        {
+            const string oldCorrespondenceExternalId = "old";
+
+            this.controller.SetExternalIdentifierMap(new ExternalIdentifierMap()
+            {
+                Correspondence =
+                {
+                    new IdCorrespondence() { ExternalId = oldCorrespondenceExternalId },
+                    new IdCorrespondence() { ExternalId = "-1" },
+                },
+                Container = this.iteration
+            });
+
+            this.controller.SetExternalIdentifierMap(this.controller.CreateExternalIdentifierMap("test"));
+            var map = this.controller.ExternalIdentifierMap;
+            Assert.IsNotNull(map);
+            this.controller.ResetExternalMappingIdentifier();
+            map = this.controller.ExternalIdentifierMap;
+            var ids = this.controller.IdCorrespondences;
+            var usedids = this.controller.UsedIdCorrespondences;
+            var previous = this.controller.PreviousIdCorrespondences;
+            Assert.IsNull(map);
+            Assert.IsTrue(usedids.Count == 0);
+            Assert.IsTrue(previous.Count == 0);
+            Assert.IsTrue(ids.Count == 0);
+        }
+
+        [Test]
         public void VerifyAddPreviousIdCorrespondances()
         {
             var correspondances = new List<IdCorrespondence>()
@@ -312,23 +348,72 @@ namespace DEHPSTEPAP242.Tests.DstController
         [Test]
         public void VerifyMap()
         {
+            STEP3D_Part part = new STEP3D_Part
+            {
+                stepId = 1,
+                type = "PD",
+                name = "Spider1",
+                representation_type = "Shape_Representation"
+            };
+
+            STEP3D_PartRelation relation = new STEP3D_PartRelation
+            {
+                id = "Spider1:1",
+                related_id = 1,
+                relating_id = 2,
+                stepId = 211,
+                type = "NUAO"
+            };
+
+            Step3DRowData stepData = new Step3DRowData(null, part, relation, "step_assembly");
+
+            Step3DRowViewModel stepModel = new Step3DRowViewModel(stepData);
+
+            var parameter = new Parameter()
+            {
+                ParameterType = new SimpleQuantityKind(),
+                ValueSet =
+                {
+                    new ParameterValueSet()
+                    {
+                        Computed = new ValueArray<string>(new [] {"654321"}),
+                        ValueSwitch = ParameterSwitchKind.COMPUTED
+                    }
+                }
+            };
+            var elementDefinition = new ElementDefinition()
+            {
+                Parameter =
+                {
+                    parameter
+                }
+            };
+
             this.mappingEngine.Setup(x => x.Map(It.IsAny<object>()))
-                .Returns((new List<ElementBase>(), new List<Step3DTargetSourceParameter>()));
+                .Returns(
+                    (new Dictionary<ParameterOrOverrideBase, MappedParameterValue>()
+                        {
+                            { parameter, new MappedParameterValue(new Step3DRowViewModel(stepData),new ValueArray<string>(),0)
+                            }
+                        },
+                        new List<ElementBase>() { elementDefinition }));
 
             this.controller.SetExternalIdentifierMap(new ExternalIdentifierMap()
             {
                 Container = this.iteration
             });
-            
-            Step3DRowData stepData = new Step3DRowData(null, new STEP3DAdapter.STEP3D_Part(), new STEP3DAdapter.STEP3D_PartRelation());
-
-
+            // we try with some data
             Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(stepData)));
-
+            var mapping = this.controller.MapResult;
+            Assert.IsTrue(mapping.Count == 1);
+            // We clean the mapping
+            this.controller.CleanCurrentMapping();
+            Assert.True(this.controller.MapResult.Count == 0);
+            // second call to test the case when the mapping is already empty
+            this.controller.CleanCurrentMapping();
+            // we try with no data
             this.mappingEngine.Setup(x => x.Map(It.IsAny<object>())).Throws<InvalidOperationException>();
             Assert.Throws<NullReferenceException>(() => this.controller.Map(default(Step3DRowViewModel)));
-
-            this.mappingEngine.Verify(x => x.Map(It.IsAny<object>()), Times.Once);
         }
 
         [Test]
@@ -508,6 +593,49 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             this.hubController.Verify(x =>
                 x.Write(It.IsAny<ThingTransaction>()), Times.Once);
+        }
+    }
+
+    internal struct NewStruct
+    {
+        public Parameter Item1;
+        public MappedParameterValue Item2;
+
+        public NewStruct(Parameter item1, MappedParameterValue item2)
+        {
+            Item1 = item1;
+            Item2 = item2;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is NewStruct other &&
+                   EqualityComparer<Parameter>.Default.Equals(Item1, other.Item1) &&
+                   EqualityComparer<MappedParameterValue>.Default.Equals(Item2, other.Item2);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = -1030903623;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Parameter>.Default.GetHashCode(Item1);
+            hashCode = hashCode * -1521134295 + EqualityComparer<MappedParameterValue>.Default.GetHashCode(Item2);
+            return hashCode;
+        }
+
+        public void Deconstruct(out Parameter item1, out MappedParameterValue item2)
+        {
+            item1 = Item1;
+            item2 = Item2;
+        }
+
+        public static implicit operator (Parameter, MappedParameterValue)(NewStruct value)
+        {
+            return (value.Item1, value.Item2);
+        }
+
+        public static implicit operator NewStruct((Parameter, MappedParameterValue) value)
+        {
+            return new NewStruct(value.Item1, value.Item2);
         }
     }
 }

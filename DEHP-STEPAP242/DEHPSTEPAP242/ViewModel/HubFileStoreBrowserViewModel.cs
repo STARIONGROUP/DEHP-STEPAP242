@@ -35,6 +35,7 @@ namespace DEHPSTEPAP242.ViewModel
     using DEHPCommon.Events;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.FileDialogService;
+    
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
     using DEHPSTEPAP242.Dialog.Interfaces;
@@ -149,6 +150,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// The <see cref="IUserPreferenceService"/>
         /// </summary>
         private readonly IUserPreferenceService<AppSettings> userPreferenceService;
+        
         /// <summary>
         /// Backing field for <see cref="IsBusy"/>
         /// </summary>
@@ -240,7 +242,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="fileDialogService"></param>
         /// <param name=userPreferenceService></param>
         public HubFileStoreBrowserViewModel(IHubController hubController, IStatusBarControlViewModel statusBarControlView,
-            IFileStoreService fileStoreService, IDstHubService dstHubService,
+            IFileStoreService fileStoreService, IDstHubService dstHubService, 
             IOpenSaveFileDialogService fileDialogService, IDstController dstController, IDstCompareStepFilesViewModel fileCompare, IUserPreferenceService<AppSettings> userPreferenceService)
         {
             this.hubController = hubController;
@@ -251,6 +253,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.dstController = dstController;
             this.fileCompare = fileCompare;
             this.userPreferenceService = userPreferenceService;
+           
             HubFiles = new ReactiveList<HubFile>();
 
             InitializeCommandsAndObservables();
@@ -535,6 +538,7 @@ namespace DEHPSTEPAP242.ViewModel
             try
             {
                 logger.Info("Using {0] to open the step file {1}", stepviewerPath,filePath);
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format("Using {0] to open the step file",stepviewerPath)));
                 System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
                 pProcess.StartInfo.FileName = stepviewerPath;
                 pProcess.StartInfo.Arguments = filePath;
@@ -550,6 +554,7 @@ namespace DEHPSTEPAP242.ViewModel
             {
                 logger.Error("An error occured when using the user specified program for displaying the file:\n{0}\n{1}\n ", filePath, output);
                 MessageBox.Show(string.Format("An error occured when trying to open\n{0}\nWith:\n{1}",filePath,stepviewerPath), "An Error Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format("An error occured when trying to open\n{0}\nWith:\n{1}", filePath, stepviewerPath)));
                 return false;
             }
             return true;
@@ -562,6 +567,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <returns>True if the execution was performed</returns>
         private bool OpenWithDefaultProgram(string path)
         {
+            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Opening step file with default application"));
             Process fileopener = new Process();
             fileopener.StartInfo.FileName = "explorer";
             fileopener.StartInfo.Arguments = "\"" + path + "\"";
@@ -596,6 +602,7 @@ namespace DEHPSTEPAP242.ViewModel
 
             if (!isOK)
             {
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format(string.Format("An error occured when comparing\n {0} and\n {1}", loadedStepFilePath, hubdestinationPath))));
                 MessageBox.Show(string.Format("An error occured when comparing\n {0} and\n {1}", loadedStepFilePath, hubdestinationPath), "An Error Occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             else
@@ -607,6 +614,7 @@ namespace DEHPSTEPAP242.ViewModel
 
                 compareDialog.ShowDialog();
             }
+            Application.Current.Dispatcher.Invoke(() => statusBar.Append(""));
         }
 
         #endregion Private/Protected methods

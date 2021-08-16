@@ -196,12 +196,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Gets the command that allows to map the selected part
         /// </summary>
-        private ReactiveCommand<object> MapCommand { get; set; }
+        public ReactiveCommand<object> MapCommand { get; set; }
 
         /// <summary>
         /// Gets the command that allows to change the mappping configuration
         /// </summary>
-        private ReactiveCommand<object> OpenMappingConfigurationManagerCommand { get; set; }
+        public ReactiveCommand<object> OpenMappingConfigurationManagerCommand { get; set; }
 
         /// <summary>
         /// Populate the context menu for this browser
@@ -277,7 +277,7 @@ namespace DEHPSTEPAP242.ViewModel
         }
 
         #endregion
-
+        
         #region Private Methods
 
         /// <summary>
