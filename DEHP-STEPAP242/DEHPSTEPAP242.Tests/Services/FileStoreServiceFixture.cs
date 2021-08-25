@@ -45,8 +45,7 @@ namespace DEHPSTEPAP242.Tests.Services
         [SetUp]
         public void Setup()
         {
-            string cwd = System.IO.Path.GetDirectoryName(new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-            //string examplesDir = cwd + "/../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
+            string cwd = System.IO.Path.GetDirectoryName(new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath);            
             fileStorePath = cwd + "/../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
 
             preferenceService = new Mock<IUserPreferenceService<AppSettings>>();

@@ -207,5 +207,18 @@ namespace STEP3DAdapter.Tests
             Assert.AreEqual(5, aRelation.relating_id);
             Assert.AreEqual(380, aRelation.related_id);
         }
+        [Test]
+        public void TestProperties()
+        {
+
+            var step3d = new STEP3DFile(MyParts_path);
+
+            Assert.IsTrue(step3d.FileName == MyParts_path);
+            Assert.IsNotEmpty(step3d.Parts);
+            Assert.IsNotEmpty(step3d.Relations);
+            Assert.IsEmpty(step3d.ErrorMessage);
+            Assert.IsFalse(step3d.HasFailed);
+        }
+
     }
 }
