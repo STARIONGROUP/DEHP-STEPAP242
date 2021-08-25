@@ -221,7 +221,7 @@ namespace DEHPSTEPAP242.Tests.ViewModels
             Assert.DoesNotThrow(() => viewModel.SelectedThing = CreateViewModel());
 
         }
-[Test]
+
         public void TestSelectThingWithOption()
         {
             Assert.DoesNotThrow(() =>
