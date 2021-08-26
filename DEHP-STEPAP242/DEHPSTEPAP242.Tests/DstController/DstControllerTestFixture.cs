@@ -135,8 +135,7 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             this.hubController.Setup(x => x.Write(It.IsAny<ThingTransaction>())).Returns(Task.CompletedTask);
 
-            //this.hlrBuilder = new Mock<IHighLevelRepresentationBuilder>();
-
+            
             this.dstHubService = new Mock<IDstHubService>();
 
             this.mappingEngine = new Mock<IMappingEngine>();
@@ -402,10 +401,14 @@ namespace DEHPSTEPAP242.Tests.DstController
             {
                 Container = this.iteration
             });
+
+            this.controller.MapResult.Add(new ElementUsage());
+            //
             // we try with some data
+
             Assert.DoesNotThrow(() => this.controller.Map(new Step3DRowViewModel(stepData)));
             var mapping = this.controller.MapResult;
-            Assert.IsTrue(mapping.Count == 1);
+            Assert.IsTrue(mapping.Count == 2);
             // We clean the mapping
             this.controller.CleanCurrentMapping();
             Assert.True(this.controller.MapResult.Count == 0);

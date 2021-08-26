@@ -1,62 +1,35 @@
-﻿/** --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DstObjectBrowserViewModelFixturecs" company="Open Engineering S.A.">
-//    Copyright (c) 2021 Open Engineering S.A.
-//
-//    Author: Ivan Fontaine
-//
-//    Part of the code was based on the work performed by RHEA as result
-//    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
-//    by Sam Gerené, Alex Vorobiev, Alexander van Delft and Nathanael Smiechowski.
-//
-//    This file is part of DEHP STEP-AP242 (STEP 3D CAD) adapter project.
-//
-//    The DEHP STEP-AP242 is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or (at your option) any later version.
-//
-//    The DEHP STEP-AP242 is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Lesser General Public License for more details.
-//
-//    You should have received a copy of the GNU Lesser General Public License
-//    along with this program; if not, write to the Free Software Foundation,
-//    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-// </copyright>
-*/
+﻿using Autofac;
+using CDP4Common.CommonData;
+using CDP4Common.EngineeringModelData;
+using CDP4Common.SiteDirectoryData;
+using CDP4Common.Types;
+using CDP4Dal;
+using CDP4Dal.Operations;
+using DEHPCommon;
+using DEHPCommon.Enumerators;
+using DEHPCommon.HubController.Interfaces;
+using DEHPCommon.MappingEngine;
+using DEHPCommon.Services.ExchangeHistory;
+using DEHPCommon.Services.NavigationService;
+using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+using DEHPSTEPAP242.Events;
+using DEHPSTEPAP242.ViewModel;
+
+using Moq;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using DEHPSTEPAP242.Services.DstHubService;
+using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
+using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
+using DEHPSTEPAP242.Views.Dialogs;
+using DEHPSTEPAP242.ViewModel.Dialogs;
 
 namespace DEHPSTEPAP242.Tests.ViewModels
 {
-    using Autofac;
-    using CDP4Common.CommonData;
-    using CDP4Common.EngineeringModelData;
-    using CDP4Common.SiteDirectoryData;
-    using CDP4Common.Types;
-    using CDP4Dal;
-    using CDP4Dal.Operations;
-    using DEHPCommon;
-    using DEHPCommon.Enumerators;
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon.MappingEngine;
-    using DEHPCommon.Services.ExchangeHistory;
-    using DEHPCommon.Services.NavigationService;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
     using DEHPSTEPAP242.DstController;
-    using DEHPSTEPAP242.Events;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using DEHPSTEPAP242.ViewModel;
-    using DEHPSTEPAP242.ViewModel.Dialogs;
-    using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
-    using DEHPSTEPAP242.Views.Dialogs;
-    using Moq;
-    using NUnit.Framework;
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-
     [TestFixture, Apartment(ApartmentState.STA)]
     public class DstObjectBrowserViewModelFixture
     {
@@ -141,16 +114,11 @@ namespace DEHPSTEPAP242.Tests.ViewModels
 
             this.hubController.Setup(x => x.Write(It.IsAny<ThingTransaction>())).Returns(Task.CompletedTask);
 
-            //this.hlrBuilder = new Mock<IHighLevelRepresentationBuilder>();
-
-            // this.dstHubService = new Mock<IDstHubService>();
-
-            //            this.mappingEngine = new Mock<IMappingEngine>();
-
+          
             this.navigationService = new Mock<INavigationService>();
             this.navigationService = new Mock<INavigationService>();
 
-            //this.dstController = new Mock<IDstController>();
+          
             this.dstController = new DstController(this.hubController.Object,
                this.mappingEngine.Object, this.navigationService.Object, this.exchangeHistoryService.Object,
                this.dstHubService.Object, this.statusBarViewModel.Object);
