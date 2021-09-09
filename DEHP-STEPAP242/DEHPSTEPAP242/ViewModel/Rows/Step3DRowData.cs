@@ -35,7 +35,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
 {
     public class Step3DRowData
     {         
-        private STEP3D_Part Part { get; }
+        public STEP3D_Part Part { get; }
 
         private STEP3D_PartRelation Relation { get; }
 

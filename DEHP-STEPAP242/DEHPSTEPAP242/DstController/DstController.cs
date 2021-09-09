@@ -1,65 +1,64 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DstController.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
-// 
+//
 //    Author: Juan Pablo Hernandez Vogt
 //
 //    Part of the code was based on the work performed by RHEA as result
 //    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
 //    by Sam Gerené, Alex Vorobiev, Alexander van Delft and Nathanael Smiechowski.
-// 
+//
 //    This file is part of DEHP STEP-AP242 (STEP 3D CAD) adapter project.
-// 
+//
 //    The DEHP STEP-AP242 is free software; you can redistribute it and/or
 //    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
 //    version 3 of the License, or (at your option) any later version.
-// 
+//
 //    The DEHP STEP-AP242 is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //    Lesser General Public License for more details.
-// 
+//
 //    You should have received a copy of the GNU Lesser General Public License
 //    along with this program; if not, write to the Free Software Foundation,
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using CDP4Common;
+using CDP4Common.CommonData;
+using CDP4Common.EngineeringModelData;
+using CDP4Common.Types;
+using CDP4Dal;
+using CDP4Dal.Operations;
+using DEHPCommon.Enumerators;
+using DEHPCommon.Events;
+using DEHPCommon.HubController.Interfaces;
+using DEHPCommon.MappingEngine;
+using DEHPCommon.Services.ExchangeHistory;
+using DEHPCommon.Services.NavigationService;
+using DEHPCommon.UserInterfaces.ViewModels;
+using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
+using DEHPCommon.UserInterfaces.Views;
+using DEHPSTEPAP242.Events;
+using DEHPSTEPAP242.Services.DstHubService;
+using DEHPSTEPAP242.ViewModel.Rows;
+using NLog;
+using ReactiveUI;
+using STEP3DAdapter;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+
 namespace DEHPSTEPAP242.DstController
 {
-    using CDP4Common;
-    using CDP4Common.CommonData;
-    using CDP4Common.EngineeringModelData;
-    using CDP4Common.Types;
-    using CDP4Dal;
-    using CDP4Dal.Operations;
-    using DEHPCommon.Enumerators;
-    using DEHPCommon.Events;
-    using DEHPCommon.HubController.Interfaces;
-    using DEHPCommon.MappingEngine;
-    using DEHPCommon.Services.ExchangeHistory;
-    using DEHPCommon.Services.NavigationService;
-    using DEHPCommon.UserInterfaces.ViewModels;
-    using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-    using DEHPCommon.UserInterfaces.Views;
-    using DEHPSTEPAP242.Events;
-    using DEHPSTEPAP242.Services.DstHubService;
-    using DEHPSTEPAP242.ViewModel.Rows;
-    using NLog;
-    using ReactiveUI;
-    using STEP3DAdapter;
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using System.Windows;
-
-
     /// <summary>
-    /// The <see cref="DstController"/> takes care of retrieving data 
+    /// The <see cref="DstController"/> takes care of retrieving data
     /// from and to STEP AP242 file.
     /// </summary>
     public class DstController : ReactiveObject, IDstController
@@ -101,7 +100,7 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        #endregion
+        #endregion Private Members
 
         #region IDstController interface
 
@@ -117,7 +116,7 @@ namespace DEHPSTEPAP242.DstController
 
         /// <summary>
         /// Gets or sets the <see cref="STEP3DFile"/> instance.
-        /// 
+        ///
         /// <seealso cref="Load"/>
         /// <seealso cref="LoadAsync"/>
         /// </summary>
@@ -130,8 +129,7 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Returns the status of the last load action.
         /// </summary>
-        /// 
-
+        ///
 
         private bool isFileOpen;
 
@@ -199,7 +197,6 @@ namespace DEHPSTEPAP242.DstController
         public async Task LoadAsync(string filename)
         {
             await Task.Run(() => Load(filename));
-            
         }
 
         /// <summary>
@@ -251,6 +248,15 @@ namespace DEHPSTEPAP242.DstController
         /// Gets the collection of <see cref="IdCorrespondences"/> for all mapping configurations before the mapping process
         /// </summary>
         public List<IdCorrespondence> PreviousIdCorrespondences { get; } = new List<IdCorrespondence>();
+        /// <summary>
+        /// Contains the list of ElementDeinfinition or ElementUsage that will be transfere
+        /// </summary>
+        public ReactiveList<ElementBase> SelectedThingsToTransfer { get;  set; } = new ReactiveList<ElementBase>();
+        /// <summary>
+        ///  Dictionnary that is used to track a step entity to its mapped entities.
+        ///  Used internally to be able to change the state of the HLR parts
+        /// </summary>
+        private Dictionary<string, List<ElementBase>> ParamToElements = new();
 
         /// <summary>
         /// Adds mapping configurations used to detect the not used ones in the mapping process
@@ -273,6 +279,7 @@ namespace DEHPSTEPAP242.DstController
             }
 
             this.MapResult.Clear();
+            this.SelectedThingsToTransfer.Clear();
             this.ParameterNodeIds.Clear();
 
             // Mapping status is reset to default
@@ -289,7 +296,23 @@ namespace DEHPSTEPAP242.DstController
         {
             foreach (var item in this.ParameterNodeIds)
             {
-                item.Value.Part.SetTransferedStatus();
+                // Unfortunately, it looks likes both sets of data do not share actual data that can be used to link them after creation.
+                // This is a solution that permits to do it wihthout deep changes to the data structures.
+                var elems = ParamToElements[item.Key.UserFriendlyName];
+                int idx = item.Key.UserFriendlyName.IndexOf(".step");
+                if (idx < 1)
+                {
+                    break;
+                }
+                var key= item.Key.UserFriendlyName.Substring(0,idx);
+
+                var transfered = (from el in SelectedThingsToTransfer where el.UserFriendlyName == key select el).Any();
+
+                if (transfered)
+                {
+                    this.logger.Debug($"Changing status of  {item.Value.Part.Name} to Transfered");
+                    item.Value.Part.SetTransferedStatus();
+                }
             }
         }
 
@@ -298,14 +321,10 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         private void CleanCurrentMappingOnTransfer()
         {
-            foreach (var item in this.ParameterNodeIds)
-            {
-                item.Value.Part.SetTransferedStatus();
-            }
-
             this.MapResult.Clear();
+            this.SelectedThingsToTransfer.Clear();
             this.ParameterNodeIds.Clear();
-
+            ParamToElements.Clear();
             // Current NetChange preview must be cleaned (Impact and Object Browser)
             CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent(true));
         }
@@ -331,7 +350,7 @@ namespace DEHPSTEPAP242.DstController
             var parts = new List<Step3DRowViewModel> { part };
 
             this.AddPreviousIdCorrespondances(part.MappingConfigurations);
-           
+
             if (this.mappingEngine.Map(parts) is (Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo, List<ElementBase> elements) && elements.Any())
             {
                 foreach (var e in elements)
@@ -339,9 +358,9 @@ namespace DEHPSTEPAP242.DstController
                     this.logger.Debug($"Adding Map ElementBase {e.Name}");
                 }
 
-                this.UpdateParmeterNodeId(parameterMappingInfo);
+                this.UpdateParmeterNodeId(parameterMappingInfo, elements);
                 this.MapResult.AddRange(elements);
-
+                
                 this.MergeExternalIdentifierMap();
                 CDPMessageBus.Current.SendMessage(new UpdateObjectBrowserTreeEvent());
             }
@@ -350,11 +369,12 @@ namespace DEHPSTEPAP242.DstController
         /// <summary>
         /// Updates <see cref="ParameterNodeIds"/> by adding or replacing values
         /// </summary>
-        /// <param name="parameterNodeIds">The  </param>
-        private void UpdateParmeterNodeId(Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo)
+        ///
+        private void UpdateParmeterNodeId(Dictionary<ParameterOrOverrideBase, MappedParameterValue> parameterMappingInfo, List<ElementBase> elements)
         {
             foreach (var entry in parameterMappingInfo)
             {
+                ParamToElements[entry.Key.UserFriendlyName] = elements;
                 if (this.ParameterNodeIds.ContainsKey(entry.Key))
                     this.logger.Debug($"Updating ParameterNodeIds[{entry.Key.ModelCode()}] = {entry.Value.Part.Description} ...");
                 else
@@ -426,7 +446,7 @@ namespace DEHPSTEPAP242.DstController
         /// <remarks>
         /// The new mappings are taken from <see cref="UsedIdCorrespondences"/> mappings.
         /// The unused mappings are calculated from <see cref="PreviousIdCorrespondences"/> and <see cref="UsedIdCorrespondences"/> mappings.
-        /// 
+        ///
         /// All of those lists are cleaned at the end.
         /// </remarks>
         public void MergeExternalIdentifierMap()
@@ -449,7 +469,6 @@ namespace DEHPSTEPAP242.DstController
 
             this.logger.Debug("UpdateExternalIdentifierMap UsedIdCorrespondances");
             this.ShowCorrespondences(this.UsedIdCorrespondences);
-
 
             this.logger.Debug("UpdateExternalIdentifierMap previousCorrespondances");
             this.ShowCorrespondences(previousCorrespondances);
@@ -549,7 +568,7 @@ namespace DEHPSTEPAP242.DstController
             }
         }
 
-        #endregion
+        #endregion IDstController interface
 
         #region Constructor
 
@@ -574,7 +593,7 @@ namespace DEHPSTEPAP242.DstController
             this.statusBar = statusBar;
         }
 
-        #endregion
+        #endregion Constructor
 
         #region Private Transfer Methods
 
@@ -605,7 +624,7 @@ namespace DEHPSTEPAP242.DstController
 
         /// <summary>
         /// Transfers the input file and mapped parts to the Hub
-        /// 
+        ///
         /// Workflow:
         /// 1. Update current STEP file to the Hub
         /// 2. Get Uuid of its FileRevision and update "source" parameters
@@ -626,7 +645,7 @@ namespace DEHPSTEPAP242.DstController
                 var iterationClone = this.hubController.OpenIteration.Clone(false);
                 var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(iterationClone), iterationClone);
 
-                if (!(this.MapResult.Any() && this.TrySupplyingAndCreatingLogEntry(transaction)))
+                if (!(this.SelectedThingsToTransfer.Any() && this.TrySupplyingAndCreatingLogEntry(transaction)))
                 {
                     return;
                 }
@@ -652,7 +671,7 @@ namespace DEHPSTEPAP242.DstController
                 // Step 3: create/update things
                 this.SendStatusMessage($"Processing {this.MapResult.Count} mapping data...");
 
-                foreach (var elementBase in this.MapResult)
+                foreach (var elementBase in this.SelectedThingsToTransfer)
                 {
                     if (elementBase is ElementDefinition elementDefinition)
                     {
@@ -757,9 +776,11 @@ namespace DEHPSTEPAP242.DstController
                 case INamedThing namedThing:
                     externalId = namedThing.Name;
                     break;
+
                 case ParameterOrOverrideBase parameterOrOverride:
                     externalId = parameterOrOverride.ParameterType.Name;
                     break;
+
                 default:
                     return;
             }
@@ -779,8 +800,8 @@ namespace DEHPSTEPAP242.DstController
         {
             var (iterationClone, transaction) = this.GetIterationTransaction();
 
-            this.UpdateParametersValueSets(transaction, this.MapResult.OfType<ElementDefinition>().SelectMany(e => e.Parameter));
-            this.UpdateParametersValueSets(transaction, this.MapResult.OfType<ElementUsage>().SelectMany(eu => eu.ParameterOverride));
+            this.UpdateParametersValueSets(transaction, this.SelectedThingsToTransfer.OfType<ElementDefinition>().SelectMany(e => e.Parameter));
+            this.UpdateParametersValueSets(transaction, this.SelectedThingsToTransfer.OfType<ElementUsage>().SelectMany(eu => eu.ParameterOverride));
 
             transaction.CreateOrUpdate(iterationClone);
             await this.hubController.Write(transaction);
@@ -910,6 +931,6 @@ namespace DEHPSTEPAP242.DstController
             return true;
         }
 
-        #endregion
+        #endregion Private Transfer Methods
     }
 }

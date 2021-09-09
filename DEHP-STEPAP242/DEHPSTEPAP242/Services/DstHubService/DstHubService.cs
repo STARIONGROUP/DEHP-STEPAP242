@@ -173,7 +173,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             this.logger.Debug($"Domain of Expertise: { currentDomainOfExpertise.Name }");
 
             var dfStore = hubController.OpenIteration.DomainFileStore.FirstOrDefault(d => d.Owner == currentDomainOfExpertise);
-            this.logger.Debug($"Domain File Store: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
+             this.logger.Debug($"Domain File Store: {dfStore.Name} (Rev: {dfStore.RevisionNumber})");
 
             var revisions = new List<FileRevision>();
 
