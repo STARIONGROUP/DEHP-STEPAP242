@@ -566,7 +566,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <returns>A <see cref="List{ElementUsage}"/></returns>
         private List<ElementUsage> GetElementUsagesFor(ElementDefinition ed)
         {
-            var usages = new List<ElementUsage>();
+             var usages = new List<ElementUsage>();
 
             var option = this.SelectedThing?.SelectedOption;
 

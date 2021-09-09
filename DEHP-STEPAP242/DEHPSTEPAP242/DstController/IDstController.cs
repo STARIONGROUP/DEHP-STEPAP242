@@ -54,7 +54,7 @@ namespace DEHPSTEPAP242.DstController
         /// The <see cref="ValueArray{string}"/> of the <see cref="IValueSet"/> of interest (fields of the compound parameter)
         /// </summary>
         public readonly ValueArray<string> Fields;
-
+        
         /// <summary>
         /// The index in the <see cref="ValueArray{string}"/> for the <see cref="ParameterTypeComponent"/> corresponding to the "source" field
         /// </summary>
@@ -108,6 +108,8 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         STEP3DFile Step3DFile { get; }
 
+        
+
         /// <summary>
         /// Loads a STEP-AP242 file.
         /// </summary>
@@ -134,6 +136,10 @@ namespace DEHPSTEPAP242.DstController
         /// Gets the colection of mapped <see cref="ElementDefinition"/>s and <see cref="Parameter"/>s
         /// </summary>
         ReactiveList<ElementBase> MapResult { get; }
+        /// <summary>
+        /// Contains the list of ElementDeinfinition or ElementUsage that will be transfere
+        /// </summary>
+        public ReactiveList<ElementBase> SelectedThingsToTransfer { get; }
 
         /// <summary>
         /// Gets a <see cref="Dictionary{TKey, TValue}"/> of all mapped parameter and the associate <see cref="Step3DRowViewModel.ID"/>

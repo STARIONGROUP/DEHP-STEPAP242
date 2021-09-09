@@ -185,9 +185,10 @@ namespace DEHPSTEPAP242
             containerBuilder.RegisterType<DstCompareStepFilesViewModel>().As<IDstCompareStepFilesViewModel>().SingleInstance();
             containerBuilder.RegisterType<DstUserSettingsViewModel>().As<IDstUserSettingsViewModel>().SingleInstance();
             containerBuilder.RegisterType<DstStatusBarControlViewModel>().As<IStatusBarControlViewModel>().SingleInstance();
-
-
             
+
+
+
 
 
 

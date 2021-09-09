@@ -40,26 +40,26 @@
     <Reference Include="Autofac, Version=6.1.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <HintPath>..\packages\Autofac.6.1.0\lib\netstandard2.0\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4Common, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4Common-CE.7.3.0\lib\net472\CDP4Common.dll</HintPath>
+    <Reference Include="CDP4Common, Version=7.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4Common-CE.7.5.1-628-PR200\lib\net452\CDP4Common.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4Dal, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4Dal-CE.7.3.0\lib\net472\CDP4Dal.dll</HintPath>
+    <Reference Include="CDP4Dal, Version=7.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4Dal-CE.7.5.1-628-PR200\lib\net452\CDP4Dal.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4JsonFileDal, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4JsonFileDal-CE.7.3.0\lib\net472\CDP4JsonFileDal.dll</HintPath>
+    <Reference Include="CDP4JsonFileDal, Version=7.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4JsonFileDal-CE.7.5.1-628-PR200\lib\net452\CDP4JsonFileDal.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4JsonSerializer, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4JsonSerializer-CE.7.3.0\lib\net472\CDP4JsonSerializer.dll</HintPath>
+    <Reference Include="CDP4JsonSerializer, Version=7.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4JsonSerializer-CE.7.5.1-628-PR200\lib\net452\CDP4JsonSerializer.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4RequirementsVerification, Version=0.6.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4RequirementsVerification-CE.0.6.1\lib\net472\CDP4RequirementsVerification.dll</HintPath>
+    <Reference Include="CDP4RequirementsVerification, Version=0.9.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4RequirementsVerification-CE.0.9.1-628-PR200\lib\net452\CDP4RequirementsVerification.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4ServicesDal, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4ServicesDal-CE.7.3.0\lib\net472\CDP4ServicesDal.dll</HintPath>
+    <Reference Include="CDP4ServicesDal, Version=7.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4ServicesDal-CE.7.5.1-628-PR200\lib\net452\CDP4ServicesDal.dll</HintPath>
     </Reference>
-    <Reference Include="CDP4WspDal, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CDP4WspDal-CE.7.3.0\lib\net472\CDP4WspDal.dll</HintPath>
+    <Reference Include="CDP4WspDal, Version=7.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CDP4WspDal-CE.7.5.1-628-PR200\lib\net452\CDP4WspDal.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.CodeParser.v20.1, Version=20.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.CodeParser.20.1.8\lib\net452\DevExpress.CodeParser.v20.1.dll</HintPath>
@@ -154,17 +154,17 @@
     <Reference Include="DevExpress.Xpo.v20.1, Version=20.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.Xpo.20.1.8\lib\net452\DevExpress.Xpo.v20.1.dll</HintPath>
     </Reference>
-    <Reference Include="DotNetZip, Version=1.13.8.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetZip.1.13.8\lib\net40\DotNetZip.dll</HintPath>
+    <Reference Include="DotNetZip, Version=1.14.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.14.0\lib\net40\DotNetZip.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.7.10\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>

@@ -420,7 +420,7 @@ namespace DEHPSTEPAP242.Tests.DstController
         }
 
         [Test]
-        public void VerifyTransferToHub()
+        public   void VerifyTransferToHub()
         {
             this.navigationService.Setup(
                 x => x.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(
@@ -497,9 +497,9 @@ namespace DEHPSTEPAP242.Tests.DstController
 
             this.hubController.Setup(x =>
                 x.GetThingById(parameterOverride.Iid, It.IsAny<Iteration>(), out parameterOverride));
-
+          this.controller.SelectedThingsToTransfer = this.controller.MapResult;
             Assert.DoesNotThrowAsync(async () => await this.controller.Transfer());
-
+            
             Assert.IsEmpty(this.controller.MapResult);
 
             this.controller.MapResult.Add(new ElementUsage());

@@ -1,25 +1,25 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="HubNetChangePrewiewModel.cs" company="Open Engineering S.A.">
 //    Copyright (c) 2020-2021 Open Engineering S.A.
-// 
+//
 //    Author: Juan Pablo Hernandez Vogt
 //
 //    Part of the code was based on the work performed by RHEA as result
 //    of the collaboration in the context of "Digital Engineering Hub Pathfinder"
 //    by Sam Gerené, Alex Vorobiev, Alexander van Delft and Nathanael Smiechowski.
-// 
+//
 //    This file is part of DEHP STEP-AP242 (STEP 3D CAD) adapter project.
-// 
+//
 //    The DEHP STEP-AP242 is free software; you can redistribute it and/or
 //    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
 //    version 3 of the License, or (at your option) any later version.
-// 
+//
 //    The DEHP STEP-AP242 is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //    Lesser General Public License for more details.
-// 
+//
 //    You should have received a copy of the GNU Lesser General Public License
 //    along with this program; if not, write to the Free Software Foundation,
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -31,32 +31,46 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
     using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
     using CDP4Dal;
+    using DEHPCommon.Enumerators;
     using DEHPCommon.Events;
     using DEHPCommon.HubController.Interfaces;
     using DEHPCommon.Services.ObjectBrowserTreeSelectorService;
     using DEHPCommon.UserInterfaces.ViewModels;
     using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
     using DEHPCommon.UserInterfaces.ViewModels.NetChangePreview;
+    using DEHPCommon.UserInterfaces.ViewModels.Rows;
     using DEHPCommon.UserInterfaces.ViewModels.Rows.ElementDefinitionTreeRows;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.ViewModel.Interfaces;
+    using ReactiveUI;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
 
-
     /// <summary>
-    /// The <see cref="HubNetChangePreviewViewModel"/> is the view model 
-    /// for the Net Change Preview of the 10-25 data source from 
+    /// The <see cref="HubNetChangePreviewViewModel"/> is the view model
+    /// for the Net Change Preview of the 10-25 data source from
     /// mappings of STEP-AP242 parts.
     /// </summary>
-    class HubNetChangePreviewViewModel : NetChangePreviewViewModel, IHubNetChangePreviewViewModel
+    public class HubNetChangePreviewViewModel : NetChangePreviewViewModel, IHubNetChangePreviewViewModel
     {
         /// <summary>
         /// The <see cref="IDstController"/>
         /// </summary>
         private readonly IDstController dstController;
+
+        /// <summary>
+        /// The command for the context menu that allows to deselect all selectable <see cref="ElementBase"/> for transfer.
+        /// It executes <see cref="SelectDeselectAllForTransfer"/>
+        /// </summary>
+        public ReactiveCommand<object> DeselectAllCommand { get; set; }
+
+        /// <summary>
+        /// The command for the context menu that allows to select all selectable <see cref="ElementBase"/> for transfer.
+        /// It executes <see cref="SelectDeselectAllForTransfer"/>
+        /// </summary>
+        public ReactiveCommand<object> SelectAllCommand { get; set; }
 
 #if UPDATE_SELECTION
         // <summary>
@@ -81,6 +95,16 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             : base(hubController, objectBrowserTreeSelectorService)
         {
             this.dstController = dstController;
+            
+
+            this.SelectedThings.BeforeItemsAdded.Subscribe(this.WhenItemSelectedChanges);
+            this.SelectedThings.BeforeItemsRemoved.Subscribe(this.WhenItemSelectedChanges);
+
+            this.SelectAllCommand = ReactiveCommand.Create();
+            this.SelectAllCommand.Subscribe(_ => this.SelectDeselectAllForTransfer());
+
+            this.DeselectAllCommand = ReactiveCommand.Create();
+            this.DeselectAllCommand.Subscribe(_ => this.SelectDeselectAllForTransfer(false));
 
 #if UPDATE_SELECTION
             //CDPMessageBus.Current.Listen<UpdateHubPreviewBasedOnSelectionEvent>()
@@ -95,7 +119,6 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                     this.UpdateTreeBasedOnSelectionHandler(this.previousSelection);
                 });
 #endif
-
         }
 
 #if UPDATE_SELECTION
@@ -126,7 +149,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         }
 
         /// <summary>
-        /// Updates the trees with the selection 
+        /// Updates the trees with the selection
         /// </summary>
         /// <param name="selection">The collection of selected <see cref="Step3DRowViewModel"/> </param>
         private void UpdateTreeBasedOnSelection(IEnumerable<Step3DRowViewModel> selection)
@@ -181,6 +204,94 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             }
         }
 #endif
+
+        private void WhenItemSelectedChanges(object row)
+        {
+            if (row is RowViewModelBase<ElementDefinition> elementDefinitionRow)
+            {
+                this.SelectChainOfContainerViewModel(elementDefinitionRow, !elementDefinitionRow.IsSelectedForTransfer);
+            }
+
+            if (row is RowViewModelBase<ElementUsage> elementUsageRow)
+            {
+                this.SelectChainOfContainerViewModel(elementUsageRow, !elementUsageRow.IsSelectedForTransfer);
+
+                var definitionRowViewModel = this.Things.OfType<ElementDefinitionsBrowserViewModel>()
+                    .SelectMany(r => r.ContainedRows.OfType<ElementDefinitionRowViewModel>())
+                    .FirstOrDefault(r => r.Thing.ShortName == elementUsageRow.Thing.ElementDefinition.ShortName);
+
+                if (definitionRowViewModel is { })
+                {
+                    definitionRowViewModel.IsSelectedForTransfer = !elementUsageRow.IsSelectedForTransfer;
+                    this.AddOrRemoveToSelectedThingsToTransfer(definitionRowViewModel, !elementUsageRow.IsSelectedForTransfer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds or removes the <paramref name="row.Thing"/> and it's chain of container to the <see cref="IDstController.SelectedThingsToTransfer"/>
+        /// </summary>
+        /// <typeparam name="TElement">The type of <see cref="ElementBase"/> the <paramref name="row"/> represents</typeparam>
+        /// <param name="row">The <see cref="IRowViewModelBase{T}"/> to select or deselect</param>
+        /// <param name="isSelected">A value indicating whether the <paramref name="row"/> should be added or removed</param>
+        private void SelectChainOfContainerViewModel<TElement>(IRowViewModelBase<TElement> row, bool isSelected = true) where TElement : ElementBase
+        {
+            this.AddOrRemoveToSelectedThingsToTransfer(row, isSelected);
+
+            if (row.ContainerViewModel is RowViewModelBase<ElementDefinition> container)
+            {
+                this.SelectChainOfContainerViewModel(container);
+            }
+        }
+
+        /// <summary>
+        /// Adds or removes the <paramref name="row.Thing"/> to the <see cref="IDstController.SelectedThingsToTransfer"/>
+        /// </summary>
+        /// <typeparam name="TElement">The type of <see cref="ElementBase"/> the <paramref name="row"/> represents</typeparam>
+        /// <param name="row">The <see cref="IRowViewModelBase{T}"/> to select or deselect</param>
+        /// <param name="isSelected">A value indicating whether the <paramref name="row"/> should be added or removed</param>
+        private void AddOrRemoveToSelectedThingsToTransfer<TElement>(IViewModelBase<TElement> row, bool isSelected = true) where TElement : ElementBase
+        {
+            this.AddOrRemoveToSelectedThingsToTransfer(row.Thing, isSelected);
+        }
+
+        /// <summary>
+        /// Adds or removes the <paramref name="element"/>  to the <see cref="IDstController.SelectedThingsToTransfer"/>
+        /// </summary>
+        /// <typeparam name="TElement">The type of <paramref name="element"/></typeparam>
+        /// <param name="element">The <typeparamref name="TElement"/> element to add or remove</param>
+        /// <param name="isSelected">A value indicating whether the <paramref name="element"/> should be added or removed</param>
+        private void AddOrRemoveToSelectedThingsToTransfer<TElement>(TElement element, bool isSelected = true) where TElement : ElementBase
+        {
+            if (isSelected)
+            {
+                this.dstController.SelectedThingsToTransfer.Add(element);
+            }
+            else
+            {
+                this.dstController.SelectedThingsToTransfer.RemoveAll(
+                    this.dstController.SelectedThingsToTransfer
+                        .Where(x => x.ShortName == element.ShortName && x.Iid == element.Iid).ToList());
+            }
+
+            CDPMessageBus.Current.SendMessage(new SelectEvent(element, !isSelected));
+        }
+
+        /// <summary>
+        /// Updates the tree
+        /// </summary>
+        /// <param name="shouldReset">A value indicating whether the tree should remove the element in preview</param>
+        public override void UpdateTree(bool shouldReset)
+        {
+            if (shouldReset)
+            {
+                this.Reload();
+            }
+            else
+            {
+                this.ComputeValuesWrapper();
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="ElementBase"/> at the previous state that correspond to the <paramref name="container"/>
@@ -301,6 +412,21 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             return result;
         }
 
+        // <summary>
+        /// Calls the <see cref="ComputeValues"/> with some household
+        /// </summary>
+        private void ComputeValuesWrapper()
+        {
+            this.IsBusy = true;
+            this.dstController.SelectedThingsToTransfer.Clear();
+            var isExpanded = this.Things.First().IsExpanded;
+            this.ComputeValues();
+            this.SelectDeselectAllForTransfer();
+            this.Things.First().IsExpanded = isExpanded;
+            this.IsDirty = false;
+            this.IsBusy = false;
+        }
+
         /// <summary>
         /// Verify that the <paramref name="parameterRow"/> contains the <paramref name="parameter"/>
         /// </summary>
@@ -322,37 +448,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         }
 
         /// <summary>
-        /// Updates the tree
-        /// </summary>
-        /// <param name="shouldReset">A value indicating whether the tree should remove the element in preview</param>
-        public override void UpdateTree(bool shouldReset)
-        {
-            if (shouldReset)
-            {
-                this.Reload();
-            }
-            else
-            {
-                this.ComputeValuesWrapper();
-            }
-        }
-
-        /// <summary>
-        /// Calls the <see cref="ComputeValues"/> with some household
-        /// </summary>
-        private void ComputeValuesWrapper()
-        {
-            this.IsBusy = true;
-
-            this.ThingsAtPreviousState.Clear();
-            var isExpanded = this.Things.First().IsExpanded;
-            this.ComputeValues();
-            this.Things.First().IsExpanded = isExpanded;
-
-            this.IsDirty = false;
-
-            this.IsBusy = false;
-        }
+        
 
         /// <summary>
         /// Computes the old values for each <see cref="P:DEHPCommon.UserInterfaces.ViewModels.ObjectBrowserViewModel.Things" />
@@ -451,11 +547,29 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
         }
 
         /// <summary>
-        /// Not available for the net change preview panel
+        /// Add a context menu to be able to select or unselect all the mapped entities show in the impact view
         /// </summary>
         public override void PopulateContextMenu()
         {
             this.ContextMenu.Clear();
+
+            this.ContextMenu.Add(
+                new ContextMenuItemViewModel("Select all for transfer", "", this.SelectAllCommand, MenuItemKind.Copy, ClassKind.NotThing));
+
+            this.ContextMenu.Add(
+                new ContextMenuItemViewModel("Deselect all for transfer", "", this.DeselectAllCommand, MenuItemKind.Delete, ClassKind.NotThing));
+        }
+
+        /// <summary>
+        /// Executes the <see cref="SelectAllCommand"/> and the <see cref="DeselectAllCommand"/>
+        /// </summary>
+        /// <param name="areSelected">A value indicating whether the elements are to be selected</param>
+        public void SelectDeselectAllForTransfer(bool areSelected = true)
+        {
+            foreach (var element in this.dstController.MapResult)
+            {
+                this.AddOrRemoveToSelectedThingsToTransfer(element, areSelected);
+            }
         }
     }
 }

@@ -149,14 +149,14 @@ namespace DEHPSTEPAP242.Tests.ViewModels
         {
             SetPart();
             viewmodel.MapCommand.Execute(null);
-            Assert.DoesNotThrow(() => viewmodel.PopulateContextMenu());
+            Assert.DoesNotThrow( () => viewmodel.PopulateContextMenu());
         }
 
         [Test]
-        public void TestMapCommand()
+        public   void TestMapCommand()
         {
             SetPart();
-            Assert.DoesNotThrow(() => viewmodel.MapCommand.Execute(null));
+            Assert.DoesNotThrow( () =>   viewmodel.MapCommand.Execute(null));
         }
 
         [Test]
