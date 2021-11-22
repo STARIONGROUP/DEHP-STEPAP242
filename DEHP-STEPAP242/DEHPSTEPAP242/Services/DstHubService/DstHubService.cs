@@ -367,7 +367,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
             var rdlClone = rdl.Clone(false);
             var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(rdlClone), rdlClone);
 
-            if (oneUnit is null || !(oneUnit is SimpleUnit))
+            if (!(oneUnit is SimpleUnit))
             {
                 oneUnit = this.CreateUnit(transaction, rdlClone, STEP_ID_UNIT_NAME, "1");
             }

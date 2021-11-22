@@ -151,12 +151,6 @@ namespace DEHPSTEPAP242.Tests.ViewModels
             });
 
 
-            //            this.mappingEngine = new Mock<IMappingEngine>();
-
-            //  userPreferenceService = new Mock<IUserPreferenceService<AppSettings>>();
-            //            userPreferenceService.Setup(x => x.Read());
-            //          userPreferenceService.SetupGet(x => x.UserPreferenceSettings).Returns(new AppSettings { FileStoreCleanOnInit = true, FileStoreDirectoryName = fileStorePath });
-
         }
 
 

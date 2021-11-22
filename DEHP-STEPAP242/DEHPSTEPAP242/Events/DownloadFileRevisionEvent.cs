@@ -31,6 +31,7 @@ namespace DEHPSTEPAP242.Events
     /// <summary>
     /// An event for <see cref="CDP4Dal.CDPMessageBus"/>
     /// </summary>
+    
     public class DownloadFileRevisionEvent
     {
         /// <summary>

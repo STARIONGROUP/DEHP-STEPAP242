@@ -26,7 +26,9 @@ namespace STEP3DAdapter.Console
 {
     using STEP3DAdapter;
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
+    [ExcludeFromCodeCoverage] // This is a developement tool.
     static class Program
     {
         static private void ShowSTEP3DInformation(String fname)

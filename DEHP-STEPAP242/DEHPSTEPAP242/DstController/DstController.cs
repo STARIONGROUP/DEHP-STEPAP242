@@ -61,6 +61,7 @@ namespace DEHPSTEPAP242.DstController
     /// The <see cref="DstController"/> takes care of retrieving data
     /// from and to STEP AP242 file.
     /// </summary>
+   
     public class DstController : ReactiveObject, IDstController
     {
         #region Private Members
@@ -256,7 +257,7 @@ namespace DEHPSTEPAP242.DstController
         ///  Dictionnary that is used to track a step entity to its mapped entities.
         ///  Used internally to be able to change the state of the HLR parts
         /// </summary>
-        private Dictionary<string, List<ElementBase>> ParamToElements = new();
+        private readonly Dictionary<string, List<ElementBase>> ParamToElements = new();
 
         /// <summary>
         /// Adds mapping configurations used to detect the not used ones in the mapping process
@@ -298,7 +299,7 @@ namespace DEHPSTEPAP242.DstController
             {
                 // Unfortunately, it looks likes both sets of data do not share actual data that can be used to link them after creation.
                 // This is a solution that permits to do it wihthout deep changes to the data structures.
-                var elems = ParamToElements[item.Key.UserFriendlyName];
+                
                 int idx = item.Key.UserFriendlyName.IndexOf(".step");
                 if (idx < 1)
                 {
@@ -602,6 +603,7 @@ namespace DEHPSTEPAP242.DstController
         /// </summary>
         /// <param name="message">The message</param>
         /// <param name="messageSeverity">The status severity</param>
+        [ExcludeFromCodeCoverage]
         private void SendStatusMessage(string message, StatusBarMessageSeverity messageSeverity = StatusBarMessageSeverity.Info)
         {
             if (Application.ResourceAssembly == null)

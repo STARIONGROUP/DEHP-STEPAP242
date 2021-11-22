@@ -207,9 +207,7 @@ namespace DEHPSTEPAP242.ViewModel
             foreach (var irow in row.ContainedRows)
             {
                 // Find if there is a child row with the STEP geometrical information
-                if (irow is ParameterRowViewModel parameter)
-                {
-                    if (this.dstHubService.IsSTEPParameterType(parameter.Thing.ParameterType))
+                if (irow is ParameterRowViewModel parameter && this.dstHubService.IsSTEPParameterType(parameter.Thing.ParameterType))
                     {
                         this.ProcessParameterContextMenu(parameter.Thing);
                         break;
@@ -218,4 +216,4 @@ namespace DEHPSTEPAP242.ViewModel
             }
         }
     }
-}
+

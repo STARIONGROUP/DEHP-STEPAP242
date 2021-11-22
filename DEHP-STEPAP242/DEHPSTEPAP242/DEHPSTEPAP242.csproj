@@ -10,8 +10,8 @@
     <Product>DEHP STEP-AP242</Product>
     <Description>DEHP Domain Specific Tool (DST) for the STEP-AP242 file format (as Desktop application)</Description>
     <Copyright>Copyright © Open Engineering S.A.</Copyright>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <AssemblyVersion>1.4.1.0</AssemblyVersion>
+    <FileVersion>1.4.1.0</FileVersion>
     <LangVersion>latest</LangVersion>
     <StartupObject></StartupObject>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -19,7 +19,7 @@
     <RepositoryUrl>https://github.com/RHEAGROUP/DEHP-STEPAP242.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <Authors>Open Engineering S.A.</Authors>
-    <Version>1.4.0</Version>
+    <Version>1.4.1</Version>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <AssemblyName>DEHPSTEPAP242</AssemblyName>
     <PackageIcon>icon.ico</PackageIcon>

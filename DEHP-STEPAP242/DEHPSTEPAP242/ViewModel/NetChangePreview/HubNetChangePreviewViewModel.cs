@@ -332,17 +332,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
             elementRow.UpdateChildren();
         }
 
-        /// <summary>
-        /// Restores the tree to the point before <see cref="ComputeValues"/> was executed the first time
-        /// </summary>
-        private void RestoreThings()
-        {
-            var isExpanded = this.Things.First().IsExpanded;
-
-            this.UpdateTree(true);
-
-            this.Things.First().IsExpanded = isExpanded;
-        }
+        
 
         /// <summary>
         /// Adds or replace the <paramref name="parameterOrOverride"/> on the <paramref name="updatedElement"/>
@@ -463,12 +453,7 @@ namespace DEHPSTEPAP242.ViewModel.NetChangePreview
                 foreach (var parameterRow in parameterRows)
                 {
                     if (parameterRow.ContainerViewModel is ElementUsageRowViewModel elementUsageRow)
-                    {
-                        //var t = elementUsageRow.ContainerViewModel.Thing;
-                        //var eu = (ElementUsage)t;
-                        //
-                        //this.UpdateRow(parameterOverride, (ElementUsage)elementUsageRow.ContainerViewModel.Thing, elementUsageRow);
-
+                    {                        
                         this.UpdateRow(parameterOverride, elementUsageRow.Thing, elementUsageRow);
                     }
 

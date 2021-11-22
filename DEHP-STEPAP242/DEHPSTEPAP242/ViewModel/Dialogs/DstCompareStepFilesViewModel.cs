@@ -233,6 +233,7 @@ namespace DEHPSTEPAP242.Dialogs
                         
             bool noCommonRoot = false;
             bool onlyBoth = true;
+
             foreach (var values in fullNodeLookup)
             {
                 if (values.AsEnumerable().Count() > 1)
@@ -278,7 +279,7 @@ namespace DEHPSTEPAP242.Dialogs
                     logger.Info("Step Diff: the two files are the same.");
                     
                 }
-                while (!onlyBoth && TryToRelocateShortestPath()) ;
+                while (!onlyBoth && TryToRelocateShortestPath()) { };
             }
             // we check if we have some duplicate keys. If we have duplicate we should no try to
             // display the dialog box as it will crash. We normally have no duplicates but this is a
@@ -347,8 +348,9 @@ namespace DEHPSTEPAP242.Dialogs
         public bool Process()
         {
             Step3DHLR?.Clear();
-           
-            fullNodeList?.Clear();
+
+            fullNodeList.Clear();
+
 
            
 

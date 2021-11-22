@@ -538,7 +538,7 @@ namespace DEHPSTEPAP242.ViewModel
             try
             {
                 logger.Info("Using {0] to open the step file {1}", stepviewerPath,filePath);
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format("Using {0] to open the step file",stepviewerPath)));
+                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format("Using {0} to open the step file",stepviewerPath)));
                 System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
                 pProcess.StartInfo.FileName = stepviewerPath;
                 pProcess.StartInfo.Arguments = filePath;

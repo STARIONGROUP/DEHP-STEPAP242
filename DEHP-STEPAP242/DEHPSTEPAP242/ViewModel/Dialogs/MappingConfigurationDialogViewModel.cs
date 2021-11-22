@@ -45,6 +45,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
     using ReactiveUI;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Text.RegularExpressions;
@@ -171,14 +172,13 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
             // First: check ED before processing other things
             foreach (var idCorrespondence in part.MappingConfigurations)
             {
-                if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing))
-                {
-                    if (thing is ElementDefinition ed)
+                if (this.hubController.GetThingById(idCorrespondence.InternalThing, this.hubController.OpenIteration, out Thing thing)
+                    &&  thing is ElementDefinition ed)
                     {
                         this.UpdateSelectionFromMappedConfiguredThing(part, ed, warnings);
                         break;
                     }
-                }
+               
             }
 
             // Second: process the rest
@@ -190,7 +190,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
 
                     switch (thing)
                     {
-                        case ElementDefinition elementDefinition:
+                        case ElementDefinition:
                             // Ignore already processed ED thing
                             break;
 
@@ -483,6 +483,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Updates the <see cref="AvailableElementUsages"/>
         /// </summary>
+        [ExcludeFromCodeCoverage]//ui feeback
         private void UpdateAvailableElementUsages()
         {
             this.logger.Debug("Clean previous elements");
@@ -529,6 +530,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Updates the <see cref="AvailableActualFiniteStates"/>
         /// </summary>
+        [ExcludeFromCodeCoverage] // ui feedback
         private void UpdateAvailableActualFiniteStates()
         {
             this.AvailableActualFiniteStates.Clear();
@@ -545,6 +547,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Updates the target <see cref="Step3DRowViewModel.SelectedParameter"/>s for the <see cref="Step3DRowViewModel.SelectedElementDefinition"/>
         /// </summary>
+        [ExcludeFromCodeCoverage]// ui feedback
         private void UpdateSelectedParameter()
         {
             if (this.SelectedThing.SelectedElementDefinition is { })
