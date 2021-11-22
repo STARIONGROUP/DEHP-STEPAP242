@@ -97,8 +97,7 @@ namespace DEHPSTEPAP242.ViewModel.Rows
         /// </summary>
         public string Description
         {
-            get => $"{Part.type}#{Part.stepId} '{Part.name}'";
-            set => Description = value;
+            get => $"{Part.type}#{Part.stepId} '{Part.name}'";            
         }
 
         /// <summary>
