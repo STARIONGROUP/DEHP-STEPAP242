@@ -586,10 +586,9 @@ namespace DEHPSTEPAP242.ViewModel
             logger.Debug("Step comparison: Hub file is located here : {0}", hubdestinationPath);
             logger.Debug("Step comparison: Local file is located here : {0} ", loadedStepFilePath);
 
-            UndeterminateProgressBar dlg = null;
+            UndeterminateProgressBar dlg = new UndeterminateProgressBar(); 
             if (!dstController.CodeCoverageState)
             {
-                dlg = new UndeterminateProgressBar();
                 dlg.Show();
             }
 
@@ -603,7 +602,9 @@ namespace DEHPSTEPAP242.ViewModel
             });
 
             if (!dstController.CodeCoverageState)
+            {
                 dlg.Close();
+            }
 
             if (!isOK)
             {
