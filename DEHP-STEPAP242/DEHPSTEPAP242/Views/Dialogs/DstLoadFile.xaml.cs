@@ -28,11 +28,13 @@
 
 namespace DEHPSTEPAP242.Views.Dialogs
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows;
 
     /// <summary>
     /// Interaction logic for DstLoadFile.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class DstLoadFile : Window
     {
         /// <summary>

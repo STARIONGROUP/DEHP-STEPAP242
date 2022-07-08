@@ -25,6 +25,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 
 namespace DEHPSTEPAP242.Views.Dialogs
@@ -32,6 +33,7 @@ namespace DEHPSTEPAP242.Views.Dialogs
     /// <summary>
     /// Interaction logic for DstUserSettings.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class DstUserSettings : Window
     {
         public DstUserSettings()

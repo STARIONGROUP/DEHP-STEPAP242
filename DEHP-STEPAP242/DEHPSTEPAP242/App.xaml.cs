@@ -150,7 +150,7 @@ namespace DEHPSTEPAP242
         /// Registers the types that can be resolved by the <see cref="IContainer"/>
         /// </summary>
         /// <param name="containerBuilder">The <see cref="ContainerBuilder"/></param>
-        private static void RegisterTypes(ContainerBuilder containerBuilder)
+        public static void RegisterTypes(ContainerBuilder containerBuilder)
         {
             containerBuilder.RegisterType<DstController.DstController>().As<IDstController>().SingleInstance();
             containerBuilder.RegisterType<FileStoreService>().As<IFileStoreService>().SingleInstance();
@@ -165,7 +165,7 @@ namespace DEHPSTEPAP242
         /// Registers all the view model so the depencies can be injected
         /// </summary>
         /// <param name="containerBuilder">The <see cref="ContainerBuilder"/></param>
-        private static void RegisterViewModels(ContainerBuilder containerBuilder)
+        public static void RegisterViewModels(ContainerBuilder containerBuilder)
         {
             containerBuilder.RegisterType<MainWindowViewModel>().As<IMainWindowViewModel>().SingleInstance();
             // Hub

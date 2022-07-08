@@ -28,11 +28,13 @@
 
 namespace DEHPSTEPAP242.Views.Rows
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MappingRow.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class MappingRow : UserControl
     {
         /// <summary>

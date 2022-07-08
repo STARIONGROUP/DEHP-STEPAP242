@@ -29,10 +29,12 @@
 namespace DEHPSTEPAP242.Views.Dialogs
 {
     using DevExpress.Xpf.Core;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Interaction logic for HubLogoutConfirmDialog.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class InputDialog : DXDialogWindow
     {
         /// <summary>

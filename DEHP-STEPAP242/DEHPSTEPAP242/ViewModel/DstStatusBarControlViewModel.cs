@@ -54,6 +54,9 @@ namespace DEHPSTEPAP242.ViewModel
         {
             this.dstUserSettingsViewModel = usvm;
 
+            this.UserSettingCommand = ReactiveCommand.Create();
+            this.UserSettingCommand.Subscribe(_ => this.ExecuteUserSettingCommand());
+
         }
 
         /// <summary>

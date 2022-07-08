@@ -28,11 +28,13 @@
 
 namespace DEHPSTEPAP242.Views
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for HubFileBrowser.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class HubFileStoreBrowser : UserControl
     {
         public HubFileStoreBrowser()

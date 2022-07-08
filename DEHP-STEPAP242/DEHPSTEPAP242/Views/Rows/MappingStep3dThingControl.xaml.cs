@@ -28,11 +28,13 @@
 
 namespace DEHPSTEPAP242.Views.Rows
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MappingStep3dThingProThing.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class MappingStep3dThing : UserControl
     {
         /// <summary>

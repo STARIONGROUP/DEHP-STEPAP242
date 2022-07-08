@@ -29,10 +29,12 @@
 namespace DEHPSTEPAP242.Views
 {
     using System.Windows.Controls;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Interaction logic for <see cref="DstBrowserHeader"/> XAML
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class DstBrowserHeader : UserControl
     {
         /// <summary>

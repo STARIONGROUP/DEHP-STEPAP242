@@ -128,6 +128,11 @@ namespace DEHPSTEPAP242.DstController
         MappingDirection MappingDirection { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="CodeCoverageState"/>
+        /// </summary>
+        bool CodeCoverageState { get; set; }
+
+        /// <summary>
         /// Gets the collection of <see cref="ExternalIdentifierMap"/>s
         /// </summary>
         IEnumerable<ExternalIdentifierMap> AvailablExternalIdentifierMap { get; }

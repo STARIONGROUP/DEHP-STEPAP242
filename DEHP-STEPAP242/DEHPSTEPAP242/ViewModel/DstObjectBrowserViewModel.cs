@@ -51,6 +51,7 @@ namespace DEHPSTEPAP242.ViewModel
     using STEP3DAdapter;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Reactive.Linq;
 
@@ -206,6 +207,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <summary>
         /// Populate the context menu for this browser
         /// </summary>
+        [ExcludeFromCodeCoverage]
         public void PopulateContextMenu()
         {
             ContextMenu.Clear();
@@ -341,7 +343,9 @@ namespace DEHPSTEPAP242.ViewModel
 
             viewModel.SetPart(this.SelectedPart);
 
-            this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
+            DstController dstController = (DstController)AppContainer.Container.Resolve<IDstController>();
+            if (!dstController.CodeCoverageState)
+                this.navigationService.ShowDialog<MappingConfigurationDialog, IMappingConfigurationDialogViewModel>(viewModel);
         }
 
         /// <summary>
@@ -349,7 +353,12 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         private void OpenMappingConfigurationManager()
         {
-            this.navigationService.ShowDialog<MappingConfigurationManagerDialog>();
+            if (!dstController.CodeCoverageState)
+                this.navigationService.ShowDialog<MappingConfigurationManagerDialog>();
+            else
+            {
+                Console.WriteLine("INFO/WARNING: MappingConfigurationManagerDialog was not opened");
+            }
         }
 
         /// <summary>

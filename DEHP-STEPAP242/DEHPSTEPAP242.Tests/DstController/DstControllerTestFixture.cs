@@ -542,7 +542,7 @@ namespace DEHPSTEPAP242.Tests.DstController
                 x.Append(It.IsAny<Thing>(), It.IsAny<ChangeKind>()), Times.Exactly(3));
 
             this.exchangeHistoryService.Verify(x =>
-                x.Append(It.IsAny<ParameterValueSetBase>(), It.IsAny<IValueSet>()), Times.Exactly(2));
+                x.Append(It.IsAny<ParameterValueSetBase>(), It.IsAny<IValueSet>(),It.IsAny<ParameterSwitchKind>()), Times.Exactly(2));
         }
 
         [Test]

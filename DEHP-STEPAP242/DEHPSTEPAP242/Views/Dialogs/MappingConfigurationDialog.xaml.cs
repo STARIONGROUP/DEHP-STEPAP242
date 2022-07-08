@@ -28,11 +28,13 @@
 
 namespace DEHPSTEPAP242.Views.Dialogs
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows;
 
     /// <summary>
     /// Interaction logic for MappingConfigurationDialog.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class MappingConfigurationDialog : Window
     {
         /// <summary>

@@ -25,6 +25,7 @@
 //    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 
 namespace DEHPSTEPAP242.Views.Dialogs
@@ -32,6 +33,7 @@ namespace DEHPSTEPAP242.Views.Dialogs
     /// <summary>
     /// Interaction logic for StepCompareDialog.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class DstCompareStepFiles : Window
     {
         public DstCompareStepFiles()

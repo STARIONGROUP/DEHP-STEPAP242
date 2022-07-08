@@ -483,7 +483,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Updates the <see cref="AvailableElementUsages"/>
         /// </summary>
-        [ExcludeFromCodeCoverage]//ui feeback
         private void UpdateAvailableElementUsages()
         {
             this.logger.Debug("Clean previous elements");
@@ -530,7 +529,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Updates the <see cref="AvailableActualFiniteStates"/>
         /// </summary>
-        [ExcludeFromCodeCoverage] // ui feedback
         private void UpdateAvailableActualFiniteStates()
         {
             this.AvailableActualFiniteStates.Clear();
@@ -547,7 +545,6 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// <summary>
         /// Updates the target <see cref="Step3DRowViewModel.SelectedParameter"/>s for the <see cref="Step3DRowViewModel.SelectedElementDefinition"/>
         /// </summary>
-        [ExcludeFromCodeCoverage]// ui feedback
         private void UpdateSelectedParameter()
         {
             if (this.SelectedThing.SelectedElementDefinition is { })
@@ -616,9 +613,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
                 {
                     // When ElementDefinition is not selected, a new one will created
                     // to store the selected geometry.
-                    if (!this.SelectNewElementDefinitionName())
+                    if (!dstController.CodeCoverageState)
                     {
-                        return;
+                        if (!this.SelectNewElementDefinitionName()) return;                     
                     }
                 }
 
@@ -700,6 +697,7 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         /// Gets the name for the new <see cref="ElementDefinition"/> to be created
         /// </summary>
         /// <returns>True if a new valid name was selected</returns>
+        [ExcludeFromCodeCoverage]
         private bool SelectNewElementDefinitionName()
         {
             string elementName = string.IsNullOrWhiteSpace(this.selectedThing.NewElementDefinitionName) ? this.SelectedThing.ElementName : this.selectedThing.NewElementDefinitionName;

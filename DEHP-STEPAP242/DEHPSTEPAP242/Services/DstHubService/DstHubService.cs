@@ -89,6 +89,7 @@ namespace DEHPSTEPAP242.Services.DstHubService
         {
             if (this.hubController.OpenIteration is null) return;
 
+            await this.CheckDomainFileStore();  // SPA: Creation date was not initialized
             await this.CheckFileTypes();
             await this.CheckParameterTypes();
         }
@@ -265,6 +266,41 @@ namespace DEHPSTEPAP242.Services.DstHubService
 
             return rdls.First();
         }
+
+
+
+        /// <summary>
+        /// Check is DomainFileStore exists in the iteration
+        /// If it does not exist, it is created.  
+        ///
+        /// </summary>
+        private async Task CheckDomainFileStore()
+        {
+            // SPA: BE CAREFUL : the creation date on the Hub is not initialized
+
+            DomainFileStore dfs = this.hubController.OpenIteration.DomainFileStore.FirstOrDefault();
+
+            if (dfs is null)
+            {
+                Iteration iterCloned = hubController.OpenIteration.Clone(false);
+
+                ThingTransaction transaction = new CDP4Dal.Operations.ThingTransaction(CDP4Dal.Operations.TransactionContextResolver.ResolveContext(iterCloned), iterCloned);
+
+                dfs = new DomainFileStore(Guid.NewGuid(), null, null)
+                {
+                    Name = this.hubController.CurrentDomainOfExpertise.Name,
+                    Owner = this.hubController.CurrentDomainOfExpertise
+                };
+
+                iterCloned.DomainFileStore.Add(dfs);
+
+                transaction.CreateOrUpdate(dfs);
+
+                await this.hubController.Write(transaction);
+            }
+        }
+
+
 
         /// <summary>
         /// Check that STEP <see cref="FileType"/> exists in the RDL

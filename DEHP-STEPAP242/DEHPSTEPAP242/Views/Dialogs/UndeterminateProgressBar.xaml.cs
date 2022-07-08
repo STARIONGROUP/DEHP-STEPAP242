@@ -26,6 +26,7 @@
 // </copyright>
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Windows;
 
@@ -34,6 +35,7 @@ namespace DEHPSTEPAP242.Views.Dialogs
     /// <summary>
     /// Interaction logic for UndeterminateProgressBar.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class UndeterminateProgressBar : Window
     { 
         /** <summary>

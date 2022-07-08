@@ -28,11 +28,13 @@
 
 namespace DEHPSTEPAP242.Views.Dialogs
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for RowDetailsControl.xaml
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class RowDetailsControl : UserControl
     {
         /// <summary>

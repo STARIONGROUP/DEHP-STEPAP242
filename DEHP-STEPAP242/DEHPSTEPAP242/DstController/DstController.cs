@@ -200,6 +200,10 @@ namespace DEHPSTEPAP242.DstController
             await Task.Run(() => Load(filename));
         }
 
+
+        public bool CodeCoverageState { get; set; } = false;    // TO AVOID apparition of dialog boxes when console test are running... SPA: TO REVIEW?
+
+
         /// <summary>
         /// Backing field for the <see cref="MappingDirection"/>
         /// </summary>
@@ -920,17 +924,25 @@ namespace DEHPSTEPAP242.DstController
         /// <returns>A boolean result, true if the user pressed OK, otherwise false</returns>
         private bool TrySupplyingAndCreatingLogEntry(ThingTransaction transaction)
         {
-            var vm = new CreateLogEntryDialogViewModel();
-
-            var dialogResult = this.navigationService.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(vm);
-
-            if (dialogResult != true)
+            if (!CodeCoverageState)
             {
-                return false;
-            }
+                var vm = new CreateLogEntryDialogViewModel();
 
-            this.hubController.RegisterNewLogEntryToTransaction(vm.LogEntryContent, transaction);
-            return true;
+                var dialogResult = this.navigationService.ShowDxDialog<CreateLogEntryDialog, CreateLogEntryDialogViewModel>(vm);
+
+                if (dialogResult != true)
+                {
+                    return false;
+                }
+
+                this.hubController.RegisterNewLogEntryToTransaction(vm.LogEntryContent, transaction);
+                return true;
+            }
+            else
+            {
+                this.hubController.RegisterNewLogEntryToTransaction("Dummy entry for code coverage", transaction);
+                return true;
+            }
         }
 
         #endregion Private Transfer Methods

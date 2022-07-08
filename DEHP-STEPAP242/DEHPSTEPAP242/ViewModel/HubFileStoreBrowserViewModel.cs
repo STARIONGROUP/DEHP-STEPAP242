@@ -377,14 +377,14 @@ namespace DEHPSTEPAP242.ViewModel
             }
 
             IsBusy = true;
-            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append("Downloading file from Hub..."));
+            this.statusBar.Append("Downloading file from Hub...");
 
             using (var fstream = new System.IO.FileStream(destinationPath, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
             {
                 await hubController.Download(fileRevision, fstream);
             }
 
-            Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"Downloaded as: {destinationPath}"));
+            this.statusBar.Append($"Downloaded as: {destinationPath}");
             IsBusy = false;
         }
 
@@ -397,7 +397,7 @@ namespace DEHPSTEPAP242.ViewModel
         {
             if (fileRevision is null)
             {
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"The FileRevision is null", StatusBarMessageSeverity.Error));
+                this.statusBar.Append($"The FileRevision is null", StatusBarMessageSeverity.Error);
                 return;
             }
 
@@ -424,7 +424,7 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = this.dstHubService.FindFileRevision(guid);
             if (fileRevision is null)
             {
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append($"The Guid {guid} did not correspond to a valid FileRevision", StatusBarMessageSeverity.Warning));
+                this.statusBar.Append($"The Guid {guid} did not correspond to a valid FileRevision", StatusBarMessageSeverity.Warning);
                 return;
             }
 
@@ -441,7 +441,7 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                Application.Current.Dispatcher.Invoke(() => this.statusBar.Append("No current file selected to perform the download"));
+                this.statusBar.Append("No current file selected to perform the download");
                 return;
             }
 
@@ -459,19 +459,19 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append("No current file selected to perform the download"));
+                statusBar.Append("No current file selected to perform the download");
                 return;
             }
 
             IsBusy = true;
-            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Downloading file from Hub..."));
+            statusBar.Append("Downloading file from Hub...");
 
             using (var fstream = fileStoreService.AddFileStream(fileRevision))
             {
                 await hubController.Download(fileRevision, fstream);
             }
 
-            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Download successful"));
+            statusBar.Append("Download successful");
             IsBusy = false;
         }
 
@@ -488,7 +488,7 @@ namespace DEHPSTEPAP242.ViewModel
             var fileRevision = CurrentFileRevision();
             if (fileRevision is null)
             {
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append("No current file selected to perform the load"));
+                statusBar.Append("No current file selected to perform the load");
                 return;
             }
 
@@ -500,7 +500,7 @@ namespace DEHPSTEPAP242.ViewModel
             var destinationPath = fileStoreService.GetPath(fileRevision);
 
             IsBusy = true;
-            Application.Current.Dispatcher.Invoke(() => statusBar.Append($"Loading from Hub: {destinationPath}"));
+            statusBar.Append($"Loading from Hub: {destinationPath}");
 
             bool openOK = false;
             userPreferenceService.Read();
@@ -517,11 +517,11 @@ namespace DEHPSTEPAP242.ViewModel
 
             if (openOK)
             {
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Load successful"));
+                statusBar.Append("Load successful");
             }
             else
             {
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Load failed", StatusBarMessageSeverity.Error));
+                statusBar.Append("Load failed", StatusBarMessageSeverity.Error);
             }
 
             IsBusy = false;
@@ -538,7 +538,7 @@ namespace DEHPSTEPAP242.ViewModel
             try
             {
                 logger.Info("Using {0] to open the step file {1}", stepviewerPath,filePath);
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format("Using {0} to open the step file",stepviewerPath)));
+                statusBar.Append(string.Format("Using {0} to open the step file",stepviewerPath));
                 System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
                 pProcess.StartInfo.FileName = stepviewerPath;
                 pProcess.StartInfo.Arguments = filePath;
@@ -554,7 +554,7 @@ namespace DEHPSTEPAP242.ViewModel
             {
                 logger.Error("An error occured when using the user specified program for displaying the file:\n{0}\n{1}\n ", filePath, output);
                 MessageBox.Show(string.Format("An error occured when trying to open\n{0}\nWith:\n{1}",filePath,stepviewerPath), "An Error Occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format("An error occured when trying to open\n{0}\nWith:\n{1}", filePath, stepviewerPath)));
+                statusBar.Append(string.Format("An error occured when trying to open\n{0}\nWith:\n{1}", filePath, stepviewerPath));
                 return false;
             }
             return true;
@@ -567,7 +567,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <returns>True if the execution was performed</returns>
         private bool OpenWithDefaultProgram(string path)
         {
-            Application.Current.Dispatcher.Invoke(() => statusBar.Append("Opening step file with default application"));
+            statusBar.Append("Opening step file with default application");
             Process fileopener = new Process();
             fileopener.StartInfo.FileName = "explorer";
             fileopener.StartInfo.Arguments = "\"" + path + "\"";
@@ -586,35 +586,43 @@ namespace DEHPSTEPAP242.ViewModel
             logger.Debug("Step comparison: Hub file is located here : {0}", hubdestinationPath);
             logger.Debug("Step comparison: Local file is located here : {0} ", loadedStepFilePath);
 
-            var dlg = new UndeterminateProgressBar();
+            UndeterminateProgressBar dlg = null;
+            if (!dstController.CodeCoverageState)
+            {
+                dlg = new UndeterminateProgressBar();
+                dlg.Show();
+            }
 
-            dlg.Show();
             bool isOK = false;
             await Task.Run(() =>
             {
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Loading files."));
+                statusBar.Append("Loading files.");
                 isOK = this.fileCompare.SetFiles(loadedStepFilePath, hubdestinationPath);
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append("Comparing the files."));
+                statusBar.Append("Comparing the files.");
                 isOK = isOK && this.fileCompare.Process();
             });
 
-            dlg.Close();
+            if (!dstController.CodeCoverageState)
+                dlg.Close();
 
             if (!isOK)
             {
-                Application.Current.Dispatcher.Invoke(() => statusBar.Append(string.Format(string.Format("An error occured when comparing\n {0} and\n {1}", loadedStepFilePath, hubdestinationPath))));
+                statusBar.Append(string.Format(string.Format("An error occured when comparing\n {0} and\n {1}", loadedStepFilePath, hubdestinationPath)));
                 MessageBox.Show(string.Format("An error occured when comparing\n {0} and\n {1}", loadedStepFilePath, hubdestinationPath), "An Error Occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             else
             {
-                var compareDialog = new DstCompareStepFiles()
+                if (!dstController.CodeCoverageState)
                 {
-                    DataContext = this.fileCompare
-                };
+                    var compareDialog = new DstCompareStepFiles()
+                    {
+                        DataContext = this.fileCompare
+                    };
 
-                compareDialog.ShowDialog();
+                    compareDialog.ShowDialog();
+                }
             }
-            Application.Current.Dispatcher.Invoke(() => statusBar.Append(""));
+            statusBar.Append("");
         }
 
         #endregion Private/Protected methods
