@@ -2,10 +2,12 @@
   <Settings activeconfig="Debug" processModel="Default" domainUsage="Default" />
   <Config name="Debug">
     <assembly path="DEHP-STEPAP242/DEHPSTEPAP242.Tests/bin/Debug/net472/win-x64/DEHPSTEPAP242.Tests.dll" />
+	<assembly path="DEHP-STEPAP242/DEHPSTEPAP242.TestsNew/bin/Debug/net472/win-x64/DEHPSTEPAP242.TestsNew.dll" />
     <assembly path="DEHP-STEPAP242/STEP3DAdapter.Tests/bin/Debug/STEP3DAdapter.Tests.dll" />
   </Config>
   <Config name="Release">
     <assembly path="DEHP-STEPAP242/DEHPSTEPAP242.Tests/bin/Release/net472/win-x64/DEHPSTEPAP242.Tests.dll" />
+	<assembly path="DEHP-STEPAP242/DEHPSTEPAP242.TestsNew/bin/Release/net472/win-x64/DEHPSTEPAP242.TestsNew.dll" />
     <assembly path="DEHP-STEPAP242/STEP3DAdapter.Tests/bin/Release/STEP3DAdapter.Tests.dll" />
   </Config>
 </NUnitProject>
