@@ -1,44 +1,25 @@
 using Autofac;
-using CDP4Common.CommonData;
 using CDP4Common.EngineeringModelData;
 using CDP4Common.SiteDirectoryData;
-using CDP4Common.Types;
-using CDP4Dal;
 using CDP4Dal.Operations;
 using DEHPCommon;
-using DEHPCommon.Enumerators;
 using DEHPCommon.HubController.Interfaces;
-using DEHPCommon.MappingEngine;
-using DEHPCommon.Services.ExchangeHistory;
-using DEHPCommon.Services.NavigationService;
 using DEHPCommon.UserInterfaces.ViewModels.Interfaces;
-using DEHPSTEPAP242.Events;
 using DEHPSTEPAP242.ViewModel;
-
-using Moq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using DEHPSTEPAP242.Services.DstHubService;
 using DEHPSTEPAP242.ViewModel.Dialogs.Interfaces;
-using DEHPSTEPAP242.Builds.HighLevelRepresentationBuilder;
-using DEHPSTEPAP242.Views.Dialogs;
 using DEHPSTEPAP242.ViewModel.Dialogs;
 
 
 
 namespace DEHPSTEPAP242.TestsNew
 {
-    using DEHPCommon.HubController;
-    using DEHPCommon.Services.FileDialogService;
-    using DEHPCommon.Services.ObjectBrowserTreeSelectorService;
     using DEHPCommon.UserInterfaces.ViewModels;
-    using DEHPCommon.UserInterfaces.ViewModels.Rows.ElementDefinitionTreeRows;
     using DEHPCommon.UserPreferenceHandler.Enums;
     using DEHPCommon.UserPreferenceHandler.UserPreferenceService;
-    using DEHPSTEPAP242.Dialog.Interfaces;
     using DEHPSTEPAP242.Dialogs;
     using DEHPSTEPAP242.DstController;
     using DEHPSTEPAP242.Services.FileStoreService;
