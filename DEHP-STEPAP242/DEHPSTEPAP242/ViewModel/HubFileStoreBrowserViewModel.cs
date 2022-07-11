@@ -51,6 +51,7 @@ namespace DEHPSTEPAP242.ViewModel
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Reactive;
     using System.Reactive.Linq;
@@ -483,6 +484,7 @@ namespace DEHPSTEPAP242.ViewModel
         ///
         /// File is loaded by the current default application from the local storage <see cref="FileStoreService"/>.
         /// </remarks>
+        [ExcludeFromCodeCoverage]
         private async Task LoadFileCommandExecute()
         {
             var fileRevision = CurrentFileRevision();
@@ -532,6 +534,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// <param name="stepViewerPath">Full path to the application to use</param>
         /// <param name="filePath">Full path to the file to be opened</param>
         /// <returns>True if the execution was performed</returns>
+        [ExcludeFromCodeCoverage]
         private bool OpenWithUserProgram(string stepviewerPath, string filePath)
         {
             string output="";
@@ -565,6 +568,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// </summary>
         /// <param name="path">Full path to the file to be opened</param>
         /// <returns>True if the execution was performed</returns>
+        [ExcludeFromCodeCoverage]
         private bool OpenWithDefaultProgram(string path)
         {
             statusBar.Append("Opening step file with default application");
@@ -586,9 +590,10 @@ namespace DEHPSTEPAP242.ViewModel
             logger.Debug("Step comparison: Hub file is located here : {0}", hubdestinationPath);
             logger.Debug("Step comparison: Local file is located here : {0} ", loadedStepFilePath);
 
-            UndeterminateProgressBar dlg = new UndeterminateProgressBar(); 
+            UndeterminateProgressBar dlg = null;
             if (!dstController.CodeCoverageState)
             {
+                dlg = new UndeterminateProgressBar();
                 dlg.Show();
             }
 
@@ -601,10 +606,8 @@ namespace DEHPSTEPAP242.ViewModel
                 isOK = isOK && this.fileCompare.Process();
             });
 
-            if (!dstController.CodeCoverageState)
-            {
+            if (dlg is not null)
                 dlg.Close();
-            }
 
             if (!isOK)
             {
