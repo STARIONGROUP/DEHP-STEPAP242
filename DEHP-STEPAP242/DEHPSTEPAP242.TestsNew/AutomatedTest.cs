@@ -66,24 +66,22 @@ namespace DEHPSTEPAP242.TestsNew
 
 
         private string SimpleCAD_Path = null;
-        
+        private string OtherCAD_Path = null;
+
 
         public void ApplicationOpen()
         {
             if(SimpleCAD_Path == null)
             {
-                
-                                
                 string cwd = System.IO.Path.GetDirectoryName(new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath);
                 string examplesDir = cwd + "/../../../../../../STEP3DWrapper/STEPcode/extra/step3d_wrapper_test/examples";
                 examplesDir = System.IO.Path.GetFullPath(examplesDir);
                 SimpleCAD_Path = System.IO.Path.Combine(examplesDir, "SimpleCAD.step");
+                OtherCAD_Path = System.IO.Path.Combine(examplesDir, "ModifiedSimpleCAD.step");
 
 
-                //SimpleCAD_Path = "D:\\StepFiles\\SimpleCAD.step";
-
-                //Console.WriteLine(SimpleCAD_Path);
-
+                //SimpleCAD_Path = "D:\\StepFiles\\SimpleCAD.step";     // To comment before commit
+                //OtherCAD_Path = "D:\\StepFiles\\ModifiedCAD.step";    // To comment before commit 
             }
 
 
@@ -683,11 +681,7 @@ namespace DEHPSTEPAP242.TestsNew
                 Console.WriteLine("Name = " + Name);
             
             }
-
             Step3DRowViewModel rowVM = null;
-
-            
-
             
             rowVM = dstObjectBrowserViewModel.Step3DHLR.Find(x => x.Name == name);
 
@@ -779,7 +773,6 @@ namespace DEHPSTEPAP242.TestsNew
         [SetUp]
         public void Setup()
         {
-           // RxApp.MainThreadScheduler = Scheduler.CurrentThread;
         }
 
 
@@ -812,11 +805,7 @@ namespace DEHPSTEPAP242.TestsNew
         {
             ApplicationOpen();
             IHubController hubController = AppContainer.Container.Resolve<IHubController>();
-
-            //ResetEngineeringModel(hubController, "Template_STEPTAS_FiniteStates", false);
-
-            //Assert.IsFalse(true);
-
+                        
             ResetEngineeringModel(hubController, "EM1_Test_STEPAP242", false);
             OpenIterationOnHub(hubController, "EM1_Test_STEPAP242");
 
@@ -855,7 +844,7 @@ namespace DEHPSTEPAP242.TestsNew
             ApplicationOpen();
             IHubController hubController = AppContainer.Container.Resolve<IHubController>();
 
-            OpenIterationOnHub(hubController, "EM2_Test_STEPAP242"); // TestModel_STEPTAS_FiniteStates_TasRef_FSAndOverride");
+            OpenIterationOnHub(hubController, "EM2_Test_STEPAP242"); 
 
             VerifyALL(2);
         }
@@ -870,32 +859,22 @@ namespace DEHPSTEPAP242.TestsNew
             DstHubService dstHubService = (DstHubService)AppContainer.Container.Resolve<IDstHubService>();
             dstHubService.CheckHubDependencies().Wait();
 
-            // call checkCheckHubDependencies() ofter constructor initialization  : IsSessionOpen
+            // call checkCheckHubDependencies() after constructor initialization  : IsSessionOpen
             HubDataSourceViewModel hubDataSourceViewModel = (HubDataSourceViewModel) AppContainer.Container.Resolve<IHubDataSourceViewModel>();
-
-
-            //DstDataSourceViewModel dstDataSourceViewModel = (DstDataSourceViewModel)AppContainer.Container.Resolve<DstDataSourceViewModel>();
 
 
             UserPreferenceService<AppSettings> userPrefService = (UserPreferenceService<AppSettings>)AppContainer.Container.Resolve<IUserPreferenceService<AppSettings>>();
             userPrefService.Read();
             AppSettings settings = userPrefService.UserPreferenceSettings;
+            Console.WriteLine(settings.FileStoreDirectoryName);
             Console.WriteLine(settings.FileStoreCleanOnInit);
             Console.WriteLine(settings.MappingUsedByFiles);
             foreach (var entry in settings.MappingUsedByFiles)
                 Console.WriteLine("  Configuration: " + entry.Key + "  -->  " + entry.Value);
 
 
-
-
-
             // Opening the STEP-TAS file
             DstLoadFileViewModel dstLoadFileViewModel = (DstLoadFileViewModel)AppContainer.Container.Resolve<IDstLoadFileViewModel>();
-            
-            // The two next lines launch an exception
-            //dstLoadFileViewModel.FilePath = pathToStepFiles + "unexistingFile.step";
-            //dstLoadFileViewModel.LoadFileCommand.ExecuteAsyncTask(null).Wait();    // Load an inexisting file to improve coverage
-
             dstLoadFileViewModel.FilePath = SimpleCAD_Path;
             dstLoadFileViewModel.LoadFileCommand.ExecuteAsyncTask(null).Wait();
             
@@ -927,17 +906,7 @@ namespace DEHPSTEPAP242.TestsNew
 
             mappingConfigurationManagerDialogViewModel.ApplyCommand.ExecuteAsyncTask(null).Wait();
 
-
             
-            // Opening the STEP-TAS file
-            //DstLoadFileViewModel dstLoadFileViewModel = (DstLoadFileViewModel) AppContainer.Container.Resolve<IDstLoadFileViewModel>();
-            //dstLoadFileViewModel.FilePath = "D:\\SC_only geometry.stp";
-            //
-            //dstLoadFileViewModel.LoadFileCommand.Execute(null);
-            //mappingConfigurationManagerDialogViewModel.ApplyCommand.Execute(null);
-
-
-
 
             // Define the mappings and transfer them
             DstTransferControlViewModel dstTransferControlViewModel = (DstTransferControlViewModel)AppContainer.Container.Resolve<ITransferControlViewModel>();
@@ -956,8 +925,6 @@ namespace DEHPSTEPAP242.TestsNew
                 {
                     DeclareMapping("Part", "OBC", null, "Launch mode");   // To define the mapping on the ED (without affecting the one defined on OBC1 just before
                     DeclareMapping("Box", "OBC", "OBC1", "Launch mode");
-                    //DeclareMapping("Part", "OBC", null, "Launch mode");   // To define the mapping on the ED (without affecting the one defined on OBC1 just before
-                    //DeclareMapping("Part", "OBC", "OBC2", "Launch mode");   // To define the mapping on the ED (without affecting the one defined on OBC1 just before
                     DeclareMapping("Cylinder", "PCDU");
                     DeclareMapping("SubPart", "Radiator");
                 }
@@ -973,7 +940,7 @@ namespace DEHPSTEPAP242.TestsNew
                 else
                 {
                     DeclareMapping("Part", "OBC", "OBC1", "Launch mode");
-                    DeclareMapping("Cube", "OBC", "OBC2", "Launch mode");   // To define the mapping on the ED (without affecting the one defined on OBC1 just before
+                    DeclareMapping("Cube", "OBC", "OBC2", "Launch mode");   
                     DeclareMapping("Box", "Radiator");
                     DeclareMapping("SubPart", "ELEMENT_CREATED_FROM_ADAPTER");
                 }
@@ -986,15 +953,6 @@ namespace DEHPSTEPAP242.TestsNew
 
             hubNetChangePreviewViewModel.DeselectAllCommand.ExecuteAsyncTask(null).Wait();
             hubNetChangePreviewViewModel.SelectAllCommand.ExecuteAsyncTask(null).Wait();
-
-
-            //hubNetChangePreviewViewModel.ComputeValues();   // For code coverage
-
-            
-
-
-
-
 
             // We transfer the mappings that were defined... at the same times....
             dstTransferControlViewModel.TransferCommand.ExecuteAsyncTask(null).Wait();
@@ -1014,28 +972,37 @@ namespace DEHPSTEPAP242.TestsNew
            
 
             hubFileStoreBrowserViewModel.CurrentHubFile = hubFileStoreBrowserViewModel.HubFiles[0];
-            //hubFileStoreBrowserViewModel.DownloadFileCommand.ExecuteAsyncTask(null).Wait(); // (hubFileStoreBrowserViewModel.HubFiles[0]);
-            //hubFileStoreBrowserViewModel.CompareFileCommand.ExecuteAsyncTask(null).Wait(); // (hubFileStoreBrowserViewModel.HubFiles[0]);            
+
+            hubFileStoreBrowserViewModel.CompareFileCommand.ExecuteAsyncTask(null).Wait(); 
+                        
+            Console.WriteLine("After CompareFileCommand (SAME FILES)");
+
+                        
             
-
-
-
-
-
-
-
-            //hubFileStoreBrowserViewModel.DownloadFileAsCommand.ExecuteAsyncTask(null).Wait();   // Open the GUI
-            //Console.WriteLine("FilePath = "+hubFileStoreBrowserViewModel.CurrentHubFile..FilePath);
-
-            hubFileStoreBrowserViewModel.CompareFileCommand.Execute(null); // (hubFileStoreBrowserViewModel.HubFiles[0]);
-
-
-
-
-            Console.WriteLine("After CompareFileCommand");
-
-
+            FileStoreService fileStoreService = (FileStoreService) AppContainer.Container.Resolve<IFileStoreService>();
+            hubFileStoreBrowserViewModel.LocalStepFilePath = fileStoreService.GetPath(hubFileStoreBrowserViewModel.CurrentFileRevision());
             
+            
+                        
+
+            Console.WriteLine("Download STEP File to " + hubFileStoreBrowserViewModel.LocalStepFilePath);
+
+            hubFileStoreBrowserViewModel.DownloadFileAsCommand.ExecuteAsyncTask(null).Wait();
+            
+            
+            // Load another local STEP file 
+            dstLoadFileViewModel.FilePath = OtherCAD_Path;
+            dstLoadFileViewModel.LoadFileCommand.ExecuteAsyncTask(null).Wait();
+            MappingConfigurationManagerDialogViewModel mappingConfigurationManagerDialogViewModel2
+             = (MappingConfigurationManagerDialogViewModel)AppContainer.Container.Resolve<IMappingConfigurationManagerDialogViewModel>();
+            mappingConfigurationManagerDialogViewModel2.CreateNewMappingConfigurationChecked = true;
+            mappingConfigurationManagerDialogViewModel2.NewExternalIdentifierMapName = "ModifiedCAD Configuration";
+            mappingConfigurationManagerDialogViewModel2.ApplyCommand.ExecuteAsyncTask(null).Wait();
+                        
+            hubFileStoreBrowserViewModel.CompareFileCommand.ExecuteAsyncTask(null).Wait(); 
+
+            Console.WriteLine("After CompareFileCommand (OTHER FILES)");
+                       
 
 
             /////////////////////////////////////////
@@ -1081,31 +1048,8 @@ namespace DEHPSTEPAP242.TestsNew
                 }
             }
 
-            /////////////////////////////////
-            // Step File comparison tools  //     SC.STP leads to a crash
-            /////////////////////////////////
-
-            //dstLoadFileViewModel.FilePath = pathToStepFiles + "XIPE_all_v1.stp";
-            //dstLoadFileViewModel.LoadFileCommand.ExecuteAsyncTask(null).Wait();   // Load another file
-            //hubFileStoreBrowserViewModel.CompareFileCommand.Execute(null);        // Execute comparison
-
-            DstCompareStepFilesViewModel compareStepFilesViewModel = (DstCompareStepFilesViewModel)AppContainer.Container.Resolve<IDstCompareStepFilesViewModel>();
-
-            //compareStepFilesViewModel.SetFiles(SimpleCAD_Path, SimpleCAD_Path);  
-            //Assert.IsTrue(compareStepFilesViewModel.Process());
-
-            //compareStepFilesViewModel.SetFiles(pathToStepTasFiles + "SCupdated.stp", pathToStepTasFiles + "SCupdated.stp");  // Same files
-            //Assert.IsTrue(compareStepFilesViewModel.Process());
-
-            //compareStepFilesViewModel.SetFiles(pathToStepTasFiles + "SCbase.stp", pathToStepTasFiles + "SCupdated.stp");  // Same files
-            //Assert.IsFalse(compareStepFilesViewModel.Process());
-            //*/
-
-
             Console.WriteLine("... END OF TEST!");
         }
-
-
        
 
         [Test]
@@ -1117,8 +1061,6 @@ namespace DEHPSTEPAP242.TestsNew
             OpenIterationOnHub(hubController, "EM2_Test_STEPAP242");
 
             MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)AppContainer.Container.Resolve<IMainWindowViewModel>();
-
-
             
 
             /////////////////////////////

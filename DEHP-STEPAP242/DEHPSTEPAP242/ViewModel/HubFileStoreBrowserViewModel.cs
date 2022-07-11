@@ -191,7 +191,8 @@ namespace DEHPSTEPAP242.ViewModel
             set => this.RaiseAndSetIfChanged(ref this.currentHubFile, value);
         }
 
-        private string localStepFilePath;
+        
+        private string localStepFilePath=null;
 
         public string LocalStepFilePath
         {
@@ -337,7 +338,7 @@ namespace DEHPSTEPAP242.ViewModel
         /// Gets the <see cref="FileRevision"/> of the <see cref="CurrentHubFile"/>
         /// </summary>
         /// <returns>The <see cref="FileRevision"/></returns>
-        private FileRevision CurrentFileRevision()
+        public FileRevision CurrentFileRevision()
         {
             var frev = HubFiles.FirstOrDefault(x => x.FilePath == CurrentHubFile?.FilePath);
 
@@ -349,11 +350,13 @@ namespace DEHPSTEPAP242.ViewModel
             return frev.FileRev;
         }
 
+        
         /// <summary>
         /// Shows the <see cref="IOpenSaveFileDialogService.GetSaveFileDialog()"/> for a <see cref="FileRevision"/>
         /// </summary>
         /// <param name="fileRevision">The <see cref="FileRevision"/> to be downloaded</param>
         /// <returns>The destination path, or null if cancelled by the user</returns>
+        [ExcludeFromCodeCoverage]
         private string GetSaveFileDestination(FileRevision fileRevision)
         {
             var fileName = System.IO.Path.GetFileNameWithoutExtension(fileRevision.Path);
@@ -363,7 +366,8 @@ namespace DEHPSTEPAP242.ViewModel
             var destinationPath = this.fileDialogService.GetSaveFileDialog(fileName, extension, filter, string.Empty, 1);
             return destinationPath;
         }
-
+        
+        
         /// <summary>
         /// Downloads the <see cref="FileRevision"/> into a file
         /// </summary>
@@ -388,7 +392,7 @@ namespace DEHPSTEPAP242.ViewModel
             this.statusBar.Append($"Downloaded as: {destinationPath}");
             IsBusy = false;
         }
-
+        
         /// <summary>
         /// Downloads the <see cref="FileRevision"/> into destination choosen by the user
         /// </summary>
@@ -402,7 +406,18 @@ namespace DEHPSTEPAP242.ViewModel
                 return;
             }
 
-            var destinationPath = this.GetSaveFileDestination(fileRevision);
+
+            string destinationPath = null;
+            if (LocalStepFilePath is not null)
+            {
+                destinationPath = LocalStepFilePath;
+            }
+            else
+            {
+                destinationPath = this.GetSaveFileDestination(fileRevision);
+            }
+                        
+            
             if (destinationPath is null)
             {
                 return;
