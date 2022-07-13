@@ -66,8 +66,9 @@ namespace DEHPSTEPAP242.TestsNew
         private App application = null;
 
         // Credentials
+		private Uri uri = new Uri("https://cdp4services-public.rheagroup.com");
+        // You can switch to a local hub if necessary during the developement process
         //private Uri uri = new Uri("http://localhost:5000");
-        private Uri uri = new Uri("https://cdp4services-public.rheagroup.com");
         private string userName = "admin";
         private string password = "pass";
 
