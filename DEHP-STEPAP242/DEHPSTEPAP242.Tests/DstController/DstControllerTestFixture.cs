@@ -541,8 +541,13 @@ namespace DEHPSTEPAP242.Tests.DstController
             this.exchangeHistoryService.Verify(x =>
                 x.Append(It.IsAny<Thing>(), It.IsAny<ChangeKind>()), Times.Exactly(3));
 
+
             this.exchangeHistoryService.Verify(x =>
-                x.Append(It.IsAny<ParameterValueSetBase>(), It.IsAny<IValueSet>(),It.IsAny<ParameterSwitchKind>()), Times.Exactly(2));
+                x.Append(It.IsAny<ParameterValueSetBase>(), It.IsAny<IValueSet>()), Times.Exactly(2));
+
+            // SPA:  Replace the previous line with the following one with DEHPCommon 10.0.281
+            //this.exchangeHistoryService.Verify(x =>
+            //    x.Append(It.IsAny<ParameterValueSetBase>(), It.IsAny<IValueSet>(),It.IsAny<ParameterSwitchKind>()), Times.Exactly(2));
         }
 
         [Test]

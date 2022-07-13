@@ -19,7 +19,7 @@
     <RepositoryUrl>https://github.com/RHEAGROUP/DEHP-STEPAP242.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <Authors>Open Engineering S.A.</Authors>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <AssemblyName>DEHPSTEPAP242</AssemblyName>
     <PackageIcon>icon.ico</PackageIcon>
@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.1.0" />
-    <PackageReference Include="DEHPCommon" Version="1.0.281" />
+    <PackageReference Include="DEHPCommon" Version="1.0.242" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="NLog.Schema" Version="4.6.8" />
     <PackageReference Include="DevExpress.WindowsDesktop.Wpf.Layout" Version="20.1.8" />

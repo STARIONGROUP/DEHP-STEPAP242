@@ -93,8 +93,9 @@ namespace DEHPSTEPAP242.ViewModel.Dialogs
         {
             this.userPreferenceService = userPreferenceService;
 
-            SelectFileCommand = ReactiveCommand.Create();
-            SelectFileCommand.Subscribe(_ => SelectFileCommandExecute());
+            // SPA: These two lines should be activated with DEHPCommon 10.0.281?
+            //SelectFileCommand = ReactiveCommand.Create();
+            //SelectFileCommand.Subscribe(_ => SelectFileCommandExecute());
         }
 
         /**
